@@ -26,6 +26,8 @@ PlotStatLab code is MIT-licensed. Dependencies retain their own licenses. Comple
 
 The launcher obtains uv from the official Astral distribution (MIT / Apache-2.0), managed CPython (Python Software Foundation license), and the pinned PyPI packages listed in requirements-runtime.txt. Their licenses are supplied by their respective distributions. SciPy and NumPy include additional notices for bundled numerical libraries; see the full copied notices. No Python interpreter or compiled scientific wheel is embedded in the source ZIP.
 
+Native Excel import additionally uses openpyxl 3.1.5 (MIT), et-xmlfile 2.0.0 (MIT) and defusedxml 0.7.1 (PSF). Full texts are included in licenses/python.
+
 ## Fonts and scientific references
 
 System fonts are referenced and are not redistributed. Exported SVG retains editable text and requires the chosen font to be available in the destination application. GraphPad Prism is a reference for workflows and published statistical methods; PlotStatLab does not distribute GraphPad code or claim affiliation. Statistical method references appear in the expert and outlier guides.

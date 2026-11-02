@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Publication layouts and scientific typography</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#263d34;max-width:900px;margin:50px auto;padding:0 26px;background:#fcfdf9}a{color:#286651}h1,h2,h3{line-height:1.25;color:#244c3c}h1{font-size:34px}h2{margin-top:40px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #dfe6d9;padding:9px;text-align:left}pre{background:#edf2e7;padding:16px;overflow:auto;border-radius:6px}code{font-size:.9em}img{max-width:100%}.masthead{font-size:13px;letter-spacing:1px;color:#7c9473;border-bottom:1px solid #dfe6d9;padding-bottom:16px}blockquote{border-left:3px solid #a8bca0;padding-left:16px;color:#6e825f}@media print{body{margin:0;max-width:none}a{color:inherit}pre{white-space:pre-wrap}}</style></head><body><div class="masthead">PlotStatLab · PSL · <a href="/">Return to app</a> · <a href="QUICK-START.html">Quick start</a></div><h1>Publication layouts and scientific typography</h1>
+<p>The <strong>Publication</strong> workspace composes figures from any loaded dataset into one editable figure. Its settings are stored in the <code>.psl</code> workspace. The original figures retain their own styling.</p>
+<h2>Make a multipanel figure</h2>
+<ol>
+<li>Open <strong>Publication</strong> and select the figures to include.</li>
+<li>Use the up/down buttons to set their order. Panel letters follow that order: A, B, C, and so on.</li>
+<li>Choose the number of columns. Set the drawing width, drawing height, gap and outer margin. All panels use identical drawing dimensions. The common legend setting keeps the top plot edges aligned.</li>
+<li>Enable <strong>Use the same fonts</strong> to use one typeface and final print size throughout the composition. Font sizes here are points at the chosen physical print width, rather than screen pixels.</li>
+<li>Set the total print width in millimetres. The height follows the layout aspect ratio. The export toolbar shows the final physical and raster dimensions.</li>
+<li>Export <strong>SVG</strong> for editable vector artwork or <strong>PNG</strong> for a raster image.</li>
+</ol>
+<p>For example, an 180 mm figure at 300 DPI has a width of approximately 2126 pixels. Increasing DPI increases the raster dimensions; it does not make the printed figure physically wider. SVG contains physical millimetre dimensions and a separate drawing-coordinate viewBox. PNG contains standard pHYs print-resolution metadata as well as exact pixel dimensions.</p>
+<p>Keep text readable at its final printed size. If many narrow panels crowd the labels, increase the print width, reduce the column count or adjust the typography. PSL warns when a chosen print size produces unusually large text within a drawing panel. It does not automatically shrink scientific labels below the requested size.</p>
+<h2>Publication size templates</h2>
+<p>Templates set a convenient starting width and PNG resolution. They do not certify a file for a journal or convert SVG/PNG into another file format.</p>
+<table>
+<thead>
+<tr>
+<th>Template</th>
+<th align="right">Width</th>
+<th align="right">Starting resolution</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Generic single column</td>
+<td align="right">85 mm</td>
+<td align="right">300 DPI</td>
+</tr>
+<tr>
+<td>Generic double column</td>
+<td align="right">180 mm</td>
+<td align="right">300 DPI</td>
+</tr>
+<tr>
+<td>Nature single / double column</td>
+<td align="right">90 / 180 mm</td>
+<td align="right">300 DPI</td>
+</tr>
+<tr>
+<td>PLOS text / full width</td>
+<td align="right">132 / 190.5 mm</td>
+<td align="right">300 DPI</td>
+</tr>
+<tr>
+<td>Presentation</td>
+<td align="right">254 mm</td>
+<td align="right">150 DPI</td>
+</tr>
+</tbody></table>
+<p>The Nature widths follow the publisher&#39;s <a href="https://www.nature.com/nature/for-authors/formatting-guide">formatting guide</a>. The PLOS widths follow its <a href="https://journals.plos.org/plosone/s/figures">figure guidance</a>. These pages were checked on 2 November 2026. Journal pages and article types may specify different widths, text sizes, maximum heights, file sizes and submission formats. In particular, the linked PLOS guidance requires TIFF or EPS for final submission; PSL&#39;s SVG/PNG exports can be used as editable artwork or raster intermediates for those workflows.</p>
+<h2>Batch export</h2>
+<p>Choose <strong>Batch export → SVG panels (.zip)</strong> or <strong>PNG panels (.zip)</strong>. The archive contains one numbered file per selected panel, in the saved publication order. The number prevents collisions when two figures have the same name. Each panel uses the size and shared typography shown in the publication layout. SVG files keep separate vectors and live text. PNG files receive the selected DPI metadata.</p>
+<p>Batch files contain individual panels; the main <strong>Export SVG/PNG</strong> buttons produce the complete labelled composition. A ZIP avoids a series of browser download prompts. Very large PNGs are limited to 80 megapixels per image; batch archives are limited to 150 MB to avoid exhausting browser memory.</p>
+<h2>Scientific text</h2>
+<p>In figure titles, axis labels, legends and category labels, use:</p>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>H_{2}O</code></td>
+<td>Subscript 2</td>
+</tr>
+<tr>
+<td><code>10^{−3}</code></td>
+<td>Superscript −3</td>
+</tr>
+<tr>
+<td><code>*P*</code></td>
+<td>Italic P</td>
+</tr>
+<tr>
+<td><code>**Signal**</code></td>
+<td>Bold Signal</td>
+</tr>
+<tr>
+<td><code>\*literal\*</code></td>
+<td>Literal asterisks</td>
+</tr>
+<tr>
+<td><code>x\^{2}</code></td>
+<td>Literal superscript notation</td>
+</tr>
+</tbody></table>
+<p>Use braces around the complete superscript or subscript. This intentionally small grammar does not evaluate LaTeX or mathematical expressions. Unbalanced or unsupported notation stays literal. Unicode Greek letters, mathematical symbols and minus signs may be typed directly, subject to the chosen font&#39;s glyph support.</p>
+<p>SVG exports keep these labels as text and <code>tspan</code> objects with font and baseline attributes. They remain text-editable in vector software. The chosen font must be installed when opening the export elsewhere. See <a href="SVG-ILLUSTRATOR.html">Editable SVG in Adobe Illustrator</a> for the interoperability scope and practical limits.</p>
+<hr><p>PlotStatLab · MIT License · Documentation included for offline use.</p></body></html>

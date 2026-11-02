@@ -18,19 +18,38 @@ export function tCritical95(df: number) { if (df < 1) return 0; let lo = 0, hi =
 export function errorSize(values: number[], kind: 'sd' | 'sem' | 'ci95' | 'none') { if (kind === 'none' || values.length < 2) return 0; const sd = deviation(values); return kind === 'sd' ? sd : sd / Math.sqrt(values.length) * (kind === 'ci95' ? tCritical95(values.length - 1) : 1); }
 
 export interface SwarmPoint { id: string; x: number; y: number; radius: number; crowded: boolean }
-/** Deterministic beeswarm: candidate tangent positions are accepted only without overlaps. */
+/** Deterministic exact beeswarm, using forbidden-interval unions instead of repeated all-pairs searches. */
 export function swarmLayout(observations: Observation[], center: number, yScale: (v: number) => number, radius: (id: string) => number, maxWidth = 120): SwarmPoint[] {
   const placed: SwarmPoint[] = [];
-  [...observations].sort((a, b) => a.value - b.value || a.id.localeCompare(b.id)).forEach(observation => {
-    const y = yScale(observation.value), r = radius(observation.id), candidates = [center];
-    placed.forEach(p => { const gap = r + p.radius + 1.4, dy = y - p.y; if (Math.abs(dy) < gap) { const dx = Math.sqrt(gap ** 2 - dy ** 2); candidates.push(p.x - dx, p.x + dx); } });
-    candidates.sort((a, b) => Math.abs(a - center) - Math.abs(b - center) || a - b);
-    const free = (x: number) => placed.every(p => Math.hypot(x - p.x, y - p.y) >= r + p.radius + 1.39);
-    const inside = candidates.find(x => Math.abs(x - center) + r <= maxWidth / 2 && free(x));
-    // When the allotted group width is exhausted, expand rather than hide observations.
-    const x = inside ?? candidates.find(free) ?? center;
-    placed.push({id: observation.id, x, y, radius: r, crowded: inside === undefined});
-  }); return placed;
+  const radii = new Map(observations.map(observation => [observation.id, Math.max(1, radius(observation.id))]));
+  const largestRadius = [...radii.values()].reduce((largest, value) => Math.max(largest, value), 1), cellSize = largestRadius*2+1.4;
+  const verticalBuckets = new Map<number, SwarmPoint[]>();
+  for (const observation of [...observations].sort((a,b) => a.value-b.value || a.id.localeCompare(b.id))) {
+    const y = yScale(observation.value), r = radii.get(observation.id)!, bucketIndex = Math.floor(y/cellSize);
+    const intervals: {left:number;right:number}[] = [];
+    // More distant vertical cells cannot collide, even with the largest point override.
+    for (let bucket = bucketIndex-1; bucket <= bucketIndex+1; bucket++) for (const point of verticalBuckets.get(bucket) ?? []) {
+      const gap = r+point.radius+1.4, dy = y-point.y;
+      if (Math.abs(dy) >= gap) continue;
+      const dx = Math.sqrt(Math.max(0,gap*gap-dy*dy));
+      intervals.push({left:point.x-dx,right:point.x+dx});
+    }
+    intervals.sort((a,b) => a.left-b.left);
+    let x = center, low = -Infinity, high = -Infinity;
+    for (const interval of [...intervals, {left:Infinity,right:Infinity}]) {
+      if (interval.left < high) {high = Math.max(high,interval.right); continue;}
+      if (center > low && center < high) {x = center-low <= high-center ? low : high; break;}
+      low = interval.left; high = interval.right;
+    }
+    const point = {id:observation.id,x,y,radius:r,crowded:Math.abs(x-center)+r>maxWidth/2};
+    placed.push(point);
+    // Ordered cells make the interval sort linear for dense, similarly sized swarms.
+    const bucket = verticalBuckets.get(bucketIndex) ?? [];
+    let lo = 0, hi = bucket.length;
+    while (lo < hi) {const middle = (lo+hi)>>>1; if (bucket[middle].x < x) lo = middle+1; else hi = middle;}
+    bucket.splice(lo,0,point); verticalBuckets.set(bucketIndex,bucket);
+  }
+  return placed;
 }
 export interface BracketLayout { comparison: Comparison; x1: number; x2: number; level: number; y: number; labelX: number }
 export function bracketLevels(comparisons: Comparison[], xFor: (id: string) => number | undefined) {
@@ -59,7 +78,7 @@ export function heatmapRows(groups: import('./types').Group[]) {
   const index = new Map<string, number>();
   groups.forEach(g => g.observations.forEach((o, i) => {
     const id = hasSubjects ? (o.subject && !duplicateSubjects.has(o.subject) ? `subject:${o.subject}` : `unpaired:${g.id}:${o.id}`) : `row:${i}`;
-    if (!index.has(id)) {index.set(id, rows.length); rows.push({id, label: hasSubjects ? (o.subject ? (duplicateSubjects.has(o.subject) ? `${o.subject} · ${o.id}` : o.subject) : `Sem par · ${o.id}`) : `${i + 1}`});}
+    if (!index.has(id)) {index.set(id, rows.length); rows.push({id, label: hasSubjects ? (o.subject ? (duplicateSubjects.has(o.subject) ? `${o.subject} · ${o.id}` : o.subject) : `Unpaired · ${o.id}`) : `${i + 1}`});}
     byObservation[o.id] = index.get(id)!;
   }));
   return {rows, byObservation};
@@ -67,7 +86,7 @@ export function heatmapRows(groups: import('./types').Group[]) {
 export function positiveLogDomain(values: number[]): [number, number] {
   const positive = values.filter(v => Number.isFinite(v) && v > 0);
   if (!positive.length) return [1, 10];
-  const min = Math.max(Number.MIN_VALUE, Math.min(...positive) / 1.35), dataMax = Math.max(...positive);
+  const min = Math.max(Number.MIN_VALUE, positive.reduce((a,b)=>Math.min(a,b),Infinity) / 1.35), dataMax = positive.reduce((a,b)=>Math.max(a,b),-Infinity);
   const max = Math.min(Number.MAX_VALUE, Math.max(dataMax * 1.3, min * 1.35));
   return [min, max > min ? max : Math.min(Number.MAX_VALUE, min * 10)];
 }

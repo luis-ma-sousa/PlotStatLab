@@ -186,3 +186,30 @@ def test_outlier_http_endpoint_preserves_observation_identity():
     assert result.status_code == 200
     assert result.json()["groups"][0]["flaggedIds"] == [payload["groups"][0]["observations"][-1]["id"]]
     assert payload["groups"][0]["observations"][-1]["value"] == 100
+
+
+def test_dunnett_published_blood_count_example_and_intrinsic_correction():
+    # SciPy published Dunnett tutorial, original two-sided control family.
+    data=groups([7.40,8.50,7.20,8.24,9.84,8.32],[9.76,8.80,7.68,9.36],[12.80,9.68,12.16,9.20,10.55])
+    result=analyze(request(data,test='anova-dunnett',comparisons='control',correction='bonferroni'))
+    assert [p['adjustedP'] for p in result['comparisons']]==pytest.approx([.62014638,.00593493],abs=5e-5)
+    assert all(p['adjustedP']==p['p'] for p in result['comparisons'])
+    assert all(p['groupA']=='g0' for p in result['comparisons'])
+    assert result['comparisons'][1]['label']=='**'
+    assert result['comparisons'][1]['ci'][1]<0  # control − treatment
+    with pytest.raises(ValueError,match='Control pairs'):
+        analyze(request(data,test='anova-dunnett',comparisons='all'))
+
+
+def test_dunn_pooled_ranks_tie_correction_and_holm_control_family():
+    # Hand-ranked samples pooled ranks [1,2.5,2.5,4,5.5,5.5,7,8,9].
+    # Rank variance = 9*10/12 − ((2³−2)+(2³−2))/(12*(9−1)) = 7.375.
+    data=groups([1,2,2],[3,4,4],[5,6,7])
+    result=analyze(request(data,test='kruskal-dunn',comparisons='control',correction='holm'))
+    z01=(2-5)/math.sqrt(7.375*2/3)
+    z02=(2-8)/math.sqrt(7.375*2/3)
+    expected=[math.erfc(abs(z01)/math.sqrt(2)),math.erfc(abs(z02)/math.sqrt(2))]
+    assert [p['statistic'] for p in result['comparisons']]==pytest.approx([z01,z02])
+    assert [p['p'] for p in result['comparisons']]==pytest.approx(expected)
+    assert [p['adjustedP'] for p in result['comparisons']]==pytest.approx([expected[0],2*expected[1]])
+    assert all('ci' not in p for p in result['comparisons'])

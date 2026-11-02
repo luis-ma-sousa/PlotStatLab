@@ -1,0 +1,7 @@
+// @vitest-environment jsdom
+import {it,expect} from 'vitest';
+import {createRoot} from 'react-dom/client';
+import {act} from 'react';
+import useDialogAccessibility from './useDialogAccessibility';
+(globalThis as {IS_REACT_ACT_ENVIRONMENT?:boolean}).IS_REACT_ACT_ENVIRONMENT=true;
+it('contains Tab focus, closes with Escape and restores the opener',async()=>{const opener=document.createElement('button');document.body.append(opener);opener.focus();const host=document.createElement('div');document.body.append(host);const root=createRoot(host);let closed=false;function Dialog({active}:{active:boolean}){useDialogAccessibility(active,()=>{closed=true});return active?<div role="dialog"><button>First</button><input aria-label="Last"/></div>:null}await act(()=>root.render(<Dialog active/>));expect(document.activeElement?.textContent).toBe('First');document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',shiftKey:true,bubbles:true}));expect((document.activeElement as HTMLInputElement).getAttribute('aria-label')).toBe('Last');document.dispatchEvent(new KeyboardEvent('keydown',{key:'Tab',bubbles:true}));expect(document.activeElement?.textContent).toBe('First');document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));expect(closed).toBe(true);await act(()=>root.render(<Dialog active={false}/>));expect(document.activeElement).toBe(opener);await act(()=>root.unmount());host.remove();opener.remove()});

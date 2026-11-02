@@ -1,6 +1,6 @@
 # PlotStatLab — beginner's guide
 
-**PSL 0.2.0 · From download to your first figure, without programming**
+**PSL 0.3.0 · From download to your first figure, without programming**
 
 This guide uses fictional data so you can learn the workflow before entering your own measurements. If you only need the clicks, use the [quick start](QUICK-START.md). For methods and file formats, use the [expert guide](EXPERT-GUIDE.md).
 
@@ -89,7 +89,7 @@ To change the current figure instead of adding another one, open the gallery and
 | Cumulative probability | **ECDF** |
 | A matrix of measurements | **Heatmap** |
 
-This version has 13 chart types. Specialized charts such as dose–response and Kaplan–Meier are listed separately in the [roadmap](ROADMAP.md).
+This version has 20 chart families. Grouped, regression, dose–response, Kaplan–Meier, forest, Bland–Altman and volcano charts use explicit scientific columns; see [advanced methods](ADVANCED-METHODS.md).
 
 ## 5. Format the figure
 

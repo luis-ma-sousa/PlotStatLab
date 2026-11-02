@@ -70,8 +70,10 @@ LABELS = {
     "wilcoxon": "Paired Wilcoxon",
     "anova": "One-way ANOVA + Student t-tests",
     "anova-tukey": "One-way ANOVA + Tukey HSD",
+    "anova-dunnett": "One-way ANOVA + Dunnett (vs control)",
     "welch-anova": "Welch ANOVA + Welch t-tests",
     "kruskal": "Kruskal–Wallis + Mann–Whitney",
+    "kruskal-dunn": "Kruskal–Wallis + Dunn",
     "friedman": "Friedman + paired Wilcoxon",
 }
 PAIRED_TESTS = {"paired-t", "wilcoxon", "friedman"}
@@ -114,9 +116,9 @@ def _compatibility(groups: list[Group], design: str, test: str) -> str | None:
         return "The paired t-test requires variability in paired differences."
     if test == "welch-anova" and any(np.std(a, ddof=1) == 0 for a in arrays):
         return "Welch ANOVA requires positive variance in every group."
-    if test in {"welch", "student", "anova", "anova-tukey"} and all(np.std(a, ddof=1) == 0 for a in arrays):
+    if test in {"welch", "student", "anova", "anova-tukey", "anova-dunnett"} and all(np.std(a, ddof=1) == 0 for a in arrays):
         return "These data do not have sufficient variability for a parametric test."
-    if test == "kruskal" and np.ptp(np.concatenate(arrays)) == 0:
+    if test in {"kruskal", "kruskal-dunn"} and np.ptp(np.concatenate(arrays)) == 0:
         return "Kruskal–Wallis is undefined when all values are identical."
     if test == "friedman" and all(np.ptp(row) == 0 for row in np.stack(arrays, axis=1)):
         return "Friedman is undefined when every subject has identical values across groups."
@@ -140,8 +142,10 @@ def suggest(request: SuggestRequest) -> dict:
         "wilcoxon": "Compares paired differences by ranks; a location interpretation assumes symmetric differences.",
         "anova": "Compares independent means with equal variances; planned comparisons use t-tests with the selected correction.",
         "anova-tukey": "Compares means with equal variances and controls all pairwise comparisons with Tukey HSD.",
+        "anova-dunnett": "Compares means with equal variances; Dunnett controls the family-wise error for treatment-versus-control comparisons only.",
         "welch-anova": "Compares several independent means without requiring equal variances; pairwise comparisons use Welch t-tests with the selected correction.",
         "kruskal": "Compares independent distributions by ranks; pairwise comparisons use Mann–Whitney with the selected correction.",
+        "kruskal-dunn": "Compares independent distributions by ranks; Dunn post-tests use pooled ranks, tie correction and the selected multiplicity adjustment.",
         "friedman": "Compares repeated conditions by ranks; pairwise comparisons use Wilcoxon with the selected correction. The approximation may be poor in small samples.",
     }
     candidates = [key for key in LABELS if (key in PAIRED_TESTS) == (design == "paired") and ((key in TWO_TESTS) == (n_groups <= 2))]
@@ -154,7 +158,7 @@ def suggest(request: SuggestRequest) -> dict:
     if any(len(g.observations) < 5 for g in request.groups):
         notes.append("Some groups have fewer than five observations; distribution assessment and asymptotic approximations are limited.")
     if design == "paired" and n_groups > 2:
-        notes.append("For more than two paired conditions, this version offers Friedman. Repeated-measures ANOVA and mixed models are planned.")
+        notes.append("For more than two paired conditions, this panel offers Friedman. Open Factorial, regression & survival for repeated-measures ANOVA or a random-intercept mixed model with explicit factor columns.")
     return {"suggestions": suggestions, "warnings": notes}
 
 
@@ -225,11 +229,13 @@ def analyze(request: AnalyzeRequest) -> dict:
         raise ValueError("Select a valid control group.")
     if test == "anova-tukey" and config.comparisons != "all":
         raise ValueError("Tukey HSD uses all pairwise comparisons. Select 'All pairs'.")
+    if test == "anova-dunnett" and config.comparisons != "control":
+        raise ValueError("Dunnett compares treatments against one control. Select 'Control pairs'.")
     arrays = _paired_arrays(groups) if config.design == "paired" else [np.array([p.value for p in g.observations]) for g in groups]
     notes = ([f"{excluded_count} explicitly excluded observations were omitted; original measurements remain in the project."] if excluded_count else [])
-    if config.correction == "none" and len(groups) > 2 and test != "anova-tukey":
+    if config.correction == "none" and len(groups) > 2 and test not in {"anova-tukey", "anova-dunnett"}:
         notes.append("Comparisons are unadjusted; the risk of false positives increases with the number of comparisons.")
-    if config.correction == "bh":
+    if config.correction == "bh" and test not in {"anova-tukey", "anova-dunnett"}:
         notes.append("Benjamini–Hochberg controls the false discovery rate (FDR), not the family-wise error rate (FWER).")
     if config.alpha != 0.05:
         notes.append("Symbols use conventional thresholds 0.05 / 0.01 / 0.001 / 0.0001; the selected alpha does not change these thresholds.")
@@ -237,18 +243,22 @@ def analyze(request: AnalyzeRequest) -> dict:
         notes.append("Some groups have n < 5; interpret assumptions and approximations carefully.")
     if test == "friedman" and (len(arrays[0]) <= 10 or len(groups) <= 6):
         notes.append("The Friedman p-value uses a chi-squared approximation, which may be inaccurate with few subjects or conditions.")
-    if test in {"kruskal", "friedman", "mann-whitney", "wilcoxon"}:
+    if test in {"kruskal", "kruskal-dunn", "friedman", "mann-whitney", "wilcoxon"}:
         notes.append("Rank tests compare distributions or differences; they are not automatically tests of medians. Displayed mean differences are descriptive only.")
     if test == "anova-tukey":
         notes.append("Tukey HSD p-values and intervals already adjust for all pairs; the additional correction is not applied.")
+    if test == "anova-dunnett":
+        notes.append("Dunnett's original two-sided single-step p-values and intervals already control the treatment-versus-control family; the additional correction is not applied. Independent Gaussian errors and equal variances are assumed. Multivariate-t integration uses a fixed random seed for reproducibility.")
+    if test == "kruskal-dunn":
+        notes.append("Dunn post-tests use mean ranks pooled across all included groups, with correction for ties and a two-sided normal approximation. The selected multiplicity correction applies to the requested comparison family.")
 
     with python_warnings.catch_warnings(record=True) as caught:
         python_warnings.simplefilter("always")
-        if test in {"anova", "anova-tukey"}:
+        if test in {"anova", "anova-tukey", "anova-dunnett"}:
             omnibus = stats.f_oneway(*arrays, equal_var=True)
         elif test == "welch-anova":
             omnibus = stats.f_oneway(*arrays, equal_var=False)
-        elif test == "kruskal":
+        elif test in {"kruskal", "kruskal-dunn"}:
             omnibus = stats.kruskal(*arrays)
         elif test == "friedman":
             omnibus = stats.friedmanchisquare(*arrays)
@@ -264,12 +274,33 @@ def analyze(request: AnalyzeRequest) -> dict:
         if test == "anova-tukey":
             tukey = stats.tukey_hsd(*arrays)
             tukey_ci = tukey.confidence_interval(confidence_level=1 - config.alpha)
+        if test == "anova-dunnett":
+            sample_indices = [j for j in range(len(groups)) if j != control_idx]
+            dunnett = stats.dunnett(*[arrays[j] for j in sample_indices], control=arrays[control_idx], alternative="two-sided", rng=np.random.default_rng(0))
+            dunnett_ci = dunnett.confidence_interval(confidence_level=1 - config.alpha)
+        if test == "kruskal-dunn":
+            pooled = np.concatenate(arrays)
+            ranks = stats.rankdata(pooled, method="average")
+            ends = np.cumsum([len(a) for a in arrays])
+            rank_means = [float(r.mean()) for r in np.split(ranks, ends[:-1])]
+            _, tie_counts = np.unique(pooled, return_counts=True)
+            n_total = len(pooled)
+            rank_variance = n_total * (n_total + 1) / 12 - float(np.sum(tie_counts ** 3 - tie_counts)) / (12 * (n_total - 1))
         for i, j in pair_indices:
             if test == "anova-tukey":
                 raw = None
                 pp = _finite(tukey.pvalue[i, j], "The Tukey p-value")
                 st = _finite(tukey.statistic[i, j], "The mean difference")
                 ci = [_finite(tukey_ci.low[i, j], "The interval bound"), _finite(tukey_ci.high[i, j], "The interval bound")]
+            elif test == "anova-dunnett":
+                k = sample_indices.index(j)
+                pp = _finite(dunnett.pvalue[k], "The Dunnett p-value")
+                st = _finite(-dunnett.statistic[k], "The Dunnett statistic")
+                ci = [_finite(-dunnett_ci.high[k], "The interval bound"), _finite(-dunnett_ci.low[k], "The interval bound")]
+            elif test == "kruskal-dunn":
+                st = _finite((rank_means[i] - rank_means[j]) / math.sqrt(rank_variance * (1 / len(arrays[i]) + 1 / len(arrays[j]))), "The Dunn statistic")
+                pp = float(2 * stats.norm.sf(abs(st)))
+                ci = None
             else:
                 raw = _pair_result(arrays[i], arrays[j], test)
                 pp = _finite(raw.pvalue, "The comparison p-value")
@@ -282,7 +313,7 @@ def analyze(request: AnalyzeRequest) -> dict:
             if ci is not None:
                 item["ci"] = ci
             pair_data.append(item)
-        adjusted = [p["p"] for p in pair_data] if test == "anova-tukey" else adjust_pvalues([p["p"] for p in pair_data], config.correction)
+        adjusted = [p["p"] for p in pair_data] if test in {"anova-tukey", "anova-dunnett"} else adjust_pvalues([p["p"] for p in pair_data], config.correction)
         for item, adjusted_p in zip(pair_data, adjusted):
             item["adjustedP"] = adjusted_p
             item["label"] = stars(adjusted_p)
@@ -298,6 +329,6 @@ def analyze(request: AnalyzeRequest) -> dict:
             text = str(warning.message)
             if text not in notes:
                 notes.append(text)
-    if test != "anova-tukey" and any("ci" in p for p in pair_data) and len(pair_data) > 1:
+    if test not in {"anova-tukey", "anova-dunnett"} and any("ci" in p for p in pair_data) and len(pair_data) > 1:
         notes.append("Difference intervals are individual; adjusted p-values apply the correction to the selected comparison family.")
     return {"test": test, "testLabel": LABELS[test], "engine": f"SciPy {scipy.__version__}", "statistic": statistic, "p": pvalue, "comparisons": pair_data, "summaries": summaries, "warnings": notes, "fingerprint": request.fingerprint, "config": config.model_dump(), "createdAt": datetime.now(timezone.utc).isoformat()}

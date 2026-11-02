@@ -87,3 +87,16 @@ describe('heatmap subject alignment', () => {
     expect(new Set(Object.values(layout.byObservation)).size).toBe(3); expect(layout.rows).toHaveLength(3);
   });
 });
+
+it('lays out 10,000 distinct observations without sampling and with finite stable coordinates',()=>{
+ const observations=Array.from({length:10000},(_,i)=>({id:`large-${i}`,value:i}));
+ const placed=swarmLayout(observations,200,v=>v*.1,()=>2,350);
+ expect(placed).toHaveLength(10000);expect(new Set(placed.map(p=>p.id)).size).toBe(10000);
+ expect(placed.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y))).toBe(true);
+ for(let i=1;i<placed.length;i++)expect(Math.hypot(placed[i].x-placed[i-1].x,placed[i].y-placed[i-1].y)).toBeGreaterThanOrEqual(5.4-1e-8);
+});
+it('retains exact collision clearance for tied values and heterogeneous point sizes',()=>{
+ const observations=Array.from({length:400},(_,i)=>({id:`tie-${i}`,value:i%4}));
+ const placed=swarmLayout(observations,0,v=>v*9,id=>Number(id.split('-')[1])%6+1,2000);
+ for(let i=0;i<placed.length;i++)for(let j=0;j<i;j++)expect(Math.hypot(placed[i].x-placed[j].x,placed[i].y-placed[j].y)).toBeGreaterThanOrEqual(placed[i].radius+placed[j].radius+1.4-1e-8);
+});

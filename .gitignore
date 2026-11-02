@@ -21,3 +21,5 @@ releases/
 node_modules
 .venv
 .updates/
+
+native-release/

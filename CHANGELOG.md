@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0 — broader science and publication
+
+- Seven specialized chart families (20 total), explicit long-format scientific tables and native Excel multi-sheet import.
+- Two-factor Type III ANOVA, Greenhouse–Geisser repeated-measures ANOVA, random-intercept REML, correlation, OLS, 4PL, Kaplan–Meier/log-rank and Bland–Altman analyses.
+- Genuine Dunn and Dunnett post-tests.
+- Preserved multi-dataset advanced histories, current/stale fit handling and per-observation editing.
+- Publication layouts, physical sizes, journal templates, scientific scripts, editable vector batch ZIP and PNG print metadata.
+- Faster exact swarms, paginated tables, modal keyboard focus, native installation wrapper build pipeline and explicit offline validation.
+
+Native installers and cross-platform checks are validated in CI before release. Publisher-trusted signatures require publisher credentials; local macOS integrity signing is not Apple notarization.
+
+
 ## 0.2.0 — development preview
 
 - Renamed the application **PlotStatLab (PSL)**.

@@ -30,7 +30,7 @@ for name, expected in requirements.items():
         actual = importlib.metadata.version(name)
         if actual != expected: errors.append(name + ': ' + actual + ' != ' + expected)
     except importlib.metadata.PackageNotFoundError: errors.append(name + ': missing')
-for name in ['numpy', 'scipy.stats', 'fastapi', 'uvicorn', 'pydantic']:
+for name in ['numpy', 'scipy.stats', 'fastapi', 'uvicorn', 'pydantic', 'openpyxl', 'defusedxml']:
     try: importlib.import_module(name)
     except Exception as exc: errors.append(name + ': ' + str(exc))
 print(json.dumps({'healthy': not errors, 'errors': errors}))

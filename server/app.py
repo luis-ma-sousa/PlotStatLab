@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 APP_VERSION = json.loads((Path(__file__).resolve().parents[1] / "package.json").read_text(encoding="utf-8"))["version"]
 from .outliers import detect_outliers
+from .advanced import analyze_advanced
 
 from .statistics import AnalyzeRequest, SuggestRequest, analyze, suggest
 
@@ -34,6 +35,21 @@ def analysis(request: AnalyzeRequest):
 def outlier_detection(request: dict):
     try:
         return detect_outliers(request)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@app.post("/api/advanced")
+def advanced_analysis(request: dict):
+    try:
+        return analyze_advanced(request)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+from .excel_import import import_excel
+@app.post("/api/import/excel")
+def import_workbook(request: dict):
+    try:
+        return import_excel(request.get("contentBase64"), request.get("filename", "Workbook.xlsx"))
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 

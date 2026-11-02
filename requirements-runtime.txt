@@ -1,4 +1,4 @@
-# PlotStatLab 0.2.0: Python 3.12 runtime only; no developer/test packages.
+# PlotStatLab 0.3.0: Python 3.12 runtime only; no developer/test packages.
 annotated-doc==0.0.5
 annotated-types==0.8.0
 anyio==4.16.0
@@ -16,3 +16,8 @@ starlette==1.10.0
 typing-inspection==0.4.4
 typing-extensions==4.16.0
 uvicorn==0.54.0
+
+# Native Excel import
+openpyxl==3.1.5
+et-xmlfile==2.0.0
+defusedxml==0.7.1

@@ -1,6 +1,6 @@
 # PlotStatLab — expert guide
 
-**PSL 0.2.0 · Data, statistics, vector editing and reproducibility**
+**PSL 0.3.0 · Data, statistics, vector editing and reproducibility**
 
 This guide describes the current workflow and its limits. The [roadmap](ROADMAP.md) separates implemented functions from planned work. For the basic clicks, use the [beginner's guide](BEGINNER-GUIDE.md).
 

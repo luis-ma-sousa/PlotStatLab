@@ -1,0 +1,72 @@
+name: Native installers
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build verified portable seed
+        run: python scripts/package_release.py --output releases
+      - name: Install Windows installer compiler
+        if: runner.os == 'Windows'
+        run: choco install nsis --yes --no-progress
+      - name: Build native installer
+        shell: bash
+        run: |
+          VERSION=$(python -c "import json;print(json.load(open('package.json'))['version'])")
+          python scripts/build_native.py --zip "releases/PlotStatLab-$VERSION.zip" --output native-release
+      - name: Test macOS application bundle in a path with spaces
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          PSL_NATIVE_HOME: ${{ runner.temp }}/PSL native installation
+          CI: '1'
+        run: |
+          "native-release/PlotStatLab.app/Contents/MacOS/PlotStatLab" --check --no-update
+          "native-release/PlotStatLab.app/Contents/MacOS/PlotStatLab" --check --no-update --offline
+      - name: Test Windows graphical installer in silent mode
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $Installer = Get-ChildItem native-release/*-Windows-Setup.exe | Select-Object -First 1
+          $Destination = Join-Path $env:RUNNER_TEMP 'PSL native installation'
+          $Process = Start-Process -FilePath $Installer.FullName -ArgumentList "/S /D=$Destination" -Wait -PassThru
+          if ($Process.ExitCode -ne 0) { exit $Process.ExitCode }
+          & "$Destination\Start PlotStatLab.bat" --check --no-update
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "$Destination\Start PlotStatLab.bat" --check --no-update --offline
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PlotStatLab-native-${{ runner.os }}
+          path: |
+            native-release/*.exe
+            native-release/*.dmg
+            native-release/*.sha256
+      - name: Attach native download to tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for RETRY in 1 2 3 4 5 6; do
+            if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then break; fi
+            sleep 10
+          done
+          shopt -s nullglob
+          ASSETS=(native-release/*.sha256 native-release/*.dmg native-release/*.exe)
+          gh release upload "$GITHUB_REF_NAME" "${ASSETS[@]}" --clobber

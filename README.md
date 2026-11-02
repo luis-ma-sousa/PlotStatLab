@@ -20,12 +20,14 @@ Open the app at **http://127.0.0.1:8765**. It works offline after initial instal
 
 ## What you can do
 
-- Import several CSV/TSV datasets at once. Import adds datasets and preserves existing work.
+- Import several CSV/TSV datasets or native Excel workbooks at once. Import adds datasets and preserves existing work.
 - Keep multiple figures per dataset, retain several statistical test results, and compare them side by side in **Overview**.
 - Choose which figures and analyses appear in the overview. Save the entire workspace as `.psl`, including datasets, results, formatting, individual point overrides and panel selections. Legacy `.labplot` projects open as one-dataset workspaces.
-- Use 13 plot families: bar+swarm, bar, swarm, box, violin, raincloud, paired, XY scatter, XY line, histogram, density, ECDF and heatmap.
+- Use 20 plot families: bar+swarm, bar, swarm, box, violin, raincloud, paired, XY scatter, XY line, histogram, density, ECDF, heatmap, grouped two-factor bar+swarm, regression, dose–response, Kaplan–Meier, forest, Bland–Altman and volcano.
 - Click an observation to edit only that point. Enter HEX colors for every color control; copy complete or selective styles between figures.
-- Run design-aware statistical comparisons, adjusted p-values and automatic draggable significance brackets.
+- Run design-aware statistical comparisons, including Dunn and Dunnett, adjusted p-values and automatic draggable significance brackets.
+- Analyze two-factor and repeated designs, fit a random-intercept mixed model, calculate correlations/regression, fit 4PL dose response and compare right-censored survival curves.
+- Compose aligned multipanel figures, share typography, label A/B/C, apply journal size templates and batch-export SVG/PNG at precise physical size and DPI.
 - Identify outliers with Grubbs or the published constant-model ROUT method. Review flags before explicitly excluding anything; original values remain saved. Numerical identity to proprietary GraphPad versions has not been certified.
 - Export PNG at exact pixel dimensions or standalone SVG1.1 with editable text and separate vector objects for Illustrator.
 - Toggle autosave. **Save workspace** also creates a portable backup independently of the toggle.
@@ -40,6 +42,10 @@ Open **Help** in the app, or read:
 - [SVG and Illustrator](docs/SVG-ILLUSTRATOR.md)
 - [Outlier methods and validation](docs/OUTLIER-METHODS.md)
 - [Updates and recovery](docs/UPDATES.md)
+- [Advanced methods](docs/ADVANCED-METHODS.md)
+- [Publication and scientific typography](docs/PUBLICATION.md)
+- [Excel import](docs/EXCEL-IMPORT.md)
+- [Offline operation](docs/OFFLINE.md)
 
 The complete interface and documentation are in English. User-supplied dataset names and imported historical notes retain their original text.
 
