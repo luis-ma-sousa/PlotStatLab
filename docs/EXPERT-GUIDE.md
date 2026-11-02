@@ -15,7 +15,7 @@ A workspace contains multiple datasets, each with its own groups and analysis se
 | SVG | Editable text and vector objects for external graphic editing |
 | PNG | A raster image at explicit pixel dimensions |
 
-Opening `.psl` restores a complete workspace. Legacy `.psl` files become single-dataset workspaces. Importing one or several CSV files adds datasets and figures without replacing existing work. Exporting a figure does not back up the statistical project.
+Opening `.psl` restores a complete workspace. Legacy `.labplot` files become single-dataset workspaces. Importing one or several CSV files adds datasets and figures without replacing existing work. Exporting a figure does not back up the statistical project.
 
 ## 2. Data layout and identity
 
@@ -193,7 +193,7 @@ Select a comparison to drag it, edit X/Y offsets or use arrow keys; `Shift` uses
 
 ### Result freshness
 
-PSL compares current data/options with the fingerprint stored in the analysis. Changes to values, IDs, X coordinates, observations or statistical configuration can make results stale. Stale annotations are hidden, including during export. Appearance-only edits do not recalculate statistics.
+PSL compares current dataset measurements with each analysis's recorded configuration and fingerprint. Changes to values, IDs, X coordinates, observations or exclusions make affected results stale. Selecting the next test in the assistant does not rewrite or invalidate a historical run; each run retains its own configuration. Stale annotations are hidden, including during export. Appearance-only edits do not recalculate statistics.
 
 Recalculating updates that figure's attached results and resets its manual comparison positions; the previous run remains in the overview history. Each run is retained in the workspace analysis history, linked to its dataset and recorded configuration. The current figure attaches the latest run made for that figure. Other figures and earlier runs retain their results; data/exclusion changes mark only the affected dataset results stale.
 

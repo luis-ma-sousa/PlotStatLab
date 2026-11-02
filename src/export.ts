@@ -1,3 +1,4 @@
+import {version as applicationVersion} from '../package.json';
 import type { Chart } from './types';
 import { exportDownload } from './project';
 
@@ -85,7 +86,7 @@ export function serializeFigureSvg(chart: Chart, source?: SVGSVGElement): string
       for (const [property, defaultValue] of Object.entries(inheritedDefaults)) {
         if (textProperties.has(property) && !['text', 'tspan', 'svg', 'g'].includes(tag)) continue;
         let value = inheritedValue(element, property, defaultValue);
-        if (value === 'currentColor') value = inheritedValue(element, 'color', '#000000');
+        if (value.toLowerCase() === 'currentcolor') value = inheritedValue(element, 'color', '#000000');
         attrs[property] = ['fill', 'stroke', 'color'].includes(property) ? presentationColor(value) : value;
       }
       for (const property of directPresentation) {
@@ -120,9 +121,9 @@ export function serializeFigureSvg(chart: Chart, source?: SVGSVGElement): string
   const doc = svg.ownerDocument;
   const title = doc.createElementNS(SVG_NS, 'title'); title.textContent = chart.title || chart.name;
   const desc = doc.createElementNS(SVG_NS, 'desc');
-  desc.textContent = 'PlotStatLab (PSL) 0.2.0. Editable vector figure: text remains text; observations, series, axes and comparisons are separate objects.';
+  desc.textContent = `PlotStatLab (PSL) ${applicationVersion}. Editable vector figure: text remains text; observations, series, axes and comparisons are separate objects.`;
   const metadata = doc.createElementNS(SVG_NS, 'metadata');
-  metadata.textContent = JSON.stringify({creator: 'PlotStatLab', abbreviation: 'PSL', version: '0.2.0', chartType: chart.type, text: 'editable', format: 'SVG 1.1'});
+  metadata.textContent = JSON.stringify({creator: 'PlotStatLab', abbreviation: 'PSL', version: applicationVersion, chartType: chart.type, text: 'editable', format: 'SVG 1.1'});
   svg.insertBefore(metadata, svg.firstChild); svg.insertBefore(desc, svg.firstChild); svg.insertBefore(title, svg.firstChild);
 
   // Group only contiguous peers: paint order and all existing transforms remain exact.

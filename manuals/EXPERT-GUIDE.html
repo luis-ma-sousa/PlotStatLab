@@ -27,7 +27,7 @@
 <td>A raster image at explicit pixel dimensions</td>
 </tr>
 </tbody></table>
-<p>Opening <code>.psl</code> restores a complete workspace. Legacy <code>.psl</code> files become single-dataset workspaces. Importing one or several CSV files adds datasets and figures without replacing existing work. Exporting a figure does not back up the statistical project.</p>
+<p>Opening <code>.psl</code> restores a complete workspace. Legacy <code>.labplot</code> files become single-dataset workspaces. Importing one or several CSV files adds datasets and figures without replacing existing work. Exporting a figure does not back up the statistical project.</p>
 <h2>2. Data layout and identity</h2>
 <h3>Wide input format</h3>
 <p>The importer expects headers and one numeric column per group. An optional subject column and X column have special meanings:</p>
@@ -326,7 +326,7 @@ P04,24.1,26.2
 <p>Automatic layout reserves space above data/error bars and separates comparisons into levels. Point size and outline width contribute to clearance. Many comparisons can require a larger figure or a more focused comparison family. Inspect manual axis limits and manual offsets before export.</p>
 <p>Select a comparison to drag it, edit X/Y offsets or use arrow keys; <code>Shift</code> uses larger arrow-key steps. X moves the label while endpoints remain anchored to groups; Y moves the bracket. Resetting removes the manual override.</p>
 <h3>Result freshness</h3>
-<p>PSL compares current data/options with the fingerprint stored in the analysis. Changes to values, IDs, X coordinates, observations or statistical configuration can make results stale. Stale annotations are hidden, including during export. Appearance-only edits do not recalculate statistics.</p>
+<p>PSL compares current dataset measurements with each analysis&#39;s recorded configuration and fingerprint. Changes to values, IDs, X coordinates, observations or exclusions make affected results stale. Selecting the next test in the assistant does not rewrite or invalidate a historical run; each run retains its own configuration. Stale annotations are hidden, including during export. Appearance-only edits do not recalculate statistics.</p>
 <p>Recalculating updates that figure&#39;s attached results and resets its manual comparison positions; the previous run remains in the overview history. Each run is retained in the workspace analysis history, linked to its dataset and recorded configuration. The current figure attaches the latest run made for that figure. Other figures and earlier runs retain their results; data/exclusion changes mark only the affected dataset results stale.</p>
 <h2>7. Visual overrides and reusable styles</h2>
 <p>General formatting covers palette, typography, axes, symbols, opacity, bar width, lines, dimensions and error settings. Point-level overrides can change color, size, shape, outline, outline width and opacity.</p>

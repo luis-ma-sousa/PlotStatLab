@@ -2,17 +2,20 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import scipy
+import json
+from pathlib import Path
+APP_VERSION = json.loads((Path(__file__).resolve().parents[1] / "package.json").read_text(encoding="utf-8"))["version"]
 from .outliers import detect_outliers
 
 from .statistics import AnalyzeRequest, SuggestRequest, analyze, suggest
 
-app = FastAPI(title="PlotStatLab Statistics", version="0.2.0")
+app = FastAPI(title="PlotStatLab Statistics", version=APP_VERSION)
 app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:4173", "http://localhost:4173"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "engine": f"SciPy {scipy.__version__}", "version": "0.2.0", "application": "PlotStatLab", "projectSchemaVersions": [1]}
+    return {"status": "ok", "engine": f"SciPy {scipy.__version__}", "version": APP_VERSION, "application": "PlotStatLab", "projectSchemaVersions": [1]}
 
 
 @app.post("/api/suggest")

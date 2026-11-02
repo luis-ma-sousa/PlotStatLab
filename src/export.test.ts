@@ -56,7 +56,7 @@ describe('Illustrator-editable SVG export',()=>{
   expect(xml.querySelector('clipPath')?.getAttribute('clipPathUnits')).toBe('userSpaceOnUse');expect(xml.querySelector('#PSL-data > g')?.getAttribute('clip-path')).toBe('url(#clip)');expect(xml.querySelector('#PSL-legend > g')?.getAttribute('transform')).toBe('translate(80 66)');expect(xml.querySelector('#PSL-comparison-g1--g2 text')?.textContent).toBe('***');
  });
  it('preserves inline presentation attributes and currentColor but removes CSS',()=>{
-  const {xml,output}=parsed('<g style="color:#aa1155;fill:currentColor;stroke:#112233;stroke-width:3"><circle cx="20" cy="20" r="5"/></g>');
+  const {xml,output}=parsed('<g style="color:#aa1155;fill:currentcolor;stroke:#112233;stroke-width:3"><circle cx="20" cy="20" r="5"/></g>');
   const circle=xml.querySelector('circle')!;expect(circle.getAttribute('fill')).toBe('#aa1155');expect(circle.getAttribute('stroke')).toBe('#112233');expect(circle.getAttribute('stroke-width')).toBe('3');expectNoEditorAttributes(xml);
  });
  it('does not mutate the live editor SVG',()=>{

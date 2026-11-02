@@ -437,7 +437,7 @@ def check_and_update(root: Path) -> bool:
         if journal_file(root).is_file():
             recover_interrupted_update(root)
         if isinstance(exc, urllib.error.HTTPError) and exc.code in (401, 403, 404):
-            message = 'No accessible published release was found (private repositories require authorized GitHub access).'
+            message = 'No stable release is available, or this private repository is not accessible.'
         elif isinstance(exc, (urllib.error.URLError, TimeoutError, socket.timeout)):
             message = 'The update service is unavailable or this computer is offline.'
         else:
