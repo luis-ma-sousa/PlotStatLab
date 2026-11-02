@@ -71,7 +71,7 @@ def test_pairing_rejects_missing_duplicate_or_unmatched_subjects(mutation):
         data[0]["observations"][0]["subject"] = "s1"
     else:
         data[0]["observations"][0]["subject"] = "different"
-    with pytest.raises(ValueError, match="indiv|emparelhados"):
+    with pytest.raises(ValueError, match="subject|Paired"):
         analyze(request(data, test="paired-t", design="paired"))
 
 
@@ -105,7 +105,7 @@ def test_friedman_published_example():
     result = analyze(request(data, test="friedman", design="paired"))
     assert result["statistic"] == pytest.approx(10.57142857142857)
     assert result["p"] == pytest.approx(0.005063414171757498)
-    assert any("aproximação" in note for note in result["warnings"])
+    assert any("approximation" in note for note in result["warnings"])
 
 
 @pytest.mark.parametrize("method,expected", [("none", [.01,.04,.03]), ("bonferroni", [.03,.12,.09]), ("holm", [.03,.06,.06]), ("bh", [.03,.04,.04])])
@@ -137,12 +137,12 @@ def test_suggestions_change_with_group_count_and_design():
 
 
 def test_constants_rejected_instead_of_nonfinite_results():
-    with pytest.raises(ValueError, match="variabilidade"):
+    with pytest.raises(ValueError, match="variability"):
         analyze(request(groups([1,1,1], [2,2,2])))
 
 
 def test_wrong_design_rejected():
-    with pytest.raises(ValueError, match="desenho"):
+    with pytest.raises(ValueError, match="design"):
         analyze(request(groups([1,2,3], [3,4,6]), test="paired-t"))
 
 
@@ -151,7 +151,7 @@ def test_http_health_and_invalid_nonfinite_data():
     assert client.get("/api/health").json()["status"] == "ok"
     response = client.post("/api/analyze", json={"groups": groups([1,2,3], [4,5,6]), "config": {"test": "unknown", "control": "g0"}, "fingerprint": "x"})
     assert response.status_code == 422
-    assert "Teste desconhecido" in response.json()["detail"]
+    assert "Unknown test" in response.json()["detail"]
     # JSON encoders correctly refuse NaN; validate the model boundary directly.
     with pytest.raises(ValueError):
         request(groups([1,math.inf,3], [4,5,6]))
@@ -160,10 +160,29 @@ def test_http_health_and_invalid_nonfinite_data():
 def test_duplicate_point_ids_rejected():
     data = groups([1,2,3], [2,4,6])
     data[1]["observations"][0]["id"] = data[0]["observations"][0]["id"]
-    with pytest.raises(ValueError, match="pontos"):
+    with pytest.raises(ValueError, match="Observation identifiers"):
         request(data)
 
 
 def test_numeric_overflow_rejected_before_json_serialization():
-    with pytest.raises(ValueError, match="finito"):
+    with pytest.raises(ValueError, match="finite"):
         analyze(request(groups([1e308,1e308], [-1e308,-1e308]), test="mann-whitney"))
+
+
+def test_explicit_exclusion_preserves_originals_and_changes_inference():
+    data = groups([1,2,3,100], [3,4,5,6])
+    data[0]["observations"][-1]["excluded"] = True
+    result = analyze(request(data, test="welch"))
+    assert result["summaries"][0]["n"] == 3
+    assert result["summaries"][0]["mean"] == 2
+    assert data[0]["observations"][-1]["value"] == 100
+    assert any("excluded" in warning for warning in result["warnings"])
+
+
+def test_outlier_http_endpoint_preserves_observation_identity():
+    client = TestClient(app)
+    payload = {"groups": groups([1,2,3,4,5,6,7,100]), "method": "grubbs", "fingerprint": "fixture"}
+    result = client.post("/api/outliers", json=payload)
+    assert result.status_code == 200
+    assert result.json()["groups"][0]["flaggedIds"] == [payload["groups"][0]["observations"][-1]["id"]]
+    assert payload["groups"][0]["observations"][-1]["value"] == 100

@@ -1,0 +1,531 @@
+{
+  "schemaVersion": 1,
+  "id": "2b2f15c3-b391-4b11-be7b-3f2380f726fb",
+  "name": "Treatment study",
+  "groups": [
+    {
+      "id": "group-1",
+      "name": "Control",
+      "observations": [
+        {
+          "id": "point-1-1",
+          "value": 28,
+          "subject": "S01",
+          "x": 1
+        },
+        {
+          "id": "point-1-2",
+          "value": 34,
+          "subject": "S02",
+          "x": 2
+        },
+        {
+          "id": "point-1-3",
+          "value": 29,
+          "subject": "S03",
+          "x": 3
+        },
+        {
+          "id": "point-1-4",
+          "value": 31,
+          "subject": "S04",
+          "x": 4
+        },
+        {
+          "id": "point-1-5",
+          "value": 26,
+          "subject": "S05",
+          "x": 5
+        },
+        {
+          "id": "point-1-6",
+          "value": 35,
+          "subject": "S06",
+          "x": 6
+        },
+        {
+          "id": "point-1-7",
+          "value": 32,
+          "subject": "S07",
+          "x": 7
+        },
+        {
+          "id": "point-1-8",
+          "value": 30,
+          "subject": "S08",
+          "x": 8
+        },
+        {
+          "id": "point-1-9",
+          "value": 27,
+          "subject": "S09",
+          "x": 9
+        },
+        {
+          "id": "point-1-10",
+          "value": 33,
+          "subject": "S10",
+          "x": 10
+        },
+        {
+          "id": "point-1-11",
+          "value": 29,
+          "subject": "S11",
+          "x": 11
+        },
+        {
+          "id": "point-1-12",
+          "value": 31,
+          "subject": "S12",
+          "x": 12
+        }
+      ]
+    },
+    {
+      "id": "group-2",
+      "name": "Vehicle",
+      "observations": [
+        {
+          "id": "point-2-1",
+          "value": 31,
+          "subject": "S01",
+          "x": 1
+        },
+        {
+          "id": "point-2-2",
+          "value": 35,
+          "subject": "S02",
+          "x": 2
+        },
+        {
+          "id": "point-2-3",
+          "value": 29,
+          "subject": "S03",
+          "x": 3
+        },
+        {
+          "id": "point-2-4",
+          "value": 33,
+          "subject": "S04",
+          "x": 4
+        },
+        {
+          "id": "point-2-5",
+          "value": 28,
+          "subject": "S05",
+          "x": 5
+        },
+        {
+          "id": "point-2-6",
+          "value": 36,
+          "subject": "S06",
+          "x": 6
+        },
+        {
+          "id": "point-2-7",
+          "value": 34,
+          "subject": "S07",
+          "x": 7
+        },
+        {
+          "id": "point-2-8",
+          "value": 31,
+          "subject": "S08",
+          "x": 8
+        },
+        {
+          "id": "point-2-9",
+          "value": 30,
+          "subject": "S09",
+          "x": 9
+        },
+        {
+          "id": "point-2-10",
+          "value": 34,
+          "subject": "S10",
+          "x": 10
+        },
+        {
+          "id": "point-2-11",
+          "value": 32,
+          "subject": "S11",
+          "x": 11
+        },
+        {
+          "id": "point-2-12",
+          "value": 33,
+          "subject": "S12",
+          "x": 12
+        }
+      ]
+    },
+    {
+      "id": "group-3",
+      "name": "Low dose",
+      "observations": [
+        {
+          "id": "point-3-1",
+          "value": 43,
+          "subject": "S01",
+          "x": 1
+        },
+        {
+          "id": "point-3-2",
+          "value": 51,
+          "subject": "S02",
+          "x": 2
+        },
+        {
+          "id": "point-3-3",
+          "value": 46,
+          "subject": "S03",
+          "x": 3
+        },
+        {
+          "id": "point-3-4",
+          "value": 48,
+          "subject": "S04",
+          "x": 4
+        },
+        {
+          "id": "point-3-5",
+          "value": 41,
+          "subject": "S05",
+          "x": 5
+        },
+        {
+          "id": "point-3-6",
+          "value": 54,
+          "subject": "S06",
+          "x": 6
+        },
+        {
+          "id": "point-3-7",
+          "value": 50,
+          "subject": "S07",
+          "x": 7
+        },
+        {
+          "id": "point-3-8",
+          "value": 47,
+          "subject": "S08",
+          "x": 8
+        },
+        {
+          "id": "point-3-9",
+          "value": 44,
+          "subject": "S09",
+          "x": 9
+        },
+        {
+          "id": "point-3-10",
+          "value": 52,
+          "subject": "S10",
+          "x": 10
+        },
+        {
+          "id": "point-3-11",
+          "value": 49,
+          "subject": "S11",
+          "x": 11
+        },
+        {
+          "id": "point-3-12",
+          "value": 45,
+          "subject": "S12",
+          "x": 12
+        }
+      ]
+    },
+    {
+      "id": "group-4",
+      "name": "High dose",
+      "observations": [
+        {
+          "id": "point-4-1",
+          "value": 61,
+          "subject": "S01",
+          "x": 1
+        },
+        {
+          "id": "point-4-2",
+          "value": 69,
+          "subject": "S02",
+          "x": 2
+        },
+        {
+          "id": "point-4-3",
+          "value": 63,
+          "subject": "S03",
+          "x": 3
+        },
+        {
+          "id": "point-4-4",
+          "value": 67,
+          "subject": "S04",
+          "x": 4
+        },
+        {
+          "id": "point-4-5",
+          "value": 58,
+          "subject": "S05",
+          "x": 5
+        },
+        {
+          "id": "point-4-6",
+          "value": 72,
+          "subject": "S06",
+          "x": 6
+        },
+        {
+          "id": "point-4-7",
+          "value": 66,
+          "subject": "S07",
+          "x": 7
+        },
+        {
+          "id": "point-4-8",
+          "value": 64,
+          "subject": "S08",
+          "x": 8
+        },
+        {
+          "id": "point-4-9",
+          "value": 60,
+          "subject": "S09",
+          "x": 9
+        },
+        {
+          "id": "point-4-10",
+          "value": 70,
+          "subject": "S10",
+          "x": 10
+        },
+        {
+          "id": "point-4-11",
+          "value": 65,
+          "subject": "S11",
+          "x": 11
+        },
+        {
+          "id": "point-4-12",
+          "value": 62,
+          "subject": "S12",
+          "x": 12
+        }
+      ]
+    }
+  ],
+  "charts": [
+    {
+      "id": "8948833a-afc0-4b0e-950c-dda7d86c14db",
+      "name": "Treatment response",
+      "type": "bar-swarm",
+      "title": "Treatment response",
+      "xLabel": "",
+      "yLabel": "Relative expression (a.u.)",
+      "style": {
+        "palette": [
+          "#769e96",
+          "#bac9c5",
+          "#ce9c70",
+          "#596f9b",
+          "#bb8292",
+          "#a4a56b"
+        ],
+        "fontFamily": "Georgia",
+        "fontSize": 15,
+        "titleSize": 22,
+        "pointSize": 5,
+        "pointShape": "circle",
+        "pointOpacity": 0.9,
+        "barOpacity": 0.55,
+        "barWidth": 0.58,
+        "lineWidth": 1.5,
+        "error": "sem",
+        "grid": false,
+        "legend": false,
+        "background": "#ffffff",
+        "axisColor": "#293e3a",
+        "yMin": null,
+        "yMax": null,
+        "yScale": "linear",
+        "width": 800,
+        "height": 560
+      },
+      "pointStyles": {
+        "point-1-1": {
+          "size": 11,
+          "color": "#cc2288"
+        }
+      },
+      "annotationPositions": {},
+      "showSignificance": true,
+      "showNs": false,
+      "significanceDisplay": "stars",
+      "analysis": {
+        "test": "welch-anova",
+        "testLabel": "ANOVA de Welch + testes t de Welch",
+        "engine": "SciPy 1.18.1",
+        "statistic": 222.5711554335169,
+        "p": 1.3128430147727701e-17,
+        "comparisons": [
+          {
+            "id": "group-1::group-2",
+            "groupA": "group-1",
+            "groupB": "group-2",
+            "p": 0.11578037595659862,
+            "statistic": -1.6384627076232967,
+            "effect": -1.7499999999999964,
+            "ci": [
+              -3.9671512891779797,
+              0.46715128917798676
+            ],
+            "adjustedP": 0.11578037595659862,
+            "label": "ns"
+          },
+          {
+            "id": "group-1::group-3",
+            "groupA": "group-1",
+            "groupB": "group-3",
+            "p": 8.58873478554364e-11,
+            "statistic": -12.366053755260891,
+            "effect": -17.083333333333332,
+            "ci": [
+              -19.966065763803552,
+              -14.200600902863114
+            ],
+            "adjustedP": 1.717746957108728e-10,
+            "label": "****"
+          },
+          {
+            "id": "group-1::group-4",
+            "groupA": "group-1",
+            "groupB": "group-4",
+            "p": 1.8282051844704415e-15,
+            "statistic": -23.441309627601704,
+            "effect": -34.33333333333333,
+            "ci": [
+              -37.39929378495175,
+              -31.267372881714905
+            ],
+            "adjustedP": 5.4846155534113244e-15,
+            "label": "****"
+          }
+        ],
+        "summaries": [
+          {
+            "group": "group-1",
+            "n": 12,
+            "mean": 30.416666666666668,
+            "sd": 2.778434265858555,
+            "sem": 0.8020648856595586,
+            "ci95": [
+              28.651333755899383,
+              32.181999577433956
+            ]
+          },
+          {
+            "group": "group-2",
+            "n": 12,
+            "mean": 32.166666666666664,
+            "sd": 2.443296332763787,
+            "sem": 0.705318897715599,
+            "ci95": [
+              30.61427023966244,
+              33.71906309367089
+            ]
+          },
+          {
+            "group": "group-3",
+            "n": 12,
+            "mean": 47.5,
+            "sd": 3.89638527122488,
+            "sem": 1.1247895426040888,
+            "ci95": [
+              45.02435490850214,
+              49.97564509149786
+            ]
+          },
+          {
+            "group": "group-4",
+            "n": 12,
+            "mean": 64.75,
+            "sd": 4.2453182769643165,
+            "sem": 1.2255178250004932,
+            "ci95": [
+              62.05265345374613,
+              67.44734654625387
+            ]
+          }
+        ],
+        "warnings": [
+          "Os intervalos das diferenças são individuais; os p-values ajustados aplicam a correção à família de comparações selecionada."
+        ],
+        "fingerprint": "d7aa86381758944c",
+        "config": {
+          "test": "welch-anova",
+          "design": "independent",
+          "comparisons": "control",
+          "correction": "holm",
+          "control": "group-1",
+          "alpha": 0.05
+        },
+        "createdAt": "2026-11-02T09:49:08.009686+00:00"
+      }
+    },
+    {
+      "id": "dbfde1bc-2cf7-4040-b52a-4697f26db31a",
+      "name": "Distribution",
+      "type": "box",
+      "title": "Response distribution",
+      "xLabel": "",
+      "yLabel": "Relative expression (a.u.)",
+      "style": {
+        "palette": [
+          "#769e96",
+          "#bac9c5",
+          "#ce9c70",
+          "#596f9b",
+          "#bb8292",
+          "#a4a56b"
+        ],
+        "fontFamily": "Georgia",
+        "fontSize": 15,
+        "titleSize": 22,
+        "pointSize": 5,
+        "pointShape": "circle",
+        "pointOpacity": 0.9,
+        "barOpacity": 0.55,
+        "barWidth": 0.58,
+        "lineWidth": 1.5,
+        "error": "sem",
+        "grid": false,
+        "legend": false,
+        "background": "#ffffff",
+        "axisColor": "#293e3a",
+        "yMin": null,
+        "yMax": null,
+        "yScale": "linear",
+        "width": 800,
+        "height": 560
+      },
+      "pointStyles": {},
+      "annotationPositions": {},
+      "showSignificance": true,
+      "showNs": false,
+      "significanceDisplay": "stars"
+    }
+  ],
+  "activeChartId": "8948833a-afc0-4b0e-950c-dda7d86c14db",
+  "presets": [],
+  "analysisConfig": {
+    "test": "welch-anova",
+    "design": "independent",
+    "comparisons": "control",
+    "correction": "holm",
+    "control": "group-1",
+    "alpha": 0.05
+  },
+  "updatedAt": "2026-11-02T10:33:16.738Z"
+}

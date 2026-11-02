@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import {afterEach,describe,it,expect,vi} from 'vitest';
 import {applyStyle,createProject,dataFingerprint,getLoadWarning,loadProject,parseCsv,parseProject,reconcileProject,saveProject,serializeProject} from './project';
 import type {Project} from './types';
@@ -36,32 +37,32 @@ describe('editable project persistence',()=>{
     expect(reconcileProject(project).charts[0].analysis).toBe(chart.analysis);
   });
   it('backs up corrupt local data before returning a sample, exposing a recovery warning',()=>{
-    const raw='{"schemaVersion":999,"important":"preserve me"}',storage=new Map([['prismatica.project.v1',raw]]);
+    const raw='{"schemaVersion":999,"important":"preserve me"}',storage=new Map([['plotstatlab.project.v1',raw]]);
     vi.stubGlobal('localStorage',{getItem:(key:string)=>storage.get(key)??null,setItem:(key:string,value:string)=>storage.set(key,value)});
     const recovered=loadProject();
-    expect(recovered.schemaVersion).toBe(1);expect(getLoadWarning()).toContain('cópia integral');
-    const backupKey=[...storage.keys()].find(key=>key.startsWith('prismatica.project.v1.recovery.'))!;
+    expect(recovered.schemaVersion).toBe(1);expect(getLoadWarning()).toContain('complete recovery copy');
+    const backupKey=[...storage.keys()].find(key=>key.startsWith('plotstatlab.project.v1.recovery.'))!;
     expect(storage.get(backupKey)).toBe(raw);
     saveProject(recovered);expect(storage.get(backupKey)).toBe(raw);
-    expect(parseProject(storage.get('prismatica.project.v1')!)).toEqual(recovered);
+    expect(parseProject(storage.get('plotstatlab.project.v1')!)).toEqual(recovered);
     loadProject();expect(getLoadWarning()).toBe('');
   });
   it('keeps the original untouched if a recovery backup cannot be written',()=>{
     const raw='corrupt data';const setItem=vi.fn((_key:string,_value:string)=>{throw new Error('quota exceeded');});
     vi.stubGlobal('localStorage',{getItem:()=>raw,setItem});
-    expect(()=>loadProject()).toThrow('dados originais foram preservados');
+    expect(()=>loadProject()).toThrow('Original data were preserved');
     expect(setItem).toHaveBeenCalledTimes(1);
     expect(setItem.mock.calls[0][1]).toBe(raw);
   });
   it('rejects unsupported formats, invalid active charts, duplicate point IDs, and nonfinite values',()=>{
     const project=createProject();
     expect(()=>parseProject('{bad')).toThrow('JSON');
-    expect(()=>parseProject(JSON.stringify({...project,schemaVersion:2}))).toThrow('versão');
-    expect(()=>parseProject(JSON.stringify({...project,activeChartId:'absent'}))).toThrow('ativo');
+    expect(()=>parseProject(JSON.stringify({...project,schemaVersion:2}))).toThrow('version');
+    expect(()=>parseProject(JSON.stringify({...project,activeChartId:'absent'}))).toThrow('active');
     project.groups[1].observations[0].id=project.groups[0].observations[0].id;
-    expect(()=>parseProject(serializeProject(project))).toThrow('duplicados');
+    expect(()=>parseProject(serializeProject(project))).toThrow('duplicate');
     const broken=createProject();broken.groups[0].observations[0].value=Infinity;
-    expect(()=>parseProject(serializeProject(broken))).toThrow('número');
+    expect(()=>parseProject(serializeProject(broken))).toThrow('number');
   });
 });
 
@@ -77,10 +78,10 @@ describe('CSV import',()=>{
     expect(groups[1].observations[1]).toMatchObject({subject:'S2',x:2.5,value:21.8});
   });
   it('rejects malformed data rather than converting it to zero or silently dropping it',()=>{
-    expect(()=>parseCsv('A,B\n1,n/a')).toThrow('Valor inválido');
-    expect(()=>parseCsv('A,A\n1,2')).toThrow('únicos');
-    expect(()=>parseCsv('Subject,A\nS1,1\nS1,2')).toThrow('duplicados');
-    expect(()=>parseCsv('A,B\n1,2,3')).toThrow('mais colunas');
+    expect(()=>parseCsv('A,B\n1,n/a')).toThrow('Invalid value');
+    expect(()=>parseCsv('A,A\n1,2')).toThrow('unique');
+    expect(()=>parseCsv('Subject,A\nS1,1\nS1,2')).toThrow('Duplicate');
+    expect(()=>parseCsv('A,B\n1,2,3')).toThrow('more columns');
   });
 });
 
@@ -111,3 +112,8 @@ describe('analysis freshness',()=>{
     p.groups[0].observations[0].subject='S01';p.groups[0].observations[0].value+=.001;expect(dataFingerprint(p.groups,p.analysisConfig)).not.toBe(fingerprint);
   });
 });
+
+it('migrates the previous brand autosave without overwriting the original project',()=>{const original=serializeProject(createProject());const storage=new Map([['prismatica.project.v1',original]]);vi.stubGlobal('localStorage',{getItem:(key:string)=>storage.get(key)??null,setItem:(key:string,value:string)=>storage.set(key,value)});const loaded=loadProject();saveProject(loaded);expect(storage.get('prismatica.project.v1')).toBe(original);expect(storage.get('plotstatlab.project.v1')).toBe(original);});
+it('preserves existing fingerprints when exclusion is absent or explicitly false',()=>{const p=createProject();const original=dataFingerprint(p.groups,p.analysisConfig);p.groups[0].observations[0].excluded=false;expect(dataFingerprint(p.groups,p.analysisConfig)).toBe(original);p.groups[0].observations[0].excluded=true;expect(dataFingerprint(p.groups,p.analysisConfig)).not.toBe(original);});
+
+it('opens the v0.1 project fixture without changing its analysis fingerprint or individual formatting',()=>{const p=parseProject(readFileSync(new URL('../examples/legacy-v0.1.labplot',import.meta.url),'utf8'));expect(dataFingerprint(p.groups,p.analysisConfig)).toBe(p.charts[0].analysis?.fingerprint);expect(p.charts[0].pointStyles['point-1-1'].color).toBe('#cc2288');expect(parseProject(serializeProject(p))).toEqual(p);});

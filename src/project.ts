@@ -31,7 +31,8 @@ export function createProject(): Project {
     presets:[], analysisConfig:{test:'welch-anova',design:'independent',comparisons:'control',correction:'holm',control:groups[0].id,alpha:.05}, updatedAt:new Date().toISOString()};
 }
 
-const storageKey = 'prismatica.project.v1';
+const storageKey = 'plotstatlab.project.v1';
+const legacyStorageKey = 'prismatica.project.v1';
 let loadWarning = '';
 export function getLoadWarning(): string { return loadWarning; }
 
@@ -52,7 +53,7 @@ export function reconcileProject(project: Project): Project {
 
 export function loadProject(): Project {
   loadWarning = '';
-  const saved = localStorage.getItem(storageKey);
+  const saved = localStorage.getItem(storageKey) ?? localStorage.getItem(legacyStorageKey);
   if (!saved) return createProject();
   try { return parseProject(saved); }
   catch (error) {
@@ -60,36 +61,36 @@ export function loadProject(): Project {
     try { localStorage.setItem(backupKey, saved); }
     catch {
       // Do not permit autosave to overwrite the only remaining copy of the user's data.
-      throw new Error('Não foi possível abrir o projeto guardado nem criar uma cópia de recuperação. Os dados originais foram preservados. Liberta espaço no browser antes de continuar.');
+      throw new Error('The saved project could not be opened or backed up. Original data were preserved. Free browser storage before continuing.');
     }
-    loadWarning = `O projeto guardado não pôde ser aberto. Foi preservada uma cópia integral em «${backupKey}» no armazenamento local do browser. Foi aberto um projeto de exemplo. ${error instanceof Error ? error.message : ''}`;
+    loadWarning = `The saved project could not be opened. A complete recovery copy was preserved at “${backupKey}” in browser storage. A sample project was opened. ${error instanceof Error ? error.message : ''}`;
     return createProject();
   }
 }
 export function saveProject(project: Project): void { localStorage.setItem(storageKey, serializeProject(project)); }
 export function serializeProject(project: Project): string { return JSON.stringify(reconcileProject(project), null, 2); }
 
-function fail(message: string): never { throw new Error(`Projeto inválido: ${message}`); }
+function fail(message: string): never { throw new Error(`Invalid project: ${message}`); }
 function object(value: unknown, path: string): Record<string,unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) fail(`${path} deve ser um objeto.`);
+  if (!value || typeof value !== 'object' || Array.isArray(value)) fail(`${path} must be an object.`);
   return value as Record<string,unknown>;
 }
 function string(value: unknown, path: string, nonempty=false): string {
-  if (typeof value !== 'string' || value.length > 100000 || (nonempty && !value.trim())) fail(`${path} deve conter texto válido.`);
+  if (typeof value !== 'string' || value.length > 100000 || (nonempty && !value.trim())) fail(`${path} must contain valid text.`);
   return value;
 }
 function number(value: unknown, path: string, min=-Infinity, max=Infinity): number {
-  if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) fail(`${path} deve ser um número entre ${min} e ${max}.`);
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) fail(`${path} must be a number between ${min} and ${max}.`);
   return value;
 }
-function boolean(value: unknown,path:string):boolean {if(typeof value!=='boolean') fail(`${path} deve ser booleano.`);return value;}
-function array(value:unknown,path:string):unknown[] {if(!Array.isArray(value))fail(`${path} deve ser uma lista.`);return value;}
-function choice<T extends string>(value:unknown,choices:readonly T[],path:string):T {if(typeof value!=='string'||!choices.includes(value as T))fail(`${path} não é suportado.`);return value as T;}
+function boolean(value: unknown,path:string):boolean {if(typeof value!=='boolean') fail(`${path} must be a boolean.`);return value;}
+function array(value:unknown,path:string):unknown[] {if(!Array.isArray(value))fail(`${path} must be an array.`);return value;}
+function choice<T extends string>(value:unknown,choices:readonly T[],path:string):T {if(typeof value!=='string'||!choices.includes(value as T))fail(`${path} is not supported.`);return value as T;}
 const shapes = ['circle','square','diamond','triangle'] as const;
 const chartTypes = ['bar-swarm','bar','swarm','box','violin','raincloud','paired','line','scatter','histogram','density','ecdf','heatmap'] as const;
 function validateStyle(value:unknown,path:string):void {
   const s=object(value,path);
-  const palette=array(s.palette,`${path}.palette`); if(!palette.length)fail('a paleta não pode estar vazia.'); palette.forEach((c,i)=>string(c,`${path}.palette[${i}]`,true));
+  const palette=array(s.palette,`${path}.palette`); if(!palette.length)fail('the palette cannot be empty.'); palette.forEach((c,i)=>string(c,`${path}.palette[${i}]`,true));
   ['fontFamily','background','axisColor'].forEach(k=>string(s[k],`${path}.${k}`,true));
   ['fontSize','titleSize','pointSize','lineWidth'].forEach(k=>number(s[k],`${path}.${k}`,.1,100));
   number(s.width,`${path}.width`,200,12000);number(s.height,`${path}.height`,200,12000);
@@ -97,8 +98,8 @@ function validateStyle(value:unknown,path:string):void {
   choice(s.pointShape,shapes,`${path}.pointShape`);choice(s.error,['sd','sem','ci95','none'],`${path}.error`);choice(s.yScale,['linear','log'],`${path}.yScale`);
   boolean(s.grid,`${path}.grid`);boolean(s.legend,`${path}.legend`);
   if(s.yMin!==null)number(s.yMin,`${path}.yMin`);if(s.yMax!==null)number(s.yMax,`${path}.yMax`);
-  if(s.yMin!==null&&s.yMax!==null&&(s.yMin as number)>=(s.yMax as number))fail('o mínimo do eixo Y deve ser inferior ao máximo.');
-  if(s.yScale==='log'&&((s.yMin!==null&&(s.yMin as number)<=0)||(s.yMax!==null&&(s.yMax as number)<=0)))fail('os limites de um eixo logarítmico devem ser positivos.');
+  if(s.yMin!==null&&s.yMax!==null&&(s.yMin as number)>=(s.yMax as number))fail('the Y minimum must be lower than the maximum.');
+  if(s.yScale==='log'&&((s.yMin!==null&&(s.yMin as number)<=0)||(s.yMax!==null&&(s.yMax as number)<=0)))fail('logarithmic axis limits must be positive.');
 }
 function validateConfig(value:unknown,path:string):void {
   const c=object(value,path);string(c.test,`${path}.test`,true);choice(c.design,['independent','paired'],`${path}.design`);
@@ -110,51 +111,52 @@ function validateAnalysis(value:unknown,path:string):void {
   if(a.statistic!==null)number(a.statistic,`${path}.statistic`);if(a.p!==null)number(a.p,`${path}.p`,0,1);
   validateConfig(a.config,`${path}.config`);array(a.warnings,`${path}.warnings`).forEach((w,i)=>string(w,`${path}.warnings[${i}]`));
   array(a.summaries,`${path}.summaries`).forEach((value,i)=>{const s=object(value,`${path}.summaries[${i}]`);string(s.group,'summary.group',true);number(s.n,'summary.n',0);number(s.mean,'summary.mean');number(s.sd,'summary.sd',0);number(s.sem,'summary.sem',0);if(s.ci95!==undefined)validateInterval(s.ci95,'summary.ci95');});
-  const ids=new Set<string>();array(a.comparisons,`${path}.comparisons`).forEach((value,i)=>{const c=object(value,`${path}.comparisons[${i}]`);const cid=string(c.id,'comparison.id',true);if(ids.has(cid))fail('comparação duplicada.');ids.add(cid);['groupA','groupB','label'].forEach(k=>string(c[k],`comparison.${k}`));number(c.p,'comparison.p',0,1);number(c.adjustedP,'comparison.adjustedP',0,1);if(c.statistic!==undefined)number(c.statistic,'comparison.statistic');if(c.effect!==undefined)number(c.effect,'comparison.effect');if(c.ci!==undefined)validateInterval(c.ci,'comparison.ci');});
+  const ids=new Set<string>();array(a.comparisons,`${path}.comparisons`).forEach((value,i)=>{const c=object(value,`${path}.comparisons[${i}]`);const cid=string(c.id,'comparison.id',true);if(ids.has(cid))fail('duplicate comparison.');ids.add(cid);['groupA','groupB','label'].forEach(k=>string(c[k],`comparison.${k}`));number(c.p,'comparison.p',0,1);number(c.adjustedP,'comparison.adjustedP',0,1);if(c.statistic!==undefined)number(c.statistic,'comparison.statistic');if(c.effect!==undefined)number(c.effect,'comparison.effect');if(c.ci!==undefined)validateInterval(c.ci,'comparison.ci');});
 }
-function validateInterval(value:unknown,path:string):void {const a=array(value,path);if(a.length!==2)fail(`${path} deve conter dois limites.`);number(a[0],path);number(a[1],path);if((a[0] as number)>(a[1] as number))fail(`${path}: limites invertidos.`);}
+function validateInterval(value:unknown,path:string):void {const a=array(value,path);if(a.length!==2)fail(`${path} must contain two bounds.`);number(a[0],path);number(a[1],path);if((a[0] as number)>(a[1] as number))fail(`${path}: reversed bounds.`);}
 
 export function parseProject(text: string): Project {
-  let parsed:unknown;try {parsed=JSON.parse(text);}catch{fail('o ficheiro não contém JSON válido.');}
-  const p=object(parsed,'projeto');if(p.schemaVersion!==1)fail('esta versão do formato não é suportada.');
+  let parsed:unknown;try {parsed=JSON.parse(text);}catch{fail('the file does not contain valid JSON.');}
+  const p=object(parsed,'project');if(p.schemaVersion!==1)fail('this format version is not supported.');
   ['id','name','activeChartId','updatedAt'].forEach(k=>string(p[k],k,true));
-  const groups=array(p.groups,'groups');if(!groups.length)fail('é necessário pelo menos um grupo.');
+  const groups=array(p.groups,'groups');if(!groups.length)fail('at least one group is required.');
   const groupIds=new Set<string>(), pointIds=new Set<string>();
-  groups.forEach((value,i)=>{const g=object(value,`groups[${i}]`);const gid=string(g.id,'group.id',true);if(groupIds.has(gid))fail('identificadores de grupo duplicados.');groupIds.add(gid);string(g.name,'group.name',true);array(g.observations,'group.observations').forEach((value,j)=>{const o=object(value,`observation[${j}]`);const oid=string(o.id,'observation.id',true);if(pointIds.has(oid))fail('identificadores de ponto duplicados.');pointIds.add(oid);number(o.value,'observation.value');if(o.x!==undefined)number(o.x,'observation.x');if(o.subject!==undefined)string(o.subject,'observation.subject',true);});});
-  const charts=array(p.charts,'charts');if(!charts.length)fail('é necessário pelo menos um gráfico.');const chartIds=new Set<string>();
-  charts.forEach((value,i)=>{const c=object(value,`charts[${i}]`);const cid=string(c.id,'chart.id',true);if(chartIds.has(cid))fail('identificadores de gráfico duplicados.');chartIds.add(cid);['name','title','xLabel','yLabel'].forEach(k=>string(c[k],`chart.${k}`));choice(c.type,chartTypes,'chart.type');validateStyle(c.style,'chart.style');
-    const styles=object(c.pointStyles,'chart.pointStyles');Object.entries(styles).forEach(([key,value])=>{if(!pointIds.has(key))fail(`o estilo refere um ponto inexistente: ${key}.`);const s=object(value,'pointStyle');['color','stroke'].forEach(k=>{if(s[k]!==undefined)string(s[k],`pointStyle.${k}`,true);});if(s.size!==undefined)number(s.size,'pointStyle.size',.1,100);if(s.strokeWidth!==undefined)number(s.strokeWidth,'pointStyle.strokeWidth',0,20);if(s.opacity!==undefined)number(s.opacity,'pointStyle.opacity',0,1);if(s.shape!==undefined)choice(s.shape,shapes,'pointStyle.shape');});
+  groups.forEach((value,i)=>{const g=object(value,`groups[${i}]`);const gid=string(g.id,'group.id',true);if(groupIds.has(gid))fail('duplicate group identifiers.');groupIds.add(gid);string(g.name,'group.name',true);array(g.observations,'group.observations').forEach((value,j)=>{const o=object(value,`observation[${j}]`);const oid=string(o.id,'observation.id',true);if(pointIds.has(oid))fail('duplicate point identifiers.');pointIds.add(oid);number(o.value,'observation.value');if(o.x!==undefined)number(o.x,'observation.x');if(o.subject!==undefined)string(o.subject,'observation.subject',true);if(o.excluded!==undefined)boolean(o.excluded,'observation.excluded');});});
+  const charts=array(p.charts,'charts');if(!charts.length)fail('at least one chart is required.');const chartIds=new Set<string>();
+  charts.forEach((value,i)=>{const c=object(value,`charts[${i}]`);const cid=string(c.id,'chart.id',true);if(chartIds.has(cid))fail('duplicate chart identifiers.');chartIds.add(cid);['name','title','xLabel','yLabel'].forEach(k=>string(c[k],`chart.${k}`));choice(c.type,chartTypes,'chart.type');validateStyle(c.style,'chart.style');
+    const styles=object(c.pointStyles,'chart.pointStyles');Object.entries(styles).forEach(([key,value])=>{if(!pointIds.has(key))fail(`style refers to a missing point: ${key}.`);const s=object(value,'pointStyle');['color','stroke'].forEach(k=>{if(s[k]!==undefined)string(s[k],`pointStyle.${k}`,true);});if(s.size!==undefined)number(s.size,'pointStyle.size',.1,100);if(s.strokeWidth!==undefined)number(s.strokeWidth,'pointStyle.strokeWidth',0,20);if(s.opacity!==undefined)number(s.opacity,'pointStyle.opacity',0,1);if(s.shape!==undefined)choice(s.shape,shapes,'pointStyle.shape');});
     Object.values(object(c.annotationPositions,'chart.annotationPositions')).forEach(value=>{const a=object(value,'annotationPosition');number(a.dx,'annotation.dx');number(a.dy,'annotation.dy');});
     boolean(c.showSignificance,'chart.showSignificance');boolean(c.showNs,'chart.showNs');choice(c.significanceDisplay,['stars','p'],'chart.significanceDisplay');if(c.analysis!==undefined)validateAnalysis(c.analysis,'chart.analysis');
   });
-  if(!chartIds.has(p.activeChartId as string))fail('o gráfico ativo não existe.');validateConfig(p.analysisConfig,'analysisConfig');
-  const presetIds=new Set<string>();array(p.presets,'presets').forEach((value,i)=>{const s=object(value,`presets[${i}]`);const sid=string(s.id,'preset.id',true);if(presetIds.has(sid))fail('presets duplicados.');presetIds.add(sid);string(s.name,'preset.name',true);validateStyle(s.style,'preset.style');});
+  if(!chartIds.has(p.activeChartId as string))fail('the active chart does not exist.');validateConfig(p.analysisConfig,'analysisConfig');
+  const presetIds=new Set<string>();array(p.presets,'presets').forEach((value,i)=>{const s=object(value,`presets[${i}]`);const sid=string(s.id,'preset.id',true);if(presetIds.has(sid))fail('duplicate presets.');presetIds.add(sid);string(s.name,'preset.name',true);validateStyle(s.style,'preset.style');});
+  if(p.outlierAnalysis!==undefined){const result=object(p.outlierAnalysis,'outlierAnalysis');choice(result.method,['rout','grubbs'],'outlier.method');['methodLabel','engine','fingerprint','createdAt','reference'].forEach(k=>string(result[k],`outlier.${k}`));const parameters=object(result.parameters,'outlier.parameters');number(parameters.alpha,'outlier.alpha',0,1);number(parameters.q,'outlier.q',0,1);array(result.warnings,'outlier.warnings').forEach(w=>string(w,'outlier.warning'));array(result.groups,'outlier.groups').forEach(value=>{const g=object(value,'outlier.group');string(g.groupId,'outlier.groupId');number(g.n,'outlier.n',0);array(g.flaggedIds,'outlier.flaggedIds').forEach(v=>string(v,'outlier.pointId'))});}
   return parsed as Project;
 }
 
 export function parseCsv(text:string):Group[] {
   const parsed=Papa.parse<string[]>(text.replace(/^\uFEFF/,''),{skipEmptyLines:false});
-  if(parsed.errors.some(e=>e.code!=='UndetectableDelimiter'))throw new Error(`CSV inválido: ${parsed.errors[0].message}`);
-  const rows=parsed.data;if(rows.length<2)throw new Error('O CSV precisa de um cabeçalho e de pelo menos uma linha de dados.');
-  const header=rows[0].map(h=>h.trim());if(header.some(h=>!h))throw new Error('Todas as colunas do CSV precisam de um nome.');if(new Set(header.map(h=>h.toLowerCase())).size!==header.length)throw new Error('Os nomes das colunas do CSV devem ser únicos.');
+  if(parsed.errors.some(e=>e.code!=='UndetectableDelimiter'))throw new Error(`Invalid CSV: ${parsed.errors[0].message}`);
+  const rows=parsed.data;if(rows.length<2)throw new Error('CSV requires a header and at least one data row.');
+  const header=rows[0].map(h=>h.trim());if(header.some(h=>!h))throw new Error('Every CSV column needs a name.');if(new Set(header.map(h=>h.toLowerCase())).size!==header.length)throw new Error('CSV column names must be unique.');
   const subjectIndex=header.findIndex(h=>/^(subject|subject id|id|sujeito|indivíduo|individuo|participante)$/i.test(h));
   const xIndex=header.findIndex(h=>/^x$/i.test(h));
   const indices=header.map((_,i)=>i).filter(i=>i!==subjectIndex&&i!==xIndex);
-  if(!indices.length)throw new Error('O CSV não contém colunas de valores.');
+  if(!indices.length)throw new Error('CSV contains no value columns.');
   const groups=indices.map(i=>({id:`csv-group-${i}`,name:header[i],observations:[]} as Group));
-  const toNumber=(raw:string,row:number,column:number)=>{const cleaned=raw.trim().replace(/\s/g,'');if(!/^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[eE][+-]?\d+)?$/.test(cleaned))throw new Error(`Valor inválido na linha ${row}, coluna «${header[column]}»: ${raw}`);const value=Number(cleaned.replace(',','.'));if(!Number.isFinite(value))throw new Error(`Valor não finito na linha ${row}, coluna «${header[column]}».`);return value;};
-  rows.slice(1).forEach((row,i)=>{const rowNumber=i+2;if(row.every(c=>!c.trim()))return;if(row.length>header.length)throw new Error(`A linha ${rowNumber} contém mais colunas do que o cabeçalho.`);
+  const toNumber=(raw:string,row:number,column:number)=>{const cleaned=raw.trim().replace(/\s/g,'');if(!/^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[eE][+-]?\d+)?$/.test(cleaned))throw new Error(`Invalid value on row ${row}, column “${header[column]}”: ${raw}`);const value=Number(cleaned.replace(',','.'));if(!Number.isFinite(value))throw new Error(`Non-finite value on row ${row}, column “${header[column]}”.`);return value;};
+  rows.slice(1).forEach((row,i)=>{const rowNumber=i+2;if(row.every(c=>!c.trim()))return;if(row.length>header.length)throw new Error(`Row ${rowNumber} contains more columns than the header.`);
     const subject=subjectIndex>=0?(row[subjectIndex]??'').trim():`row-${i+1}`;
     const xRaw=xIndex>=0?(row[xIndex]??'').trim():'';const x=xRaw?toNumber(xRaw,rowNumber,xIndex):undefined;
-    indices.forEach((column,j)=>{const raw=(row[column]??'').trim();if(!raw)return;if(subjectIndex>=0&&!subject)throw new Error(`Falta o identificador do sujeito na linha ${rowNumber}.`);if(xIndex>=0&&x===undefined)throw new Error(`Falta o valor X na linha ${rowNumber}.`);groups[j].observations.push({id:`csv-point-${column}-${i+1}`,value:toNumber(raw,rowNumber,column),subject,...(x!==undefined?{x}:{})});});
+    indices.forEach((column,j)=>{const raw=(row[column]??'').trim();if(!raw)return;if(subjectIndex>=0&&!subject)throw new Error(`Missing subject ID on row ${rowNumber}.`);if(xIndex>=0&&x===undefined)throw new Error(`Missing X value on row ${rowNumber}.`);groups[j].observations.push({id:`csv-point-${column}-${i+1}`,value:toNumber(raw,rowNumber,column),subject,...(x!==undefined?{x}:{})});});
   });
-  if(groups.some(g=>!g.observations.length))throw new Error('Cada coluna de valores deve conter pelo menos um número.');
-  if(subjectIndex>=0&&groups.some(g=>new Set(g.observations.map(o=>o.subject)).size!==g.observations.length))throw new Error('Existem identificadores de sujeito duplicados na mesma coluna.');
+  if(groups.some(g=>!g.observations.length))throw new Error('Every value column must contain at least one number.');
+  if(subjectIndex>=0&&groups.some(g=>new Set(g.observations.map(o=>o.subject)).size!==g.observations.length))throw new Error('Duplicate subject IDs in the same column.');
   return groups;
 }
 
 export function dataFingerprint(groups:Group[],config:AnalysisConfig):string {
-  const canonical=JSON.stringify({groups:groups.map(g=>({id:g.id,observations:g.observations.map(o=>({id:o.id,value:o.value,subject:o.subject??null,x:o.x??null}))})),config:{test:config.test,design:config.design,comparisons:config.comparisons,correction:config.correction,control:config.control,alpha:config.alpha}});
+  const canonical=JSON.stringify({groups:groups.map(g=>({id:g.id,observations:g.observations.map(o=>({id:o.id,value:o.value,subject:o.subject??null,x:o.x??null,...(o.excluded?{excluded:true}:{})}))})),config:{test:config.test,design:config.design,comparisons:config.comparisons,correction:config.correction,control:config.control,alpha:config.alpha}});
   let hash=14695981039346656037n;for(let i=0;i<canonical.length;i++){hash^=BigInt(canonical.charCodeAt(i));hash=BigInt.asUintN(64,hash*1099511628211n);}return hash.toString(16).padStart(16,'0');
 }
 
@@ -168,3 +170,5 @@ export function applyStyle(targetChart:Chart,sourceChart:Chart,scope:StyleScope=
 export function exportDownload(filename:string,content:string|Blob,mime='application/octet-stream'):void {
   const blob=content instanceof Blob?content:new Blob([content],{type:mime});const url=URL.createObjectURL(blob);const anchor=document.createElement('a');anchor.href=url;anchor.download=filename;document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+
+export function outlierFingerprint(groups:Group[]):string {return dataFingerprint(groups,{test:'outliers',design:'independent',comparisons:'all',correction:'none',control:'',alpha:.05});}

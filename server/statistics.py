@@ -24,6 +24,7 @@ class Observation(BaseModel):
     value: float
     x: float | None = None
     subject: str | None = None
+    excluded: bool = False
 
 
 class Group(BaseModel):
@@ -50,9 +51,9 @@ class SuggestRequest(BaseModel):
         group_ids = [g.id for g in self.groups]
         point_ids = [p.id for g in self.groups for p in g.observations]
         if len(group_ids) != len(set(group_ids)):
-            raise ValueError("Os identificadores dos grupos têm de ser únicos.")
+            raise ValueError("Group identifiers must be unique.")
         if len(point_ids) != len(set(point_ids)):
-            raise ValueError("Os identificadores dos pontos têm de ser únicos.")
+            raise ValueError("Observation identifiers must be unique.")
         return self
 
 
@@ -62,16 +63,16 @@ class AnalyzeRequest(SuggestRequest):
 
 
 LABELS = {
-    "welch": "Teste t de Welch",
-    "student": "Teste t de Student",
-    "paired-t": "Teste t emparelhado",
+    "welch": "Welch t-test",
+    "student": "Student t-test",
+    "paired-t": "Paired t-test",
     "mann-whitney": "Mann–Whitney U",
-    "wilcoxon": "Wilcoxon emparelhado",
-    "anova": "ANOVA de um fator + testes t de Student",
-    "anova-tukey": "ANOVA de um fator + Tukey HSD",
-    "welch-anova": "ANOVA de Welch + testes t de Welch",
+    "wilcoxon": "Paired Wilcoxon",
+    "anova": "One-way ANOVA + Student t-tests",
+    "anova-tukey": "One-way ANOVA + Tukey HSD",
+    "welch-anova": "Welch ANOVA + Welch t-tests",
     "kruskal": "Kruskal–Wallis + Mann–Whitney",
-    "friedman": "Friedman + Wilcoxon emparelhado",
+    "friedman": "Friedman + paired Wilcoxon",
 }
 PAIRED_TESTS = {"paired-t", "wilcoxon", "friedman"}
 TWO_TESTS = {"welch", "student", "paired-t", "mann-whitney", "wilcoxon"}
@@ -83,60 +84,65 @@ def _paired_arrays(groups: list[Group]) -> list[np.ndarray]:
     for group in groups:
         subjects = [p.subject.strip() if p.subject else "" for p in group.observations]
         if not all(subjects):
-            raise ValueError("Dados emparelhados exigem um identificador de indivíduo em cada ponto.")
+            raise ValueError("Paired data require an explicit subject ID for every observation.")
         if len(subjects) != len(set(subjects)):
-            raise ValueError(f"O grupo {group.name} repete identificadores de indivíduos.")
+            raise ValueError(f"Group {group.name} contains duplicate subject IDs.")
         maps.append(dict(zip(subjects, [p.value for p in group.observations])))
     expected = set(maps[0])
     if any(set(m) != expected for m in maps[1:]):
-        raise ValueError("Os grupos emparelhados têm de conter os mesmos indivíduos; não são eliminados pares incompletos automaticamente.")
+        raise ValueError("Paired groups must contain the same subjects; incomplete pairs are never dropped automatically.")
     order = sorted(expected)
     return [np.array([m[key] for key in order], dtype=float) for m in maps]
 
 
 def _compatibility(groups: list[Group], design: str, test: str) -> str | None:
     if len(groups) < 2:
-        return "São necessários pelo menos dois grupos."
+        return "At least two groups are required."
     if any(len(g.observations) < 2 for g in groups):
-        return "Cada grupo necessita de pelo menos duas observações."
+        return "Each group needs at least two observations."
     if test in TWO_TESTS and len(groups) != 2:
-        return "Este teste compara exatamente dois grupos."
+        return "This test compares exactly two groups."
     if test in MULTI_TESTS and len(groups) < 3:
-        return "Este procedimento requer pelo menos três grupos."
+        return "This procedure requires at least three groups."
     if (test in PAIRED_TESTS) != (design == "paired"):
-        return "Este teste não corresponde ao desenho experimental selecionado."
+        return "This test does not match the selected experimental design."
     try:
         arrays = _paired_arrays(groups) if design == "paired" else [np.array([p.value for p in g.observations]) for g in groups]
     except ValueError as exc:
         return str(exc)
     if test == "paired-t" and np.std(arrays[0] - arrays[1], ddof=1) == 0:
-        return "O teste t emparelhado necessita de variabilidade nas diferenças entre pares."
+        return "The paired t-test requires variability in paired differences."
     if test == "welch-anova" and any(np.std(a, ddof=1) == 0 for a in arrays):
-        return "A ANOVA de Welch necessita de variância positiva em todos os grupos."
+        return "Welch ANOVA requires positive variance in every group."
     if test in {"welch", "student", "anova", "anova-tukey"} and all(np.std(a, ddof=1) == 0 for a in arrays):
-        return "Estes dados não têm variabilidade suficiente para o teste paramétrico."
+        return "These data do not have sufficient variability for a parametric test."
     if test == "kruskal" and np.ptp(np.concatenate(arrays)) == 0:
-        return "Kruskal–Wallis não está definido quando todos os valores são iguais."
+        return "Kruskal–Wallis is undefined when all values are identical."
     if test == "friedman" and all(np.ptp(row) == 0 for row in np.stack(arrays, axis=1)):
-        return "Friedman não está definido quando todos os indivíduos têm valores iguais em todos os grupos."
+        return "Friedman is undefined when every subject has identical values across groups."
     return None
 
 
+def _included_groups(groups: list[Group]) -> list[Group]:
+    return [g.model_copy(update={"observations": [p for p in g.observations if not p.excluded]}) for g in groups]
+
+
 def suggest(request: SuggestRequest) -> dict:
+    request = request.model_copy(update={"groups": _included_groups(request.groups)})
     design = request.design
     n_groups = len(request.groups)
     recommended = ("paired-t" if n_groups == 2 else "friedman") if design == "paired" else ("welch" if n_groups == 2 else "welch-anova")
     reasons = {
-        "welch": "Compara médias de dois grupos independentes sem exigir variâncias iguais; confirmar independência e adequação do modelo.",
-        "student": "Compara médias de dois grupos independentes, assumindo variâncias populacionais iguais e erros aproximadamente normais.",
-        "paired-t": "Compara a média das diferenças dos mesmos indivíduos; requer diferenças aproximadamente normais.",
-        "mann-whitney": "Compara distribuições de dois grupos independentes por postos; não equivale sempre a um teste de medianas.",
-        "wilcoxon": "Compara diferenças emparelhadas por postos; assume simetria das diferenças para interpretação como localização.",
-        "anova": "Compara médias de grupos independentes com variâncias iguais; comparações planeadas usam testes t e a correção selecionada.",
-        "anova-tukey": "Compara médias com variâncias iguais e controla a família de todas as comparações através de Tukey HSD.",
-        "welch-anova": "Compara médias de vários grupos independentes sem exigir variâncias iguais; comparações usam testes t de Welch e a correção selecionada.",
-        "kruskal": "Compara distribuições de vários grupos independentes por postos; comparações usam Mann–Whitney com a correção selecionada.",
-        "friedman": "Compara condições repetidas dos mesmos indivíduos por postos; comparações usam Wilcoxon com a correção selecionada. A aproximação pode ser fraca em amostras pequenas.",
+        "welch": "Compares two independent means without requiring equal variances; confirm independence and model suitability.",
+        "student": "Compares two independent means, assuming equal population variances and approximately normal errors.",
+        "paired-t": "Compares mean within-subject differences; requires approximately normal differences.",
+        "mann-whitney": "Compares two independent distributions by ranks; this is not always a test of medians.",
+        "wilcoxon": "Compares paired differences by ranks; a location interpretation assumes symmetric differences.",
+        "anova": "Compares independent means with equal variances; planned comparisons use t-tests with the selected correction.",
+        "anova-tukey": "Compares means with equal variances and controls all pairwise comparisons with Tukey HSD.",
+        "welch-anova": "Compares several independent means without requiring equal variances; pairwise comparisons use Welch t-tests with the selected correction.",
+        "kruskal": "Compares independent distributions by ranks; pairwise comparisons use Mann–Whitney with the selected correction.",
+        "friedman": "Compares repeated conditions by ranks; pairwise comparisons use Wilcoxon with the selected correction. The approximation may be poor in small samples.",
     }
     candidates = [key for key in LABELS if (key in PAIRED_TESTS) == (design == "paired") and ((key in TWO_TESTS) == (n_groups <= 2))]
     suggestions = []
@@ -144,11 +150,11 @@ def suggest(request: SuggestRequest) -> dict:
         problem = _compatibility(request.groups, design, test)
         suggestions.append({"id": test, "label": LABELS[test], "reason": problem or reasons[test], "recommended": test == recommended and problem is None, "compatible": problem is None})
     suggestions.sort(key=lambda s: (not s["recommended"], not s["compatible"]))
-    notes = ["O desenho experimental e os pressupostos não podem ser deduzidos apenas dos números. As sugestões indicam compatibilidade, não validam os pressupostos."]
+    notes = ["Experimental design and assumptions cannot be inferred from numbers alone. Suggestions indicate compatibility; they do not validate assumptions."]
     if any(len(g.observations) < 5 for g in request.groups):
-        notes.append("Há grupos com menos de cinco observações; a avaliação da distribuição e as aproximações assintóticas são limitadas.")
+        notes.append("Some groups have fewer than five observations; distribution assessment and asymptotic approximations are limited.")
     if design == "paired" and n_groups > 2:
-        notes.append("Nesta versão, o teste disponível para mais de duas condições emparelhadas é Friedman. ANOVA de medidas repetidas e modelos mistos estão planeados.")
+        notes.append("For more than two paired conditions, this version offers Friedman. Repeated-measures ANOVA and mixed models are planned.")
     return {"suggestions": suggestions, "warnings": notes}
 
 
@@ -169,7 +175,7 @@ def adjust_pvalues(pvalues: list[float], method: str) -> list[float]:
     elif method == "bh":
         corrected = np.minimum(1, np.minimum.accumulate((ranked * n / np.arange(1, n + 1))[::-1])[::-1])
     else:
-        raise ValueError("Método de correção desconhecido.")
+        raise ValueError("Unknown correction method.")
     output = np.empty(n)
     output[order] = corrected
     return output.tolist()
@@ -185,7 +191,7 @@ def stars(p: float) -> str:
 def _finite(value: float, description: str) -> float:
     number = float(value)
     if not math.isfinite(number):
-        raise ValueError(f"{description} não é finito. Verifica a variabilidade e o número de observações.")
+        raise ValueError(f"{description} is not finite. Check variability and the number of observations.")
     return number
 
 
@@ -201,38 +207,40 @@ def _pair_result(a: np.ndarray, b: np.ndarray, test: str):
     if test in {"wilcoxon", "friedman"}:
         # zsplit handles all-zero differences (p=1) without dropping subjects.
         return stats.wilcoxon(a - b, alternative="two-sided", zero_method="zsplit", method="auto")
-    raise ValueError("Teste não implementado.")
+    raise ValueError("Test not implemented.")
 
 
 def analyze(request: AnalyzeRequest) -> dict:
+    excluded_count = sum(p.excluded for g in request.groups for p in g.observations)
+    request = request.model_copy(update={"groups": _included_groups(request.groups)})
     config = request.config
     test = config.test
     if test not in LABELS:
-        raise ValueError("Teste desconhecido. Escolhe um dos testes disponíveis.")
+        raise ValueError("Unknown test. Choose an available test.")
     problem = _compatibility(request.groups, config.design, test)
     if problem:
         raise ValueError(problem)
     groups = request.groups
     if config.comparisons == "control" and config.control not in {g.id for g in groups}:
-        raise ValueError("Seleciona um grupo de controlo válido.")
+        raise ValueError("Select a valid control group.")
     if test == "anova-tukey" and config.comparisons != "all":
-        raise ValueError("Tukey HSD utiliza a família de todas as comparações. Seleciona 'Todos os pares'.")
+        raise ValueError("Tukey HSD uses all pairwise comparisons. Select 'All pairs'.")
     arrays = _paired_arrays(groups) if config.design == "paired" else [np.array([p.value for p in g.observations]) for g in groups]
-    notes = []
+    notes = ([f"{excluded_count} explicitly excluded observations were omitted; original measurements remain in the project."] if excluded_count else [])
     if config.correction == "none" and len(groups) > 2 and test != "anova-tukey":
-        notes.append("Comparações sem correção de multiplicidade; a probabilidade de falsos positivos aumenta com o número de comparações.")
+        notes.append("Comparisons are unadjusted; the risk of false positives increases with the number of comparisons.")
     if config.correction == "bh":
-        notes.append("Benjamini–Hochberg controla a taxa de falsas descobertas (FDR), não o erro familiar (FWER).")
+        notes.append("Benjamini–Hochberg controls the false discovery rate (FDR), not the family-wise error rate (FWER).")
     if config.alpha != 0.05:
-        notes.append("Os símbolos usam os limiares convencionais 0,05 / 0,01 / 0,001 / 0,0001; o alfa escolhido não altera estes limiares.")
+        notes.append("Symbols use conventional thresholds 0.05 / 0.01 / 0.001 / 0.0001; the selected alpha does not change these thresholds.")
     if any(len(a) < 5 for a in arrays):
-        notes.append("Há grupos com n < 5; interpretar pressupostos e aproximações com cuidado.")
+        notes.append("Some groups have n < 5; interpret assumptions and approximations carefully.")
     if test == "friedman" and (len(arrays[0]) <= 10 or len(groups) <= 6):
-        notes.append("O p-value de Friedman usa uma aproximação qui-quadrado, que pode ser imprecisa com poucos indivíduos ou condições.")
+        notes.append("The Friedman p-value uses a chi-squared approximation, which may be inaccurate with few subjects or conditions.")
     if test in {"kruskal", "friedman", "mann-whitney", "wilcoxon"}:
-        notes.append("Testes por postos comparam distribuições/diferenças; não são automaticamente testes de medianas. As diferenças de médias apresentadas são apenas descritivas.")
+        notes.append("Rank tests compare distributions or differences; they are not automatically tests of medians. Displayed mean differences are descriptive only.")
     if test == "anova-tukey":
-        notes.append("Os p-values e intervalos de Tukey HSD já são ajustados para todas as comparações; a correção adicional selecionada não é aplicada.")
+        notes.append("Tukey HSD p-values and intervals already adjust for all pairs; the additional correction is not applied.")
 
     with python_warnings.catch_warnings(record=True) as caught:
         python_warnings.simplefilter("always")
@@ -246,8 +254,8 @@ def analyze(request: AnalyzeRequest) -> dict:
             omnibus = stats.friedmanchisquare(*arrays)
         else:
             omnibus = _pair_result(arrays[0], arrays[1], test)
-        statistic = _finite(omnibus.statistic, "A estatística do teste")
-        pvalue = _finite(omnibus.pvalue, "O p-value")
+        statistic = _finite(omnibus.statistic, "The test statistic")
+        pvalue = _finite(omnibus.pvalue, "The p-value")
         pair_indices = list(combinations(range(len(groups)), 2))
         if config.comparisons == "control":
             control_idx = next(i for i, g in enumerate(groups) if g.id == config.control)
@@ -259,18 +267,18 @@ def analyze(request: AnalyzeRequest) -> dict:
         for i, j in pair_indices:
             if test == "anova-tukey":
                 raw = None
-                pp = _finite(tukey.pvalue[i, j], "O p-value de Tukey")
-                st = _finite(tukey.statistic[i, j], "A diferença de médias")
-                ci = [_finite(tukey_ci.low[i, j], "O limite do intervalo"), _finite(tukey_ci.high[i, j], "O limite do intervalo")]
+                pp = _finite(tukey.pvalue[i, j], "The Tukey p-value")
+                st = _finite(tukey.statistic[i, j], "The mean difference")
+                ci = [_finite(tukey_ci.low[i, j], "The interval bound"), _finite(tukey_ci.high[i, j], "The interval bound")]
             else:
                 raw = _pair_result(arrays[i], arrays[j], test)
-                pp = _finite(raw.pvalue, "O p-value da comparação")
-                st = _finite(raw.statistic, "A estatística da comparação")
+                pp = _finite(raw.pvalue, "The comparison p-value")
+                st = _finite(raw.statistic, "The comparison statistic")
                 ci = None
                 if hasattr(raw, "confidence_interval"):
                     interval = raw.confidence_interval(confidence_level=1 - config.alpha)
-                    ci = [_finite(interval.low, "O limite do intervalo"), _finite(interval.high, "O limite do intervalo")]
-            item = {"id": f"{groups[i].id}::{groups[j].id}", "groupA": groups[i].id, "groupB": groups[j].id, "p": pp, "statistic": st, "effect": _finite(np.mean(arrays[i]) - np.mean(arrays[j]), "A diferença de médias")}
+                    ci = [_finite(interval.low, "The interval bound"), _finite(interval.high, "The interval bound")]
+            item = {"id": f"{groups[i].id}::{groups[j].id}", "groupA": groups[i].id, "groupB": groups[j].id, "p": pp, "statistic": st, "effect": _finite(np.mean(arrays[i]) - np.mean(arrays[j]), "The mean difference")}
             if ci is not None:
                 item["ci"] = ci
             pair_data.append(item)
@@ -281,15 +289,15 @@ def analyze(request: AnalyzeRequest) -> dict:
         summaries = []
         for group, values in zip(groups, arrays):
             n = len(values)
-            mean = _finite(np.mean(values), "A média")
-            sd = _finite(np.std(values, ddof=1), "O desvio padrão")
+            mean = _finite(np.mean(values), "The mean")
+            sd = _finite(np.std(values, ddof=1), "The standard deviation")
             sem = sd / math.sqrt(n)
             half_ci = float(stats.t.ppf(0.975, n - 1)) * sem
-            summaries.append({"group": group.id, "n": n, "mean": mean, "sd": sd, "sem": _finite(sem, "O erro padrão"), "ci95": [_finite(mean - half_ci, "O limite do intervalo"), _finite(mean + half_ci, "O limite do intervalo")]})
+            summaries.append({"group": group.id, "n": n, "mean": mean, "sd": sd, "sem": _finite(sem, "The standard error"), "ci95": [_finite(mean - half_ci, "The interval bound"), _finite(mean + half_ci, "The interval bound")]})
         for warning in caught:
             text = str(warning.message)
             if text not in notes:
                 notes.append(text)
     if test != "anova-tukey" and any("ci" in p for p in pair_data) and len(pair_data) > 1:
-        notes.append("Os intervalos das diferenças são individuais; os p-values ajustados aplicam a correção à família de comparações selecionada.")
+        notes.append("Difference intervals are individual; adjusted p-values apply the correction to the selected comparison family.")
     return {"test": test, "testLabel": LABELS[test], "engine": f"SciPy {scipy.__version__}", "statistic": statistic, "p": pvalue, "comparisons": pair_data, "summaries": summaries, "warnings": notes, "fingerprint": request.fingerprint, "config": config.model_dump(), "createdAt": datetime.now(timezone.utc).isoformat()}

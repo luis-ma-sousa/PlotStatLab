@@ -1,5 +1,4 @@
 node_modules/
-dist/
 .venv/
 __pycache__/
 .pytest_cache/
@@ -13,3 +12,8 @@ test-results/
 .pnpm-store/
 
 .browsers/
+
+.runtime/
+.psl-update/
+.psl-backups/
+releases/
