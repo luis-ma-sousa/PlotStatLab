@@ -6,7 +6,7 @@ import {exportDownload,tableNumber} from './project';
 import './dataGrid.css';
 
 type GridAddress={row:number;column:number};
-type Props={groups:Group[];onChange:(groups:Group[])=>void;onSelection?:(selection:Selection)=>void;onPaste?:()=>void;onNew?:()=>void;showX?:boolean};
+type Props={groups:Group[];onChange:(groups:Group[])=>void;onSelection?:(selection:Selection)=>void;onPaste?:()=>void;onNew?:()=>void;showX?:boolean;focusPointId?:string};
 const uid=()=>crypto.randomUUID();
 export const gridSubjects=(groups:Group[])=>[...new Set(groups.flatMap(g=>g.observations.map(o=>o.subject??o.id)))];
 const observation=(group:Group,subject:string)=>group.observations.find(o=>(o.subject??o.id)===subject);
@@ -59,16 +59,30 @@ export function applyGridPaste(groups:Group[],subjects:string[],start:GridAddres
  return next;
 }
 
-export default function DataGrid({groups,onChange,onSelection,onPaste,onNew,showX=false}:Props){
+export default function DataGrid({groups,onChange,onSelection,onPaste,onNew,showX=false,focusPointId}:Props){
  const [extraRows,setExtraRows]=useState(5),[error,setError]=useState(''),[page,setPage]=useState(0),[draftLabels,setDraftLabels]=useState<Record<number,string>>({}),[exportFormat,setExportFormat]=useState<''|'wide'|'long'>(''),[copyNotice,setCopyNotice]=useState('');
  const [context,setContext]=useState<{x:number;y:number;row:number;groupId?:string;pointId?:string}|null>(null);
  const table=useRef<HTMLDivElement>(null);
+ const requestedFocus=useRef<string|undefined>(undefined),pendingFocus=useRef<string|undefined>(undefined);
  const storedSubjects=gridSubjects(groups),subjects=Array.from({length:Math.max(8,storedSubjects.length+extraRows)},(_,row)=>storedSubjects[row]??draftLabels[row]??`row-${row+1}`),labelKeys=[...new Set(groups.flatMap(g=>g.observations.flatMap(o=>Object.keys(o.labels??{}))))];
  const rowCount=subjects.length,pageStart=page*100,measurementOffset=1+labelKeys.length;
  const rows=Array.from({length:Math.min(100,Math.max(0,rowCount-pageStart))},(_,i)=>pageStart+i);
  const rowSubject=(row:number)=>subjects[row]??`row-${row+1}`;
  const excluded=groups.flatMap(g=>g.observations).filter(o=>o.excluded).length;
  const dataFormat=exportFormat||(excluded?'long':'wide');
+ useEffect(()=>{
+  if(!focusPointId){requestedFocus.current=undefined;pendingFocus.current=undefined;return}
+  if(requestedFocus.current===focusPointId)return;
+  const point=groups.flatMap(g=>g.observations).find(o=>o.id===focusPointId);if(!point)return;
+  const row=gridSubjects(groups).indexOf(point.subject??point.id);if(row<0)return;
+  requestedFocus.current=focusPointId;pendingFocus.current=focusPointId;setPage(Math.floor(row/100));
+ },[focusPointId,groups]);
+ useEffect(()=>{
+  if(!pendingFocus.current)return;
+  const cell=Array.from(table.current?.querySelectorAll<HTMLTableCellElement>('td[data-observation-id]')??[]).find(cell=>cell.dataset.observationId===pendingFocus.current);
+  if(!cell)return;
+  cell.querySelector<HTMLInputElement>('input')?.focus();cell.scrollIntoView?.({block:'center',inline:'center'});pendingFocus.current=undefined;
+ },[focusPointId,page]);
  useEffect(()=>{if(!context)return;const close=()=>setContext(null);window.addEventListener('click',close);const key=(e:globalThis.KeyboardEvent)=>{if(e.key==='Escape')close()};window.addEventListener('keydown',key);return()=>{window.removeEventListener('click',close);window.removeEventListener('keydown',key)}},[context]);
  function update(changes:()=>Group[]){try{const next=changes();onChange(next);setError('');return true}catch(e){setError((e as Error).message);return false}}
  function paste(event:ClipboardEvent<HTMLInputElement>,row:number,column:number){const text=event.clipboardData.getData('text');if(!text)return;event.preventDefault();update(()=>applyGridPaste(groups,subjects,{row,column},text,labelKeys));setExtraRows(n=>Math.max(n,5))}

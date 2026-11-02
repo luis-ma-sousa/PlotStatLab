@@ -59,7 +59,7 @@ function ClassicChartView({svgId="chart-svg",chart, groups, selection, onSelect,
   const yScale = useLog ? scaleLog().domain([minY, maxY]).range([plotBottom, plotTop]) : scaleLinear().domain([minY, maxY]).range([plotBottom, plotTop]);
   const swarm = ['swarm','bar-swarm','box','violin','raincloud','paired'].includes(chart.type)?visibleGroups.map((group, index) => swarmLayout(group.observations, groupX(index) + (chart.type === 'raincloud' ? step * .13 : 0), yScale, collisionRadius, step * (chart.type === 'raincloud' ? .36 : .75))):visibleGroups.map(()=>[]);
   const zeroY = useLog ? plotBottom : Math.max(plotTop, Math.min(plotBottom, yScale(0)));
-  const dataTop = Math.min(...visibleGroups.flatMap(g => g.observations.map(o => yScale(o.value) - (chart.type === 'bar' ? 0 : collisionRadius(o.id)))), ...visibleGroups.filter(g => g.observations.length > 0).map(g => yScale(mean(g.observations.filter(o => !o.excluded).map(o => o.value)) + errorSize(g.observations.filter(o => !o.excluded).map(o => o.value), style.error))), plotBottom);
+  const dataTop = Math.min(...visibleGroups.flatMap(g => g.observations.map(o => yScale(o.value) - (chart.type === 'bar' ? 0 : collisionRadius(o.id)))), ...visibleGroups.filter(g => g.observations.some(o => !o.excluded)).map(g => yScale(mean(g.observations.filter(o => !o.excluded).map(o => o.value)) + errorSize(g.observations.filter(o => !o.excluded).map(o => o.value), style.error))), plotBottom);
   const positions = preview ? {...chart.annotationPositions, [preview.id]: preview.position} : chart.annotationPositions;
   const placedBrackets = placeBrackets(comparisons, xFor, dataTop, positions, annotationLayout.spacing);
 
@@ -193,14 +193,15 @@ function ClassicChartView({svgId="chart-svg",chart, groups, selection, onSelect,
 
 export default function ChartView(props:Props){
   const groups=props.chart.groupIds ? props.groups.filter(group=>props.chart.groupIds!.includes(group.id)) : props.groups;
+  // Column-based palettes keep the source dataset's slots when columns are hidden.
+  // Grouped/volcano figures use factor-B/status slots instead of dataset columns.
+  const columnChart=props.chart.groupIds ? {...props.chart,style:{...props.chart.style,palette:groups.map(group=>props.chart.style.palette[props.groups.findIndex(source=>source.id===group.id)%props.chart.style.palette.length])}} : props.chart;
   if(advancedChartTypes.has(props.chart.type)){
     const allRows:AdvancedRow[]=props.advancedRows??props.groups.flatMap(g=>g.observations.map(o=>({id:o.id,y:o.value,x:o.x,subject:o.subject,groupId:g.id,factorA:g.name,excluded:o.excluded})));
     const visibleIds=new Set(groups.flatMap(group=>group.observations.map(o=>o.id)));
     const rows=props.chart.groupIds ? allRows.filter(row=>visibleIds.has(row.id)||groups.some(group=>group.id===row.groupId || (!row.groupId && group.name===(row.factorA||row.group)))) : allRows;
-    return <AdvancedChartView {...props} groups={groups} rows={rows} result={props.advancedResult} analysisStale={!!props.advancedResult&&props.advancedResult.fingerprint!==advancedFingerprint(allRows)}/>;
+    const chart=props.chart.type==='grouped'||props.chart.type==='volcano'?props.chart:columnChart;
+    return <AdvancedChartView {...props} chart={chart} groups={groups} rows={rows} result={props.advancedResult} analysisStale={!!props.advancedResult&&props.advancedResult.fingerprint!==advancedFingerprint(allRows)}/>;
   }
-  // Keep a dataset column's palette slot stable when another column is hidden.
-  // Point overrides stay attached to their observation IDs and take precedence.
-  const chart=props.chart.groupIds ? {...props.chart,style:{...props.chart.style,palette:groups.map(group=>props.chart.style.palette[props.groups.findIndex(source=>source.id===group.id)%props.chart.style.palette.length])}} : props.chart;
-  return <ClassicChartView {...props} chart={chart} groups={groups}/>;
+  return <ClassicChartView {...props} chart={columnChart} groups={groups}/>;
 }

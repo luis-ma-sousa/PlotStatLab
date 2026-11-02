@@ -3,7 +3,7 @@ import {act} from 'react';
 import {createRoot} from 'react-dom/client';
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 import ChartView from './ChartView';
-import {createChart} from './project';
+import {createChart,dataFingerprint} from './project';
 import type {AnalysisResult,Chart,Group} from './types';
 
 const groups:Group[]=[
@@ -67,6 +67,24 @@ it('does not retain a stale annotation after its linked data change',async()=>{
   await act(async()=>root.render(<ChartView chart={{...createChart(),analysis}} groups={groups} selection={{kind:'chart'}} onSelect={()=>{}} onAnnotationMove={()=>{}} analysisStale/>));
   expect(host.querySelector('[data-annotation-id]')).toBeNull();
 });
+it('keeps a current comparison finite on a logarithmic plot when an untested column is entirely excluded',async()=>{
+  const data:Group[]=[...groups,{id:'untested',name:'Untested',observations:[{id:'c1',value:150,excluded:true},{id:'c2',value:180,excluded:true}]}];
+  const config={...analysis.config,groupIds:['control','treated']};
+  const current={...analysis,config,fingerprint:dataFingerprint(data,config)};
+  const beforeExclusion=data.map(group=>group.id==='untested'?{...group,observations:group.observations.map(point=>({...point,excluded:false}))}:group);
+  expect(dataFingerprint(beforeExclusion,config)).toBe(current.fingerprint);
+  const chart={...createChart('bar-swarm'),analysis:current,style:{...createChart().style,yScale:'log' as const}};
+  await act(async()=>root.render(<ChartView chart={chart} groups={data} selection={{kind:'chart'}} onSelect={()=>{}} onAnnotationMove={()=>{}} analysisStale={false}/>));
+  expect(host.innerHTML).not.toMatch(/NaN|Infinity/);
+  const bracket=host.querySelector('[data-annotation-id="control::treated"]')!;
+  expect(bracket).not.toBeNull();
+  const labelY=Number(bracket.querySelector('text')!.getAttribute('y'));
+  const topPoint=Math.min(...[...host.querySelectorAll('[data-point-id] > circle:first-of-type')].map(point=>Number(point.getAttribute('cy'))-Number(point.getAttribute('r'))));
+  expect(Number.isFinite(labelY)).toBe(true);
+  expect(labelY).toBeLessThan(topPoint-15);
+  expect(labelY).toBeGreaterThan(0);
+  expect(host.querySelectorAll('[data-point-id][data-excluded="true"]')).toHaveLength(3);
+});
 it('filters columns for an individual chart without mutating or hiding source data elsewhere',async()=>{
   const chart={...createChart('bar-swarm'),groupIds:['treated']};
   const original=structuredClone(groups);
@@ -89,4 +107,14 @@ it('offers the same individual context actions for specialized chart points',asy
   expect(onContextMenu).toHaveBeenCalledTimes(1);
   expect(onContextMenu.mock.calls[0][1]).toEqual({kind:'point',id:'a3',groupId:'control'});
   expect(host.querySelectorAll('[data-point-id]')).toHaveLength(3);
+});
+it.each(['regression','dose-response','kaplan-meier','forest','bland-altman'] as const)('preserves dataset palette slots when hiding the first column of a %s figure',async type=>{
+  const chart={...createChart(type),groupIds:['treated']};
+  const rows=groups.flatMap(group=>group.observations.map((point,index)=>({id:point.id,y:point.value,x:index+1,lower:point.value-.5,upper:point.value+.5,event:true,factorA:group.name,groupId:group.id,excluded:point.excluded})));
+  const view=(current:Chart)=><ChartView chart={current} groups={groups} advancedRows={rows} selection={{kind:'chart'}} onSelect={()=>{}} onAnnotationMove={()=>{}}/>;
+  await act(async()=>root.render(view(chart)));
+  expect(host.querySelector('[data-point-id="b1"] circle')?.getAttribute('fill')).toBe(chart.style.palette[1]);
+  expect(host.querySelector('[data-point-id="a1"]')).toBeNull();
+  await act(async()=>root.render(view({...chart,groupIds:undefined})));
+  expect(host.querySelector('[data-point-id="b1"] circle')?.getAttribute('fill')).toBe(chart.style.palette[1]);
 });

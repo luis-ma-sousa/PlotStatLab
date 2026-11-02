@@ -56,6 +56,15 @@ it('lets a user name an empty row before typing numbers and paste a numeric bloc
  const paste=new Event('paste',{bubbles:true,cancelable:true});Object.defineProperty(paste,'clipboardData',{value:{getData:()=> '2\t3\n4\t5'}});
  await act(async()=>cell.dispatchEvent(paste));expect(groups[0].observations[0].subject).toBe('Mouse one');expect(groups[1].observations.map(o=>o.value)).toEqual([3,5]);
 });
+it('finds a selected point after row 100, opens its page, and does not steal focus on subsequent edits',async()=>{
+ let groups:Group[]=[{id:'g',name:'A',observations:Array.from({length:250},(_,index)=>({id:`point-${index+1}`,subject:`sample-${index+1}`,value:index+1}))}];
+ const render=()=>root.render(<DataGrid groups={groups} onChange={()=>{}} focusPointId="point-225"/>);
+ await act(async()=>render());
+ expect(host.textContent).toContain('Rows 201–255');
+ const selected=host.querySelector<HTMLInputElement>('td[data-observation-id="point-225"] input')!;expect(selected).not.toBeNull();expect(document.activeElement).toBe(selected);expect(selected.getAttribute('aria-label')).toBe('A, row 225');
+ const other=host.querySelector<HTMLInputElement>('td[data-observation-id="point-226"] input')!;other.focus();
+ groups=groups.map(group=>({...group,observations:group.observations.map((point,index)=>index===0?{...point,value:1000}:point)}));await act(async()=>render());expect(document.activeElement).toBe(other);
+});
 it('fingerprints only selected groups and retains legacy fingerprints for absent selection',()=>{
  const p=createProject(),config={...p.analysisConfig,groupIds:p.groups.slice(0,2).map(g=>g.id)},fp=dataFingerprint(p.groups,config),changed=structuredClone(p.groups);changed[3].observations[0].value=999;
  expect(dataFingerprint(changed,config)).toBe(fp);changed[0].observations[0].value=888;expect(dataFingerprint(changed,config)).not.toBe(fp);
