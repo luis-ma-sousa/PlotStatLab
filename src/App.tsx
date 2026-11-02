@@ -64,6 +64,7 @@ export default function App(){
  const [tab,setTab]=useState<'editor'|'data'|'analysis'|'workspace'|'publication'>('workspace');
  const [analysisMode,setAnalysisMode]=useState<'groups'|'advanced'>('groups');
  const [selection,setSelection]=useState<Selection>({kind:'chart'});
+ useEffect(()=>{if(inspectorOpen&&['point','annotation','group'].includes(selection.kind)){const panel=document.querySelector<HTMLElement>('.inspector-scroll');if(panel)panel.scrollTop=0}},[inspectorOpen,selection]);
  const [modal,setModal]=useState<null|'gallery'|'export'|'style'|'paste'|'preset'|'rename'|'help'|'workspaces'|'newDataset'>(null);
  useDialogAccessibility(!!modal,()=>setModal(null));
  const [notice,setNotice]=useState(''),[error,setError]=useState(loadFailure.warning);
