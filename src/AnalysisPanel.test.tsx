@@ -56,7 +56,7 @@ it('runs a chosen pair from a larger dataset and keeps results independent from 
  await act(async()=>root.render(<Harness/>));await button('Run and save new analysis');
  const request=vi.mocked(fetch).mock.calls.find(([url])=>url==='/api/analyze')!;
  const body=JSON.parse(request[1]!.body as string);
- expect(body.config.groupIds).toHaveLength(2);expect(body.groups).toHaveLength(4);
+ expect(body.config.groupIds).toHaveLength(2);expect(body.groups).toHaveLength(2);expect(body.groups.map((g:{id:string})=>g.id)).toEqual(body.config.groupIds);
  expect(saved.analysisRuns).toHaveLength(1);expect(saved.charts[0].analysis).toBeUndefined();expect(onAttach).not.toHaveBeenCalled();
  await button('Run and save new analysis');expect(saved.analysisRuns).toHaveLength(2);
  await button('Add stars / ns to figure');expect(onAttach).toHaveBeenCalledWith('run-1',saved.charts[0].id);
