@@ -1,0 +1,122 @@
+[
+  {
+    "name": "d3-array",
+    "version": "3.2.4",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/d3-array/LICENSE"
+    ]
+  },
+  {
+    "name": "d3-color",
+    "version": "3.1.0",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/d3-color/LICENSE"
+    ]
+  },
+  {
+    "name": "d3-format",
+    "version": "3.1.2",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/d3-format/LICENSE"
+    ]
+  },
+  {
+    "name": "d3-interpolate",
+    "version": "3.0.1",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/d3-interpolate/LICENSE"
+    ]
+  },
+  {
+    "name": "d3-path",
+    "version": "3.1.0",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/d3-path/LICENSE"
+    ]
+  },
+  {
+    "name": "d3-scale",
+    "version": "4.0.2",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/d3-scale/LICENSE"
+    ]
+  },
+  {
+    "name": "d3-shape",
+    "version": "3.2.0",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/d3-shape/LICENSE"
+    ]
+  },
+  {
+    "name": "d3-time",
+    "version": "3.1.0",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/d3-time/LICENSE"
+    ]
+  },
+  {
+    "name": "d3-time-format",
+    "version": "4.1.0",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/d3-time-format/LICENSE"
+    ]
+  },
+  {
+    "name": "internmap",
+    "version": "2.0.3",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/internmap/LICENSE"
+    ]
+  },
+  {
+    "name": "lucide-react",
+    "version": "0.468.0",
+    "license": "ISC",
+    "notices": [
+      "licenses/frontend/lucide-react/LICENSE"
+    ]
+  },
+  {
+    "name": "papaparse",
+    "version": "5.7.0",
+    "license": "MIT",
+    "notices": [
+      "licenses/frontend/papaparse/LICENSE"
+    ]
+  },
+  {
+    "name": "react",
+    "version": "19.3.1",
+    "license": "MIT",
+    "notices": [
+      "licenses/frontend/react/LICENSE"
+    ]
+  },
+  {
+    "name": "react-dom",
+    "version": "19.3.1",
+    "license": "MIT",
+    "notices": [
+      "licenses/frontend/react-dom/LICENSE"
+    ]
+  },
+  {
+    "name": "scheduler",
+    "version": "0.28.0",
+    "license": "MIT",
+    "notices": [
+      "licenses/frontend/scheduler/LICENSE"
+    ]
+  }
+]

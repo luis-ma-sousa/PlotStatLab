@@ -1,0 +1,130 @@
+[
+  {
+    "name": "annotated-doc",
+    "version": "0.0.5",
+    "notices": [
+      "licenses/python/annotated-doc/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "annotated-types",
+    "version": "0.8.0",
+    "notices": [
+      "licenses/python/annotated-types/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "anyio",
+    "version": "4.16.0",
+    "notices": [
+      "licenses/python/anyio/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "click",
+    "version": "8.5.0",
+    "notices": [
+      "licenses/python/click/licenses/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "fastapi",
+    "version": "0.162.0",
+    "notices": [
+      "licenses/python/fastapi/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "h11",
+    "version": "0.16.0",
+    "notices": [
+      "licenses/python/h11/licenses/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "idna",
+    "version": "3.20",
+    "notices": [
+      "licenses/python/idna/licenses/LICENSE.md"
+    ]
+  },
+  {
+    "name": "numpy",
+    "version": "2.5.4",
+    "notices": [
+      "licenses/python/numpy/licenses/LICENSE.txt",
+      "licenses/python/numpy/licenses/numpy/_core/include/numpy/libdivide/LICENSE.txt",
+      "licenses/python/numpy/licenses/numpy/_core/src/common/pythoncapi-compat/COPYING",
+      "licenses/python/numpy/licenses/numpy/_core/src/highway/LICENSE",
+      "licenses/python/numpy/licenses/numpy/_core/src/multiarray/dragon4_LICENSE.txt",
+      "licenses/python/numpy/licenses/numpy/_core/src/npysort/x86-simd-sort/LICENSE.md",
+      "licenses/python/numpy/licenses/numpy/_core/src/umath/svml/LICENSE",
+      "licenses/python/numpy/licenses/numpy/fft/pocketfft/LICENSE.md",
+      "licenses/python/numpy/licenses/numpy/linalg/lapack_lite/LICENSE.txt",
+      "licenses/python/numpy/licenses/numpy/ma/LICENSE",
+      "licenses/python/numpy/licenses/numpy/random/LICENSE.md",
+      "licenses/python/numpy/licenses/numpy/random/src/distributions/LICENSE.md",
+      "licenses/python/numpy/licenses/numpy/random/src/mt19937/LICENSE.md",
+      "licenses/python/numpy/licenses/numpy/random/src/pcg64/LICENSE.md",
+      "licenses/python/numpy/licenses/numpy/random/src/philox/LICENSE.md",
+      "licenses/python/numpy/licenses/numpy/random/src/sfc64/LICENSE.md",
+      "licenses/python/numpy/licenses/numpy/random/src/splitmix64/LICENSE.md"
+    ]
+  },
+  {
+    "name": "opentelemetry-api",
+    "version": "1.45.2",
+    "notices": [
+      "licenses/python/opentelemetry-api/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "pydantic",
+    "version": "2.14.2",
+    "notices": [
+      "licenses/python/pydantic/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "pydantic-core",
+    "version": "2.50.2",
+    "notices": [
+      "licenses/python/pydantic-core/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "scipy",
+    "version": "1.18.1",
+    "notices": [
+      "licenses/python/scipy/LICENSE.txt"
+    ]
+  },
+  {
+    "name": "starlette",
+    "version": "1.10.0",
+    "notices": [
+      "licenses/python/starlette/licenses/LICENSE.md"
+    ]
+  },
+  {
+    "name": "typing-inspection",
+    "version": "0.4.4",
+    "notices": [
+      "licenses/python/typing-inspection/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "typing-extensions",
+    "version": "4.16.0",
+    "notices": [
+      "licenses/python/typing-extensions/licenses/LICENSE"
+    ]
+  },
+  {
+    "name": "uvicorn",
+    "version": "0.54.0",
+    "notices": [
+      "licenses/python/uvicorn/licenses/LICENSE.md"
+    ]
+  }
+]

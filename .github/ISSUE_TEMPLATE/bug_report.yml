@@ -1,0 +1,20 @@
+name: Bug report
+description: Report a reproducible problem using non-sensitive example data.
+body:
+  - type: input
+    id: version
+    attributes:
+      label: PlotStatLab version and operating system
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps and expected result
+      description: Use synthetic data. Do not upload private research datasets or tokens.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result and error message

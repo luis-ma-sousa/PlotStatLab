@@ -1,0 +1,85 @@
+name: Validate PlotStatLab
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned package manager
+        run: npm install --global pnpm@11.25.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-lock.txt
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - name: Ensure checked-in frontend matches source
+        run: git diff --exit-code -- dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compiled-editor
+          path: dist/
+          retention-days: 7
+  python-and-portable-launch:
+    needs: frontend
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: compiled-editor
+          path: dist/
+      - name: Install validation dependencies
+        run: python -m pip install -r requirements-lock.txt
+      - name: Run scientific, distribution and updater tests
+        run: python -m pytest tests/ -q --ignore=tests/e2e
+      - name: Build and extract the user ZIP into a path with spaces
+        shell: bash
+        run: |
+          python scripts/package_release.py --output "$RUNNER_TEMP/PSL release artifacts"
+          python -c "from pathlib import Path; import os,zipfile; output=Path(os.environ['RUNNER_TEMP'])/'PSL release artifacts'; z=next(output.glob('*.zip')); zipfile.ZipFile(z).extractall(Path(os.environ['RUNNER_TEMP'])/'PSL clean install')"
+      - name: First clean installation (macOS/Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: sh "$RUNNER_TEMP/PSL clean install/PlotStatLab/scripts/bootstrap.sh" --check --no-update
+      - name: First clean installation (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          & "$env:RUNNER_TEMP\PSL clean install\PlotStatLab\scripts\bootstrap.ps1" --check --no-update
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Second cached installation without network (macOS/Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          UV_OFFLINE: '1'
+          PSL_NO_UPDATE: '1'
+        run: sh "$RUNNER_TEMP/PSL clean install/PlotStatLab/scripts/bootstrap.sh" --check --offline --no-update
+      - name: Second cached installation without network (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        env:
+          UV_OFFLINE: '1'
+          PSL_NO_UPDATE: '1'
+        run: |
+          & "$env:RUNNER_TEMP\PSL clean install\PlotStatLab\scripts\bootstrap.ps1" --check --offline --no-update
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

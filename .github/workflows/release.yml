@@ -1,0 +1,45 @@
+name: Package PlotStatLab release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install --global pnpm@11.25.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+      - run: pnpm build
+      - run: python -m pip install -r requirements-lock.txt
+      - run: python -m pytest tests/ -q --ignore=tests/e2e
+      - name: Match release tag and application version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: python -c "import json,os; version=json.load(open('package.json'))['version']; tag=os.environ['GITHUB_REF_NAME']; assert tag=='v'+version, f'Tag {tag} differs from package version {version}'"
+      - run: python scripts/package_release.py --output releases
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PlotStatLab-ready-to-use
+          path: |
+            releases/*.zip
+            releases/*.sha256
+          retention-days: 30
+      - name: Publish downloadable release assets
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" releases/*.zip releases/*.sha256 --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" releases/*.zip releases/*.sha256 --title "PlotStatLab $GITHUB_REF_NAME — development preview" --prerelease --generate-notes
+          fi

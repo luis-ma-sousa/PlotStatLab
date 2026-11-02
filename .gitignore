@@ -17,3 +17,7 @@ test-results/
 .psl-update/
 .psl-backups/
 releases/
+
+node_modules
+.venv
+.updates/
