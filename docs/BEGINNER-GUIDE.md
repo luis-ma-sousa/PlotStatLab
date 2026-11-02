@@ -232,3 +232,13 @@ Use **Overview → Import datasets** to select several CSV/TSV files in one oper
 Every successful statistical run is kept in the analysis history, including its dataset, test, correction, alpha, results and timestamp. Run different tests or analyze different datasets, then use **Overview → Choose analyses** to display selected results side by side. Each historical result is checked against its own recorded configuration and current dataset measurements. Changing the assistant's next-test controls does not rewrite previous tests.
 
 Use **Choose figures** to select several figures from the same or different datasets. Preview cards show the dataset name and provide **Edit figure**. The complete selection is saved in **Save workspace → .psl**, along with every dataset, test and figure. Legacy `.labplot` files remain supported and convert to a one-dataset workspace. CSV export contains raw measurements; use `.psl` to preserve exclusions and the complete analysis state.
+
+## Advanced figures and publication layouts
+
+For XY, factorial, survival and specialized charts, open **Data → Advanced table & scientific examples**. Add a synthetic example to learn the column meanings while preserving your existing work. Import CSV/TSV or native `.xlsx` workbooks; every visible nonempty Excel sheet becomes a separate dataset. Select an appropriate table-column view to keep the editor simple.
+
+Open **Statistics → Factorial, regression & survival**, choose a compatible method and review its requirements. Click **Run analysis**, then **Create figure with this result**. Each run is kept; changing data marks older results out of date. The [advanced guide](ADVANCED-METHODS.md) explains the supported models.
+
+Use **Publication** to select figures across datasets, put them in order, choose columns and print width, and add A/B/C labels. Export the entire layout or a ZIP of individual panels. Scientific titles accept `H_{2}O`, `X^{2}`, `*italic*` and `**bold**`; exported SVG keeps editable text. See the [publication guide](PUBLICATION.md).
+
+All these functions run offline after initial setup. The [installation guide](INSTALLATION.md) covers Windows/macOS graphical packages, and the [offline guide](OFFLINE.md) identifies the few network connections PSL uses.

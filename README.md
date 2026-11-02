@@ -46,6 +46,7 @@ Open **Help** in the app, or read:
 - [Publication and scientific typography](docs/PUBLICATION.md)
 - [Excel import](docs/EXCEL-IMPORT.md)
 - [Offline operation](docs/OFFLINE.md)
+- [Installation](docs/INSTALLATION.md)
 
 The complete interface and documentation are in English. User-supplied dataset names and imported historical notes retain their original text.
 

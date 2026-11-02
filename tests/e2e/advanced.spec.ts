@@ -29,6 +29,7 @@ test('advanced analyses, individual edits, multipanel vector export and complete
  await expect(page.locator('.advanced-overview-results .advanced-results')).toHaveCount(2);
  await page.locator('.tab-switch').getByRole('button',{name:'Publication',exact:true}).click();
  await page.getByLabel('Publication size preset').selectOption('nature-double');
+ await page.locator('.publication-choices label').filter({hasText:'Local XY · Regression'}).getByRole('checkbox').check();
  const vectorPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Export SVG',exact:true}).click();const vector=await downloadText(await vectorPromise);
  expect(vector).toContain('width="180mm"');expect(vector).toContain('baseline-shift="sub"');expect(vector).toContain('#ab24df');expect(vector).not.toMatch(/<image|foreignObject|data-editor-only/);
  const savedPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Save workspace',exact:true}).click();const saved=await downloadText(await savedPromise);const state=JSON.parse(saved);

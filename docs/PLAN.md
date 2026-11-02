@@ -36,7 +36,7 @@ Use independent numerical references and invalid-input cases. Verify pairing by 
 
 The initial version was a local browser application without a native installer. Its own project format preserves editability; PNG, SVG or Prism files cannot guarantee reconstruction of data and analysis. Specialized charts and analyses above were planned work, not completed functions. Data/autosave remain local; GitHub receives source and synthetic demonstration data.
 
-The 0.2 revision adds the PlotStatLab identity, MIT licensing, English guides, autosave control, HEX color entry, Illustrator-oriented SVG and distribution/update preparation. Consult the current [roadmap](ROADMAP.md), [changelog](../CHANGELOG.md) and validation records for implementation status.
+The 0.2 revision adds the PlotStatLab identity, MIT licensing, English guides, autosave control, HEX color entry, Illustrator-oriented SVG and distribution/update preparation. The 0.3 workbench implements the broader scientific and publication stages with the exact supported models documented in [Advanced methods](ADVANCED-METHODS.md), and native installation wrappers documented in [Installation](INSTALLATION.md). Consult the current [roadmap](ROADMAP.md), [changelog](../CHANGELOG.md) and validation records for implementation status.
 
 ## References
 

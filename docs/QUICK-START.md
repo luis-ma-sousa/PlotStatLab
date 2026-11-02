@@ -21,3 +21,5 @@
 | Control autosave | Use the **Autosave** switch. OFF stops automatic browser writes; save explicitly before closing. |
 
 A `.psl` is the scientific workspace. SVG/PNG are presentation figures. Flags do not prove laboratory error, and suggestions do not establish experimental assumptions. Use portable workspace backups when moving browsers or computers. Detailed help is available offline under **Help**.
+
+For two factors, XY fits or survival: **Data → Advanced table & scientific examples**, then **Statistics → Factorial, regression & survival → Run analysis**. Use **Create figure with this result** for the fitted graph. For a publication figure: **Publication → choose/order figures → print width/DPI → Export SVG/PNG**. Import `.xlsx` alongside CSV/TSV; each visible sheet becomes a dataset. All calculations and exports work offline after setup.

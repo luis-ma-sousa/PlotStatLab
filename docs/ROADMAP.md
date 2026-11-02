@@ -1,47 +1,31 @@
-# PlotStatLab — current scope and roadmap
+# PlotStatLab — delivery roadmap and acceptance record
 
-This page distinguishes implemented functionality from planned work. Priority can change with user needs and scientific validation.
+The 0.3 line implements the scientific and publication stages below. A checked implementation is not a claim of numerical identity with proprietary GraphPad Prism, support for every possible statistical model, or completion of external certification. Each method's exact scope is documented in [Advanced methods](ADVANCED-METHODS.md).
 
-## Current 0.2 line
+| Stage | Implemented delivery | Acceptance evidence |
+|---|---|---|
+| Foundation | Local React/TypeScript SVG editor, local SciPy engine, MIT licensing, English UI/manuals | TypeScript/build, numerical references, local browser workflow |
+| Core figures | Bar+swarm, bar, swarm, box, violin, raincloud, paired, scatter, lines, histogram, density, ECDF, heatmap | Stable point identities, collision tests, per-point edits, style transfer and saved-project roundtrips |
+| Workspace | Simultaneous datasets, figures and independent group/advanced result histories, chosen overview panels | Legacy and multi-dataset file roundtrips, stale-result checks |
+| Broader science | Two-factor tables/grouped plots, Type III two-way ANOVA, one-factor repeated ANOVA with Greenhouse–Geisser, random-intercept REML, Pearson/Spearman and OLS/diagnostics | Independent statsmodels fixtures, closed-form references and invalid-design cases |
+| Specialized science | 4PL dose response, Kaplan–Meier/log-rank, forest, Bland–Altman, volcano, genuine Dunn and Dunnett | Known nonlinear parameters, independent log-rank reference, pooled tied-rank reference, SciPy published Dunnett example, chart render/export tests |
+| Outliers | Constant-model ROUT, Grubbs, preserved originals, review flags and reversible explicit exclusions | Published equations/NIST reference, masking/invariance/exclusion tests; proprietary numerical identity is not certified |
+| Publication | Aligned multipanel layouts, A/B/C labels, shared fonts, scientific scripts/italics/bold, journal size templates, mm/DPI and batch export | Editable multipanel SVG, unique clipping IDs, ZIP CRC, PNG resolution metadata and UI tests |
+| Import | CSV/TSV, long XY/factor/censoring schemas, native Excel multi-sheet import | Real OOXML fixtures including formulas/caches, malformed archives, limits and no silent missing-response conversion |
+| Accessibility/performance | Keyboard point/annotation editing, modal focus containment/restoration, paginated tables, optimized exact swarm | Keyboard browser tests, 10,000-point identity/finite-coordinate test, tied heterogeneous-marker collision test |
+| Distribution | Small portable ZIP, per-user Windows graphical installer, drag-to-Applications macOS DMG/application, hidden runtime components | Native Windows/macOS build + actual install/start and cached offline start in CI; portable macOS/Windows/Linux checks |
+| Updates/recovery | Startup release checks, offline fallback, isolated dependency preparation, verified staged app, atomic promotion, rollback/crash recovery, schema-1 compatibility | Updater transaction/security/recovery tests and previous-format fixtures |
 
-- Thirteen charts: bar + swarm, bar, swarm, box, violin, raincloud, paired, XY scatter, XY lines, histogram, density, ECDF and heatmap.
-- Per-observation styling, selective style transfer and project presets.
-- Outlier review with ROUT/Grubbs options, preserved original measurements, visual flags and explicit reversible exclusions; method-specific validation must be reported.
-- Ten group procedures: Welch, Student, paired t, Mann–Whitney, Wilcoxon, one-way ANOVA, Welch ANOVA, ANOVA/Tukey HSD, Kruskal–Wallis and Friedman, with pairwise methods named explicitly in the expert guide.
-- Holm/Bonferroni/BH or Tukey's own adjustment, automatic significance annotations and manual positioning.
-- CSV/TSV, editable tables, versioned projects, controllable autosave and PNG/editable SVG export.
-- Setup/launch workflows, compiled interface and documentation for use under MIT.
+## Release gate
 
-## Broader experimental designs
+Before changing repository visibility, require all scientific/unit checks, the browser workflow, clean installation and cached offline checks to pass for the release commit. Native installer builds must also pass. The maintainer records run links in [Validation](VALIDATION.md). An online statistics service, account, subscription or API key is not required for any analysis/editor feature; see [Offline operation](OFFLINE.md).
 
-- Two-factor tables and grouped charts.
-- Two-way ANOVA and parametric repeated-measures ANOVA.
-- Mixed models with explicit missing-observation policy.
-- Correlation, linear regression and diagnostics.
-- Independent validation of each analysis, result format and recommendation.
+## External validation and publisher credentials
 
-## Specialized charts and analyses
+- SVG exports are checked as standalone editable vectors and live text. Actual Illustrator testing is deferred at the user's request; no Illustrator access is assumed. Further checks across Illustrator releases can be recorded when the user provides feedback.
+- The macOS application has an ad-hoc local integrity signature. Windows trusted publisher signing and Apple Developer ID/notarization require publisher credentials that are not available. These must not be described as completed or silently substituted with checksums. The owner decides whether the free, unsigned/ad-hoc-signed distribution is sufficient for initial public release.
+- Native GraphPad project import was an investigation item rather than an approved implemented file format. PSL currently reopens its own `.psl`/legacy `.labplot` projects. PNG/SVG cannot reconstruct missing measurements or analysis history.
 
-- Dose–response and nonlinear regression.
-- Kaplan–Meier and survival comparisons.
-- Forest, Bland–Altman and volcano plots.
-- Additional post-tests with their own names/assumptions, including evaluation of Dunn and Dunnett.
-- Further validation and reporting of outlier detection, flagging and explicit exclusion workflows; preserving original measurements is required.
+## Explicit scientific boundaries
 
-These specialized chart/analysis items are not part of the 13-chart catalog.
-
-## Publication workflows
-
-- Multipanel layouts with alignment and A/B/C labels.
-- Batch export, physical dimensions and journal presets.
-- Broader scientific typography, including superscripts and subscripts.
-- Vector interoperability tests across more versions/platforms.
-
-## Data and distribution
-
-- Native Excel import and more flexible XY schemas.
-- Larger-dataset and accessibility testing.
-- Signed desktop packages and graphical installation, complementing current launchers.
-- Format migrations, recovery and verified update behavior across more environments.
-
-Importing native GraphPad Prism projects requires separate investigation. PNG and SVG cannot reconstruct an earlier figure's underlying data and analysis automatically.
+The mixed model is a Gaussian random intercept with one fixed predictor; repeated ANOVA is one within-subject factor; 4PL uses positive doses and unweighted errors; survival supports independent right-censored observations. Forest/volcano plots display supplied estimates/probabilities. Advanced ANOVA overall effects are not automatically converted into pairwise significance brackets. These boundaries are visible in the interface/manuals and invalid inputs are rejected. Additional model families are future extensions, not claims about this release.
