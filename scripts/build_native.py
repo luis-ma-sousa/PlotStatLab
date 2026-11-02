@@ -23,7 +23,7 @@ def checksum(path:Path)->None:
 def prepare_macos(user_zip:Path,output:Path,version:str)->Path:
     app=output/'PlotStatLab.app';resources=app/'Contents'/'Resources';binary=app/'Contents'/'MacOS';resources.mkdir(parents=True,exist_ok=True);binary.mkdir(parents=True,exist_ok=True)
     shutil.copy2(user_zip,resources/'PlotStatLab.zip')
-    info={'CFBundleName':'PlotStatLab','CFBundleDisplayName':'PlotStatLab','CFBundleIdentifier':'org.plotstatlab.desktop','CFBundleExecutable':'PlotStatLab','CFBundlePackageType':'APPL','CFBundleShortVersionString':version,'CFBundleVersion':version,'LSMinimumSystemVersion':'11.0','NSHighResolutionCapable':True}
+    info={'CFBundleName':'PlotStatLab','CFBundleDisplayName':'PlotStatLab','CFBundleIdentifier':'org.plotstatlab.desktop','CFBundleExecutable':'PlotStatLab','CFBundlePackageType':'APPL','CFBundleShortVersionString':version,'CFBundleVersion':version,'LSMinimumSystemVersion':'14.0','NSHighResolutionCapable':True}
     (app/'Contents'/'Info.plist').write_bytes(plistlib.dumps(info))
     launcher=binary/'PlotStatLab'
     launcher.write_text('''#!/bin/sh

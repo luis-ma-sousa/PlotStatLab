@@ -6,7 +6,7 @@ The browser talks to a Python service at `127.0.0.1:8765`, which is your own mac
 
 ## Complete offline download
 
-For a first launch without Internet access, download the **offline** ZIP for your operating system and architecture. It includes a managed Python runtime, local installer and exact binary scientific wheels. Extract it completely, then open the normal launcher. A fresh environment is created at the final folder path using the bundled wheels, without an existing cache or downloaded dependencies. The offline package is larger than the small universal ZIP. Do not substitute a package for another operating system/CPU.
+For a first launch without Internet access, download the **offline** ZIP for your operating system and architecture (Windows x64, macOS 14+ arm64/x64 or Linux x64). It includes a managed Python runtime, local installer and exact binary scientific wheels. Extract it completely, then open the normal launcher. A fresh environment is created at the final folder path using the bundled wheels, without an existing cache or downloaded dependencies. The offline package is larger than the small universal ZIP. Do not substitute a package for another operating system/CPU.
 
 ## Connections that PSL uses
 

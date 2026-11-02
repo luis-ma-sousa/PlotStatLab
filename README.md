@@ -9,7 +9,7 @@ Download **PlotStatLab-0.3.0.zip** from [Releases](https://github.com/luis-ma-so
 | System | Launcher |
 |---|---|
 | Windows 10/11, 64-bit | `Start PlotStatLab.bat` |
-| macOS | `Start PlotStatLab.command` |
+| macOS 14+ (Apple Silicon or Intel) | `Start PlotStatLab.command` |
 | Linux | `sh start-plotstatlab.sh` |
 
 **For first launch without Internet, choose the complete offline ZIP for your system/CPU.** It includes Python and pinned scientific wheels. The small universal ZIP instead needs Internet access on first launch to download a local Python runtime and pinned packages. You do not need to install Node.js, Python or a compiler yourself. Later launches verify the existing dependencies and start the app. Keep the terminal window open; Ctrl+C stops the local server. If your system asks for permission to execute a downloaded file, inspect the package and use the normal system approval flow.
