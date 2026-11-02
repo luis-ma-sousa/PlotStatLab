@@ -60,7 +60,7 @@ export default function AnalysisPanel({project,dataset,chart,onConfigChange,onRe
   const version=++requestVersion.current,requestDatasetId=dataset.id,requestConfig=structuredClone(config),fingerprint=dataFingerprint(dataset.groups,requestConfig);
   setBusy(true);setError('');setMessage('');
   try{
-   const response=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({groups:dataset.groups,config:requestConfig,fingerprint})});
+   const response=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({groups:dataset.groups.filter(g=>!requestConfig.groupIds||requestConfig.groupIds.includes(g.id)),config:requestConfig,fingerprint})});
    const body=await response.json();if(!response.ok)throw new Error(typeof body.detail==='string'?body.detail:'Check the selected groups and experimental design.');
    if(latest.current.dataset.id!==requestDatasetId||dataFingerprint(latest.current.dataset.groups,requestConfig)!==fingerprint)throw new Error('The dataset changed during calculation. Please run the analysis again.');
    latest.current.onResult(body as AnalysisResult);setMessage('New result saved in this workspace. Earlier results are kept.');
@@ -72,8 +72,8 @@ export default function AnalysisPanel({project,dataset,chart,onConfigChange,onRe
   {dataset.advancedRows?.some(row=>row.factorB)&&<p className="analysis-warning">This panel compares factor A / group only. Use the advanced workbench to model both factors.</p>}
   <div className="analysis-grid">
    <section className="analysis-card"><h3>1. Choose columns and design</h3>
-    <div className="analysis-group-choices">{dataset.groups.map(group=><label key={group.id}><input type="checkbox" checked={selectedIds.includes(group.id)} onChange={()=>toggleGroup(group.id)}/><span>{group.name}</span><small>n = {group.observations.filter(o=>!o.excluded).length}</small></label>)}</div>
-    <p className="muted-note">Select two columns for a t-test, or several for a multiple-group test. Excluded values are omitted.</p>
+    <div className="inline-actions"><button className="button compact" onClick={()=>change({groupIds:undefined,control:dataset.groups[0]?.id??config.control,test:config.design==='paired'?(dataset.groups.length===2?'paired-t':'friedman'):(dataset.groups.length===2?'welch':'welch-anova')})}>Select all columns</button><button className="button compact" onClick={()=>change({groupIds:[]})}>Clear column selection</button></div><div className="analysis-group-choices">{dataset.groups.map(group=><label key={group.id}><input type="checkbox" checked={selectedIds.includes(group.id)} onChange={()=>toggleGroup(group.id)}/><span>{group.name}</span><small>n = {group.observations.filter(o=>!o.excluded).length}</small></label>)}</div>
+    <p className="muted-note">Select two columns for a t-test, or up to 30 for a multiple-group test. Excluded values are omitted.</p>
     <label className="field"><span>Experimental design</span><select aria-label="Experimental design" value={config.design} onChange={e=>{const design=e.target.value as AnalysisConfig['design'];change({design,test:design==='paired'?(selectedGroups.length===2?'paired-t':'friedman'):(selectedGroups.length===2?'welch':'welch-anova')})}}><option value="independent">Independent groups</option><option value="paired">Paired / matched by subject ID</option></select></label>
     <p className="muted-note">The same subject IDs must be present in every selected paired column. Design depends on your experiment.</p>
     <h3>2. Choose a test</h3>
