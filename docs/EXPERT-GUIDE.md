@@ -169,7 +169,7 @@ An outlier procedure identifies observations that deserve review under a specifi
 
 Do not infer exclusion from opacity, symbol color or whether a point is easy to see. Review exclusions explicitly and report the rule, method, threshold, affected observations and results with/without exclusions when appropriate.
 
-Named outlier methods are not interchangeable. Grubbs tests and ROUT use different assumptions and procedures. A result should identify the method actually implemented and its parameters; do not assume equivalence to GraphPad's implementation from a similar name or interface. The outlier implementations are experimental until their method-specific validation is recorded; consult the current method documentation and validation notes before using a detection result in a final analysis. Never delete original measurements automatically as part of review.
+Named outlier methods are not interchangeable. Grubbs tests and ROUT use different assumptions and procedures. A result should identify the method actually implemented and its parameters; do not assume equivalence to GraphPad's implementation from a similar name or interface. Published-method references, numerical cases and current implementation limits are recorded in the outlier-method and validation guides; consult those records before choosing a detection method. Never delete original measurements automatically as part of review.
 
 ## 6. Significance annotations
 

@@ -41,7 +41,11 @@ def create_offline_package(seed:Path,runtime:Path,output:Path,version:str,label:
     output.mkdir(parents=True,exist_ok=True);target=output/f'PlotStatLab-{version}-offline-{label or platform_label()}.zip'
     manifest={}
     with zipfile.ZipFile(seed) as source,zipfile.ZipFile(target,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
-        for item in source.infolist():archive.writestr(item,source.read(item))
+        for item in source.infolist():
+            data=source.read(item)
+            if item.filename=='PlotStatLab/Read me.txt':
+                data=data.replace(b'The first launch installs local dependencies and needs Internet access.',b'This complete offline package prepares its bundled local dependencies without Internet access.')
+            archive.writestr(item,data)
         for path,name in files:
             data=path.read_bytes();destination='PlotStatLab/.psl/.runtime/'+name
             info=zipfile.ZipInfo(destination);info.create_system=3;info.compress_type=zipfile.ZIP_DEFLATED;info.external_attr=(stat.S_IFREG|stat.S_IMODE(path.stat().st_mode))<<16

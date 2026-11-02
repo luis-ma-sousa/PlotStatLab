@@ -6,7 +6,7 @@ This guide uses fictional data so you can learn the workflow before entering you
 
 ## 1. Download and open
 
-1. Download the complete package from the [PlotStatLab GitHub repository](https://github.com/luis-ma-sousa/PlotStatLab). Use the intended release package when one is available, or **Code → Download ZIP** for the repository contents.
+1. Download a package from [PlotStatLab Releases](https://github.com/luis-ma-sousa/PlotStatLab/releases/latest). Choose the **complete offline ZIP** matching your system and CPU for first launch without Internet. The smaller universal ZIP downloads dependencies during initial setup. Windows Setup and macOS DMG are also available; see the [installation guide](INSTALLATION.md).
 2. **Extract the ZIP** into a folder where you can save files. Do not run the launcher from inside the ZIP.
 3. Open the launcher for your operating system:
 
@@ -16,12 +16,12 @@ This guide uses fictional data so you can learn the workflow before entering you
 | macOS | `Start PlotStatLab.command` |
 | Linux | `start-plotstatlab.sh` |
 
-4. On the first run, stay connected to the Internet and let setup finish. The package includes the compiled interface; using it does not require a separate Node.js installation.
+4. On the first run, let local setup finish. The complete offline package needs no Internet; the small universal ZIP needs Internet for that first setup. The package includes the compiled interface; using it does not require a separate Node.js installation.
 5. The app opens in your browser at `http://127.0.0.1:8765`.
 
 Later launches reuse compatible installed dependencies. After initial setup, the installed version can run offline. Online launches check GitHub for available updates; a change in dependencies may require another setup step. If a session is already running, updates are deferred until a later full start to protect unfinished work.
 
-Keep the terminal window open while using the app. `Ctrl+C` in that window stops the local server. You do not need a PlotStatLab account. The source is licensed under [MIT](../LICENSE); while the GitHub repository is private, downloading and checking private updates still requires authorized GitHub access.
+Keep the terminal window open while using the app. `Ctrl+C` in that window stops the local server. You do not need a PlotStatLab account. The source is licensed under [MIT](../LICENSE); no paid account or subscription is required.
 
 ## 2. Find your way around
 

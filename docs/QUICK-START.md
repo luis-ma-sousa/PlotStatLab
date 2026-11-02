@@ -1,10 +1,10 @@
 # PlotStatLab: super quick guide
 
-**Download → extract the complete folder → open the launcher.** Windows: `Start PlotStatLab.bat`; macOS: `Start PlotStatLab.command`; Linux: `sh start-plotstatlab.sh`. The first launch installs local dependencies and needs Internet. Later work can be offline.
+**Download → extract the complete folder → open the launcher.** Windows: `Start PlotStatLab.bat`; macOS: `Start PlotStatLab.command`; Linux: `sh start-plotstatlab.sh`. Choose the **complete offline ZIP** for a first launch without Internet. The small universal ZIP instead downloads dependencies on first setup. All editing and analyses run locally.
 
 | I want to… | Do this |
 |---|---|
-| Add several datasets | **Overview → Import datasets**, then select multiple CSV/TSV files. Existing work stays intact. |
+| Add several datasets | **Overview → Import datasets**, then select multiple CSV/TSV/XLSX files. Existing work stays intact. |
 | Paste a table | **Data → Add pasted dataset**. First row contains group names; optional `Subject` and `X` columns preserve identities/coordinates. |
 | Switch datasets | Choose the dataset in the left sidebar. Changes affect that dataset only. |
 | Make a chart | Select a dataset, then **New chart → chart type**. Multiple figures can use one dataset. |
