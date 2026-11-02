@@ -4,7 +4,7 @@ Free, local scientific plotting and statistics with a live vector editor and mul
 
 ## Download, extract, open
 
-Download **PlotStatLab-0.3.0.zip** from [Releases](https://github.com/luis-ma-sousa/PlotStatLab/releases), extract the complete folder, then open:
+Download the complete offline package for your system, or the small portable ZIP, from [Releases](https://github.com/luis-ma-sousa/PlotStatLab/releases/latest), extract the complete folder, then open:
 
 | System | Launcher |
 |---|---|

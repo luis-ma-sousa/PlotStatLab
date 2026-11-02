@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — specialized axis defaults
+
+- Newly created specialized figures use the chart family's semantic axis labels, including survival probability and transformed volcano p-values.
+- Switching a default response chart to a specialized type resets the initial placeholder Y label; saved custom workspace formatting is preserved.
+- Added renderer/factory integration checks for survival and volcano labels.
+
 ## 0.3.0 — broader science and publication
 
 - Seven specialized chart families (20 total), explicit long-format scientific tables and native Excel multi-sheet import.

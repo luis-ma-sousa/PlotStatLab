@@ -61,3 +61,11 @@ describe('advanced chart catalog and editable export', () => {
     const {output} = render(type,[]); expect(output).not.toMatch(/NaN|Infinity/); expect(output).toContain('Advanced data');
   });
 });
+
+it.each([
+ {type:'kaplan-meier' as const,x:'Time',y:'Survival probability',data:[{id:'a',y:3,event:true},{id:'b',y:5,event:false}]},
+ {type:'volcano' as const,x:'log₂ fold change',y:'−log₁₀(p)',data:[{id:'a',x:2,y:.001},{id:'b',x:-2,y:.01}]},
+])('new $type figures use semantic axis defaults instead of response-unit placeholders',({type,x,y,data})=>{
+ const chart=createChart(type),markup=renderToStaticMarkup(<AdvancedChartView chart={chart} rows={data} groups={[]} selection={{kind:'chart'}} onSelect={()=>{}}/>);document.body.innerHTML=markup;
+ expect(document.querySelector('[data-edit="xaxis"]')?.textContent).toBe(x);expect(document.querySelector('[data-edit="yaxis"]')?.textContent).toBe(y);expect(markup).not.toContain('Relative expression');
+});

@@ -15,7 +15,7 @@ const id = () => crypto.randomUUID();
 
 export function createChart(type: ChartType = 'bar-swarm'): Chart {
   return { id: id(), name: 'Treatment response', type, title: 'Treatment response',
-    xLabel: '', yLabel: 'Relative expression (a.u.)', style: clone(defaultStyle),
+    xLabel: '', yLabel: ['grouped','regression','dose-response','kaplan-meier','forest','bland-altman','volcano'].includes(type)?'':'Relative expression (a.u.)', style: clone(defaultStyle),
     pointStyles: {}, annotationPositions: {}, showSignificance: true, showNs: false, significanceDisplay: 'stars' };
 }
 
