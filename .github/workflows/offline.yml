@@ -34,7 +34,8 @@ jobs:
           & "offline-seed/PlotStatLab/Start PlotStatLab.bat" --check --no-update
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Download exact binary wheels for this platform
-        run: python -m pip download --only-binary=:all: -r requirements-runtime.txt --dest offline-seed/PlotStatLab/.psl/.runtime/wheels
+        run: |
+          python -m pip download --only-binary=:all: -r requirements-runtime.txt --dest offline-seed/PlotStatLab/.psl/.runtime/wheels
       - name: Package complete relocatable runtime
         shell: bash
         run: |

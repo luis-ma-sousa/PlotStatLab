@@ -23,6 +23,10 @@ test('advanced analyses, individual edits, multipanel vector export and complete
  await expect(page.locator('#chart-svg tspan[baseline-shift="sub"]')).toHaveText('2');
  await page.locator('.dataset-navigation>button').filter({hasText:'Local Survival'}).click();
  await page.locator('.tab-switch').getByRole('button',{name:'Statistics',exact:true}).click();
+ await page.getByRole('button',{name:'Group comparisons & outliers',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'These data contain right-censored outcomes.',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Detect outliers',exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'Open survival methods',exact:true}).click();
  await page.getByLabel('Advanced analysis',{exact:true}).selectOption('survival');await page.getByRole('button',{name:'Run analysis',exact:true}).click();
  await expect(page.getByRole('heading',{name:'Kaplan–Meier + log-rank survival analysis',exact:true})).toBeVisible();
  await page.locator('.tab-switch').getByRole('button',{name:'Overview',exact:true}).click();
@@ -47,4 +51,15 @@ test('modal keyboard focus, escape, gallery catalog and large table paging',asyn
  await page.locator('.sidebar').getByRole('button',{name:'New chart',exact:true}).first().click();await expect(page.locator('.gallery-card')).toHaveCount(20);await page.keyboard.press('Escape');
  const rows=Array.from({length:250},(_,i)=>`S${i},${i},${i+5}`).join('\n');await page.locator('input[type=file][accept*=".csv"]').setInputFiles({name:'Large table.csv',mimeType:'text/csv',buffer:Buffer.from('Subject,Control,Treated\n'+rows)});
  await page.locator('.dataset-navigation>button').filter({hasText:'Large table'}).click();await expect(page.getByLabel('Subject ID 100',{exact:true})).toBeVisible();await expect(page.getByLabel('Subject ID 101',{exact:true})).toHaveCount(0);await page.getByRole('button',{name:'Next rows',exact:true}).click();await expect(page.getByLabel('Subject ID 101',{exact:true})).toBeVisible();
+});
+
+test('native Excel import preserves visible sheets, explicit XY columns and import notes',async({page})=>{
+ await page.goto('/');await page.locator('input[type=file][accept*=".xlsx"]').setInputFiles('tests/fixtures/synthetic-multiple-sheets.xlsx');
+ await expect(page.locator('.dataset-navigation>button')).toHaveCount(3);
+ await expect(page.getByText(/1 hidden worksheet/)).toBeVisible();
+ await page.locator('.dataset-navigation>button').filter({hasText:'· XY'}).click();
+ await expect(page.getByLabel('x, observation 1',{exact:true})).toHaveValue('1');
+ await expect(page.getByLabel('y, observation 1',{exact:true})).toHaveValue('2.2');
+ await page.locator('.tab-switch').getByRole('button',{name:'Editor',exact:true}).click();
+ await expect(page.locator('#chart-svg [data-point-id]')).toHaveCount(5);
 });

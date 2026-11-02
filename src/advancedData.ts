@@ -4,7 +4,7 @@ import type {Dataset,Group} from './types';
 
 export function rowsForDataset(dataset:Dataset):AdvancedRow[]{
  const anchors=new Map(dataset.groups.flatMap(g=>g.observations.map(o=>[o.id,{o,g}] as const)));
- if(dataset.advancedRows)return dataset.advancedRows.flatMap(row=>{const anchor=anchors.get(row.id);return anchor?[{...row,y:anchor.o.value,x:anchor.o.x??row.x,subject:anchor.o.subject??row.subject,excluded:anchor.o.excluded??false,groupId:anchor.g.id}]:[]});
+ if(dataset.advancedRows)return dataset.advancedRows.flatMap(row=>{const anchor=anchors.get(row.id);return anchor?[{...row,y:anchor.o.value,...(row.p!==undefined?{p:anchor.o.value}:{}),x:anchor.o.x??row.x,subject:anchor.o.subject??row.subject,excluded:anchor.o.excluded??false,groupId:anchor.g.id}]:[]});
  return dataset.groups.flatMap(g=>g.observations.map(o=>({id:o.id,groupId:g.id,group:g.name,factorA:g.name,y:o.value,x:o.x,subject:o.subject,excluded:o.excluded})));
 }
 export function advancedFingerprint(rows:AdvancedRow[]):string{
@@ -60,3 +60,5 @@ export function resultForChart(dataset:Dataset,chart:{type:string;advancedResult
  const kinds:Record<string,string[]>={grouped:['two-way-anova','repeated-anova','mixed-model'],regression:['linear-regression'], 'dose-response':['dose-response'],'kaplan-meier':['survival'],'bland-altman':['bland-altman']};
  return [...(dataset.advancedAnalyses??[])].reverse().find(r=>kinds[chart.type]?.includes(r.result.method))?.result;
 }
+/** Standard column tests cannot treat right-censored times as complete outcomes. */
+export function hasCensoredObservations(dataset:Dataset):boolean{return rowsForDataset(dataset).some(row=>!row.excluded&&row.event===false)}

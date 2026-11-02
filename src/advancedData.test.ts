@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {advancedExamples,advancedFingerprint,groupsFromAdvanced,isAdvancedCsv,parseAdvancedCsv,rowsForDataset} from './advancedData';
+import {hasCensoredObservations,advancedExamples,advancedFingerprint,groupsFromAdvanced,isAdvancedCsv,parseAdvancedCsv,rowsForDataset} from './advancedData';
 import {appendDatasets,normalizeWorkspace} from './workspace';
 import {createProject,createChart,parseProject,serializeProject} from './project';
 import {defaultPublication} from './publication';
@@ -21,4 +21,8 @@ it('does not load external paint or background resources from imported projects'
 });
 it('rejects inverted or nonpositive logarithmic X limits in a reopened figure',()=>{
  const p=normalizeWorkspace(createProject());p.charts[0].advancedOptions={xScale:'log',xMin:0,xMax:5};expect(()=>parseProject(JSON.stringify(p))).toThrow(/options/);p.charts[0].advancedOptions={xMin:5,xMax:1};expect(()=>parseProject(JSON.stringify(p))).toThrow(/options/);
+});
+
+it('keeps volcano probabilities synchronized with edits and detects included censoring',()=>{
+ const rows=parseAdvancedCsv('x,p,event\n2,.001,0\n3,.01,1'),groups=groupsFromAdvanced(rows);groups[0].observations[0].value=.2;const d={id:'d',name:'Test',groups,advancedRows:rows,analysisConfig:createProject().analysisConfig};expect(rowsForDataset(d)[0].p).toBe(.2);expect(hasCensoredObservations(d)).toBe(true);groups[0].observations[0].excluded=true;expect(hasCensoredObservations(d)).toBe(false);
 });

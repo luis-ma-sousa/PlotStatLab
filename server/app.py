@@ -10,7 +10,7 @@ from .advanced import analyze_advanced
 
 from .statistics import AnalyzeRequest, SuggestRequest, analyze, suggest
 
-app = FastAPI(title="PlotStatLab Statistics", version=APP_VERSION)
+app = FastAPI(title="PlotStatLab Statistics", version=APP_VERSION, docs_url=None, redoc_url=None)
 @app.middleware("http")
 async def local_resource_policy(request, call_next):
     response = await call_next(request)
