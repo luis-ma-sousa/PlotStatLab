@@ -1,6 +1,6 @@
 # PlotStatLab (PSL)
 
-Free, local scientific plotting and statistics with a live vector editor and multi-dataset workspaces. MIT-licensed. **Development preview**: the repository remains private until the project is finalized.
+Free, local scientific plotting and statistics with a live vector editor and multi-dataset workspaces. MIT-licensed, with 20 chart families, publication layouts and fully local statistical analyses.
 
 ## Download, extract, open
 
@@ -16,7 +16,7 @@ Download **PlotStatLab-0.3.0.zip** from [Releases](https://github.com/luis-ma-so
 
 The user download shows the launchers and a quick guide; application components live in a reserved `.psl` folder. Keep that folder with the launchers. Developer source is distributed separately through the repository. Extract the whole folder; running inside a ZIP or copying only a launcher will not work. Supported platforms must have binary wheels for the pinned scientific runtime. Clean installation and cached offline launch have passed on macOS, Windows and Linux in GitHub Actions, in addition to local Apple Silicon macOS testing. See the validation guide for the recorded run.
 
-Open the app at **http://127.0.0.1:8765**. It works offline after initial installation. No paid service or cloud account is needed to analyze data. While this repository is private, authorized GitHub access is needed to download private releases; public anonymous distribution is prepared but has not been enabled.
+Open the app at **http://127.0.0.1:8765**. It works offline after initial installation. No paid service or cloud account is needed to analyze data. Complete offline packages include the runtime and scientific wheels, so a fresh installation can also start without Internet access.
 
 ## What you can do
 

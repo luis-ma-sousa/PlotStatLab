@@ -58,6 +58,7 @@ jobs:
           & "First offline launch with spaces/PlotStatLab/Start PlotStatLab.bat" --check --offline --no-update
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
+        if: github.event_name == 'workflow_dispatch'
         with:
           name: PlotStatLab-offline-${{ matrix.os }}
           path: offline-release/*

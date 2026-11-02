@@ -49,3 +49,21 @@ Windows/macOS/Linux CI jobs and Playwright browser workflows are configured. Pla
 ### Recorded cross-platform result
 
 [GitHub Actions run41440037235](https://github.com/luis-ma-sousa/PlotStatLab/actions/runs/41440037235) passed frontend tests/build, all three Playwright browser scenarios, and the scientific/bootstrap/updater suite plus clean and cached-offline installation on Windows, macOS and Ubuntu. The packaging was subsequently simplified to place runtime components in the reserved `.psl` folder; its dedicated follow-up CI run checks the actual Windows BAT and macOS command launchers.
+
+## 0.3 public-release acceptance
+
+The scientific/publication release is validated by these recorded runs:
+
+- [Scientific/unit/browser and portable macOS, Intel macOS, Windows and Linux validation](https://github.com/luis-ma-sousa/PlotStatLab/actions/runs/41454380704).
+- [Actual Windows installer and macOS application/DMG builds, install/start checks and second offline launch](https://github.com/luis-ma-sousa/PlotStatLab/actions/runs/41454380611).
+- [Complete offline packages: first launch after relocation, without an existing environment/cache, on all four platform/CPU targets](https://github.com/luis-ma-sousa/PlotStatLab/actions/runs/41454380664).
+
+The acceptance suite contains 98 frontend/math/project/publication cases, 164 Python/science/import/install/update cases and six browser workflows (268 distinct cases). The Unix symlink-creation packaging test is skipped on Windows because it requires special host privileges; actual Windows offline packaging and relocated first launch are tested directly. Repeated executions across operating systems are not counted as new test cases.
+
+New references include an unbalanced sum-contrast Type III ANOVA and missing-observation random-intercept REML comparison with statsmodels 0.15.0; repeated ANOVA against AnovaRM plus the Greenhouse–Geisser covariance equation; closed-form regression; exact small Spearman permutations; increasing/decreasing 4PL parameter recovery; Kaplan–Meier ties/censoring and SciPy log-rank agreement; Bland–Altman sample-SD limits; tied pooled-rank Dunn and SciPy's published Dunnett example. `scripts/validate_advanced_references.py` regenerates the independent synthetic reference fixture without calling PSL analysis code.
+
+Publication checks include live editable text/scripts, independently styled observations, stale fitted-series suppression, multipanel clipping-ID isolation, physical units, PNG pHYs metadata and batch ZIP CRCs. The browser suite imports and preserves native Excel sheets, shows import notes, blocks standard column inference for right-censored outcomes, and completes the calculation/save/reopen/vector-export workflow while rejecting all external HTTP requests. Performance tests preserve all 10,000 swarm observation identities and test exact collision clearance for heterogeneous marker sizes. Tables render at most 100 observation rows per page.
+
+Complete offline archives include CPython, uv and exact wheels, omit absolute launch pointers and virtual environments, and recreate the environment at its final path using `--no-index --find-links`. Managed-Python minor-version aliases are recreated rather than flattened into conflicting directories. A fresh local Apple Silicon extraction was also verified using `UV_OFFLINE=1 --offline --no-update`.
+
+The owner excluded trusted publisher certificates/notarization from initial delivery and deferred direct Illustrator testing. These are not represented as completed certifications. SVG structural/editability checks and all local analysis/editor features remain independently tested. Scientific model scope is documented in ADVANCED-METHODS.md.
