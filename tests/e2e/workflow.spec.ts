@@ -64,10 +64,10 @@ test('label columns, selected-pair tests, saved results, stars, point context ed
  const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'Save workspace',exact:true}).click();const text=await downloadText(await downloaded);
  await page.locator('input[type=file]').first().setInputFiles({name:'workflow.psl',mimeType:'application/json',buffer:Buffer.from(text)});
  await page.locator('.figure-item').filter({hasText:'Labels'}).click();
- await expect(page.locator(`#chart-svg [data-point-id="${pointId}"] circle`).first()).toHaveAttribute('fill','#dd1177');
+ await expect(page.locator(`#chart-svg [data-point-id="${pointId}"]`)).toHaveAttribute('data-excluded','true');await expect(page.locator(`#chart-svg [data-point-id="${pointId}"] circle`).first()).toHaveAttribute('stroke','#dd1177');
  expect((await saved(page)).analysisRuns).toHaveLength(3);
  await data(page).click();await page.getByLabel('Control, row 1',{exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'Restore value to analysis',exact:true}).click();await expect(page.locator('.data-grid-cell-excluded')).toHaveCount(0);
- expect(errors).toEqual([]);expect(external).toEqual([]);
+ await page.locator('.tab-switch').getByRole('button',{name:'Editor',exact:true}).click();await expect(page.locator(`#chart-svg [data-point-id="${pointId}"] circle`).first()).toHaveAttribute('fill','#dd1177');expect(errors).toEqual([]);expect(external).toEqual([]);
 });
 
 test('workspace switcher keeps distinct workspaces and opens them again',async({page})=>{
