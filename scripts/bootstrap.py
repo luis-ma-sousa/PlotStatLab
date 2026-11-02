@@ -198,6 +198,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         python = ensure_runtime(ROOT, args.uv, args.offline)
         if args.check:
+            if (ROOT / 'server' / 'app.py').is_file():
+                subprocess.run([str(python), str(ROOT / 'scripts/launch.py'), '--check'], cwd=ROOT, check=True, timeout=30)
             print('PlotStatLab: installation is ready and verified.', flush=True)
             if args.runtime_path:
                 print('PSL_RUNTIME_PYTHON=' + str(python), flush=True)

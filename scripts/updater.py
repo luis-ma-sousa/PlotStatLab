@@ -400,12 +400,15 @@ def check_and_update(root: Path) -> bool:
         if version_tuple(version) <= version_tuple(current_version):
             print('PlotStatLab: the installed version is up to date.', flush=True)
             return False
+        if (root / '.git').exists() or (root / 'src' / 'App.tsx').exists():
+            print('PlotStatLab: a newer release is available. This developer checkout was preserved; use the ready-to-use release for automatic updates.', flush=True)
+            return False
         if existing_server():
             print('PlotStatLab: an update is available. Close the running PSL server; the next launch will install it.', flush=True)
             return False
         installed_manifest(root)  # Require a known managed-file list before downloading a candidate.
-        filename = f'PlotStatLab-{version}.zip'
         assets = {asset.get('name'): asset for asset in release.get('assets', [])}
+        filename = f'PlotStatLab-update-{version}.zip' if f'PlotStatLab-update-{version}.zip' in assets else f'PlotStatLab-{version}.zip'
         if filename not in assets or filename + '.sha256' not in assets:
             raise UpdateError('The latest release does not include a ready-to-use package and checksum.')
         def download(name, limit):

@@ -119,7 +119,7 @@ def test_no_update_environment_skips_updater_import(app_root, monkeypatch):
 
 def complete_release_root(root):
     (root / 'scripts').mkdir()
-    for name in ['bootstrap.py', 'launch.py']:
+    for name in ['bootstrap.py', 'launch.py', 'updater.py', 'bootstrap.sh', 'bootstrap.ps1']:
         (root / 'scripts' / name).write_text('# source\n')
     for name in ['LICENSE', 'Start PlotStatLab.bat', 'Start PlotStatLab.command']:
         (root / name).write_text('PSL\n')
@@ -142,6 +142,7 @@ def test_package_is_deterministic_manifested_and_excludes_local_data(app_root, t
     with zipfile.ZipFile(archive) as z:
         names = z.namelist()
         assert 'PlotStatLab/manuals/index.html' in names
+        assert all('/src/' not in name and '/tests/' not in name for name in names)
         assert all('secret' not in n and '.env' not in n for n in names)
         manifest = json.loads(z.read('PlotStatLab/release-manifest.json'))
         assert manifest['application'] == 'PlotStatLab'
@@ -149,13 +150,13 @@ def test_package_is_deterministic_manifested_and_excludes_local_data(app_root, t
         assert len(manifest['files']) == len(names) - 1
         for path, digest in manifest['files'].items():
             assert hashlib.sha256(z.read('PlotStatLab/' + path)).hexdigest() == digest
-        executable = z.getinfo('PlotStatLab/Start PlotStatLab.command').external_attr >> 16
+        executable = z.getinfo('PlotStatLab/scripts/bootstrap.sh').external_attr >> 16
         assert executable & 0o111
 
 
 def test_package_refuses_included_symlinks(app_root, tmp_path):
     complete_release_root(app_root)
-    link = app_root / 'src'
+    link = app_root / 'server'
     link.mkdir()
     try:
         (link / 'external.ts').symlink_to(tmp_path / 'elsewhere')
@@ -190,3 +191,21 @@ def test_staging_does_not_change_the_active_runtime_hint(app_root, monkeypatch):
     monkeypatch.setattr(bootstrap, 'cached_runtime_valid', lambda *_: True)
     assert bootstrap.ensure_runtime(app_root) == python
     assert not (app_root / '.runtime/active-python.txt').exists()
+
+
+def test_user_package_shows_launchers_and_hides_developer_material(app_root,tmp_path):
+    complete_release_root(app_root)
+    (app_root/'src').mkdir();(app_root/'src'/'App.tsx').write_text('developer source')
+    (app_root/'tests').mkdir();(app_root/'tests'/'private.py').write_text('developer test')
+    core,_=package.create_package(app_root,tmp_path/'out')
+    user,_=package.create_user_package(app_root,tmp_path/'out',core)
+    with zipfile.ZipFile(user) as archive:
+        names=archive.namelist()
+        assert 'PlotStatLab/Start PlotStatLab.bat' in names
+        assert 'PlotStatLab/Start PlotStatLab.command' in names
+        assert 'PlotStatLab/LICENSE' in names
+        assert 'PlotStatLab/.psl/dist/index.html' in names
+        assert 'PlotStatLab/.psl/manuals/index.html' in names
+        assert all('/src/' not in name and '/tests/' not in name and '/.git/' not in name for name in names)
+        assert archive.getinfo('PlotStatLab/.psl/').external_attr & 2
+        assert all(name.startswith('PlotStatLab/.psl/') or name.split('/')[-1] in {'Start PlotStatLab.bat','Start PlotStatLab.command','start-plotstatlab.sh','LICENSE','Quick start.html','Read me.txt'} for name in names)

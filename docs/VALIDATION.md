@@ -44,3 +44,8 @@ Interactive verification in the local browser imported two CSV files together wh
 Direct verification inside Illustrator is deferred at the user's request. Structural compatibility tests do not claim certification for every Illustrator version. Numerical identity between PSL's ROUT optimizer and a proprietary Prism version remains unverified; see the outlier methods guide.
 
 Windows/macOS/Linux CI jobs and Playwright browser workflows are configured. Platform or workflow results must be read from the actual GitHub run; configuration alone is not a pass. Local Chromium CLI automation was blocked by the macOS sandbox in the original setup; browser verification used the integrated browser.
+
+
+### Recorded cross-platform result
+
+[GitHub Actions run41440037235](https://github.com/luis-ma-sousa/PlotStatLab/actions/runs/41440037235) passed frontend tests/build, all three Playwright browser scenarios, and the scientific/bootstrap/updater suite plus clean and cached-offline installation on Windows, macOS and Ubuntu. The packaging was subsequently simplified to place runtime components in the reserved `.psl` folder; its dedicated follow-up CI run checks the actual Windows BAT and macOS command launchers.

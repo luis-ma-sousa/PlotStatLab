@@ -2,7 +2,7 @@
 
 ## Normal launches
 
-The platform launcher first verifies that the compiled editor is present. It uses an existing local runtime when healthy; otherwise it installs the official pinned uv tooling, managed CPython3.12 and pinned binary scientific packages under `.runtime/`. No administrator privileges, system PATH changes or global Python installation are required.
+The platform launcher first verifies that the compiled editor is present. It uses an existing local runtime when healthy; otherwise it installs the official pinned uv tooling, managed CPython3.12 and pinned binary scientific packages under the reserved application folder's `.runtime/`. No administrator privileges, system PATH changes or global Python installation are required.
 
 Every normal launch then checks the official GitHub release channel. A network failure, no newer stable release or lack of private-repository authorization retains the installed version. Private updates can use `PSL_GITHUB_TOKEN`, `GH_TOKEN`, or an existing authenticated GitHub CLI. Tokens are not written into release packages or workspaces. Do not put tokens in a downloaded source file.
 
@@ -12,7 +12,7 @@ Once dependencies are installed, all data editing, statistics, plotting, saving,
 
 A candidate release must be newer and support project schema1. The updater verifies the ZIP SHA256, validates the internal manifest and every managed file, rejects unsafe archive paths/symlinks, installs any new dependencies into a separate hash-keyed environment, and starts a temporary local health check. Only then does it replace program files.
 
-The replacement has a recovery journal and a program-file backup in `.updates/backup-*`. The promoted application is checked again. Failure restores the previous managed files; the previous dependency environment remains available. An interrupted transaction is recovered at the next launch before a new update is attempted.
+The replacement has a recovery journal and a program-file backup in the reserved application folder's `.updates/backup-*`. The promoted application is checked again. Failure restores the previous managed files; the previous dependency environment remains available. An interrupted transaction is recovered at the next launch before a new update is attempted.
 
 If an editor is already running at port8765, the updater defers replacement until that session has been closed. Launching again may reopen that existing session. This prevents an update from replacing resources while unsaved work is being edited.
 
@@ -33,3 +33,10 @@ Keep the terminal error text and the `.updates` folder if an update cannot recov
 The launchers accept `--offline` to use installed/cached resources and skip the release check, `--no-update` to skip the check once, `--check` to verify installation without opening the editor, and `--no-browser` to run the local server without opening a browser. These options are useful for troubleshooting and automated validation; ordinary users can double-click the launcher.
 
 Checksums verify integrity relative to the published release; they are not an independent cryptographic signature. Numerical equivalence to a proprietary application and universal OS compatibility are not implied by a successful update.
+
+
+## Distribution layout
+
+The normal user ZIP contains launchers, a quick guide, the license and a reserved `.psl` application folder. It omits developer source trees, tests, build configuration and repository metadata. The interface is compiled and minified without source maps. macOS hides the reserved dot folder by default; the Windows launcher also marks it hidden. This is packaging for a clean user experience, not an access-control mechanism. The MIT license and source repository remain available.
+
+The updater downloads the separate `PlotStatLab-update-VERSION.zip` runtime asset into that reserved folder. Existing development checkouts are preserved instead of being overwritten automatically; use Git to maintain source or install the normal user package for automatic runtime updates.

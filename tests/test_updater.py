@@ -17,7 +17,7 @@ def release_tree(root: Path, version='0.2.0', requirements='numpy==2.5.4\n'):
     contents = {'package.json': json.dumps({'version': version}), 'requirements-runtime.txt': requirements,
                 'LICENSE': 'MIT\n', 'dist/index.html': f'<h1>PSL {version}</h1>',
                 'scripts/bootstrap.py': '# bootstrap', 'scripts/launch.py': '# launch',
-                'scripts/updater.py': '# updater', 'src/App.tsx': f'// {version}'}
+                'scripts/updater.py': '# updater', 'server/logic.py': f'# {version}'}
     for name, value in contents.items():
         target = root / name
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -37,9 +37,10 @@ def zip_tree(root):
     return stream.getvalue()
 
 
-def remote_release(monkeypatch, payload, version='0.3.0'):
+def remote_release(monkeypatch, payload, version='0.3.0', core=False):
+    prefix='PlotStatLab-update' if core else 'PlotStatLab'
     release = {'tag_name': 'v' + version, 'draft': False, 'prerelease': False, 'assets': [
-        {'name': f'PlotStatLab-{version}.zip', 'id': 1}, {'name': f'PlotStatLab-{version}.zip.sha256', 'id': 2}]}
+        {'name': f'{prefix}-{version}.zip', 'id': 1}, {'name': f'{prefix}-{version}.zip.sha256', 'id': 2}]}
     def github_get(path, **kwargs):
         if path.endswith('/latest'):
             return json.dumps(release).encode()
@@ -72,7 +73,7 @@ def test_manifest_version_and_project_format_must_match(tmp_path):
 def test_extraction_checks_every_file_hash(tmp_path):
     source = tmp_path / 'source'
     release_tree(source, '0.3.0')
-    (source / 'src/App.tsx').write_text('modified after manifest')
+    (source / 'server/logic.py').write_text('modified after manifest')
     archive = tmp_path / 'bad.zip'
     archive.write_bytes(zip_tree(source))
     with pytest.raises(updater.UpdateError, match='checksum'):
@@ -113,16 +114,17 @@ def test_interrupted_transaction_recovers_on_next_launch(tmp_path):
     backup.mkdir(parents=True)
     (backup / 'package.json').write_bytes((root / 'package.json').read_bytes())
     (root / 'package.json').write_text('{"version":"0.3.0"}')
-    (root / 'src/new.ts').write_text('new file from interrupted update')
+    (root / 'server/new.py').write_text('new file from interrupted update')
     updater.write_json_atomic(updater.journal_file(root), {'schemaVersion': 1, 'state': 'applying', 'backup': backup.name,
-        'paths': [{'path': 'package.json', 'existed': True}, {'path': 'src/new.ts', 'existed': False}]})
+        'paths': [{'path': 'package.json', 'existed': True}, {'path': 'server/new.py', 'existed': False}]})
     updater.recover_interrupted_update(root)
     assert json.loads((root / 'package.json').read_text())['version'] == '0.2.0'
-    assert not (root / 'src/new.ts').exists()
+    assert not (root / 'server/new.py').exists()
     assert not updater.journal_file(root).exists()
 
 
-def test_automatic_dependency_update_keeps_old_runtime_and_all_work(tmp_path, monkeypatch):
+@pytest.mark.parametrize('core',[False,True])
+def test_automatic_dependency_update_keeps_old_runtime_and_all_work(tmp_path, monkeypatch,core):
     root, remote = tmp_path / 'installed', tmp_path / 'remote'
     release_tree(root)
     release_tree(remote, '0.3.0', requirements='numpy==2.5.5\n')
@@ -131,7 +133,7 @@ def test_automatic_dependency_update_keeps_old_runtime_and_all_work(tmp_path, mo
     old_runtime.write_text('old runtime remains available')
     work = root / 'experiment.labplot'
     work.write_text('do not touch')
-    remote_release(monkeypatch, zip_tree(remote))
+    remote_release(monkeypatch, zip_tree(remote),core=core)
     new_runtime = root / '.runtime/venvs/new-environment/python'
     def staged_validation(installed, stage, version):
         assert (stage / 'requirements-runtime.txt').read_text() == 'numpy==2.5.5\n'
@@ -221,7 +223,9 @@ def test_real_packager_produces_an_archive_the_updater_accepts(tmp_path):
     (root/'Start PlotStatLab.command').write_text('launcher')
     (root/'examples').mkdir();(root/'examples'/'raw.csv').write_text('never manage scientific files')
     (root/'examples'/'fixture.json').write_text('{}')
+    for name in ['bootstrap.sh','bootstrap.ps1']:(root/'scripts'/name).write_text('launcher')
     archive,_=package.create_package(root,tmp_path/'output')
     manifest=updater.extract_verified(archive,tmp_path/'stage','0.3.0')
     assert 'examples/raw.csv' not in manifest['files']
-    assert 'examples/fixture.json' in manifest['files']
+    assert 'examples/fixture.json' not in manifest['files']
+    assert 'src/App.tsx' not in manifest['files']

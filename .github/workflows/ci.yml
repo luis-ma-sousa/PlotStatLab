@@ -38,6 +38,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -51,16 +52,16 @@ jobs:
         shell: bash
         run: |
           python scripts/package_release.py --output "$RUNNER_TEMP/PSL release artifacts"
-          python -c "from pathlib import Path; import os,zipfile; output=Path(os.environ['RUNNER_TEMP'])/'PSL release artifacts'; z=next(output.glob('*.zip')); zipfile.ZipFile(z).extractall(Path(os.environ['RUNNER_TEMP'])/'PSL clean install')"
+          python -c "from pathlib import Path; import os,zipfile,json; output=Path(os.environ['RUNNER_TEMP'])/'PSL release artifacts'; version=json.load(open('package.json'))['version']; z=output/('PlotStatLab-'+version+'.zip'); zipfile.ZipFile(z).extractall(Path(os.environ['RUNNER_TEMP'])/'PSL clean install')"
       - name: First clean installation (macOS/Linux)
         if: runner.os != 'Windows'
         shell: bash
-        run: sh "$RUNNER_TEMP/PSL clean install/PlotStatLab/scripts/bootstrap.sh" --check --no-update
+        run: sh "$RUNNER_TEMP/PSL clean install/PlotStatLab/Start PlotStatLab.command" --check --no-update
       - name: First clean installation (Windows)
         if: runner.os == 'Windows'
         shell: powershell
         run: |
-          & "$env:RUNNER_TEMP\PSL clean install\PlotStatLab\scripts\bootstrap.ps1" --check --no-update
+          & "$env:RUNNER_TEMP\PSL clean install\PlotStatLab\Start PlotStatLab.bat" --check --no-update
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Second cached installation without network (macOS/Linux)
         if: runner.os != 'Windows'
@@ -68,7 +69,7 @@ jobs:
         env:
           UV_OFFLINE: '1'
           PSL_NO_UPDATE: '1'
-        run: sh "$RUNNER_TEMP/PSL clean install/PlotStatLab/scripts/bootstrap.sh" --check --offline --no-update
+        run: sh "$RUNNER_TEMP/PSL clean install/PlotStatLab/Start PlotStatLab.command" --check --offline --no-update
       - name: Second cached installation without network (Windows)
         if: runner.os == 'Windows'
         shell: powershell
@@ -76,5 +77,5 @@ jobs:
           UV_OFFLINE: '1'
           PSL_NO_UPDATE: '1'
         run: |
-          & "$env:RUNNER_TEMP\PSL clean install\PlotStatLab\scripts\bootstrap.ps1" --check --offline --no-update
+          & "$env:RUNNER_TEMP\PSL clean install\PlotStatLab\Start PlotStatLab.bat" --check --offline --no-update
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
