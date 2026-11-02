@@ -11,18 +11,18 @@ beforeEach(()=>{localStorage.clear();vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT',tr
 afterEach(async()=>{await act(async()=>root.unmount());host.remove();vi.restoreAllMocks();vi.unstubAllGlobals()});
 async function click(selector:string){const element=host.querySelector<HTMLElement>(selector);expect(element).not.toBeNull();await act(async()=>element!.click())}
 it('autosave OFF preserves the last saved project; ON checkpoints edits; manual saving works while OFF',async()=>{
- await act(async()=>root.render(<App/>));
+ await act(async()=>root.render(<App/>));const open=[...host.querySelectorAll('button')].find(b=>b.textContent?.includes('Treatment response')&&b.className.includes('figure-item'))!;await act(async()=>open.click());
  const key='plotstatlab.project.v1',original=localStorage.getItem(key);
  await click('input[role=switch]');expect(localStorage.getItem('plotstatlab.settings.autosave')).toBe('false');
  await click('button[aria-label="Palette 1"]');expect(localStorage.getItem(key)).toBe(original);expect(host.textContent).toContain('Unsaved changes');
  const leave=new Event('beforeunload',{cancelable:true});window.dispatchEvent(leave);expect(leave.defaultPrevented).toBe(true);
  await click('input[role=switch]');expect(localStorage.getItem(key)).not.toBe(original);
  await click('input[role=switch]');await click('button[aria-label="Palette 2"]');const beforeManual=localStorage.getItem(key);
- const save=[...host.querySelectorAll('button')].find(b=>b.textContent==='Save project')!;await act(async()=>save.click());
+ const save=[...host.querySelectorAll('button')].find(b=>b.textContent==='Save workspace')!;await act(async()=>save.click());
  expect(localStorage.getItem(key)).not.toBe(beforeManual);expect(host.textContent).not.toContain('Unsaved changes');
 });
 it('data input accepts negative decimals without replacing intermediate typing with numbers',async()=>{
- await act(async()=>root.render(<App/>));const dataButton=[...host.querySelectorAll('button')].find(b=>b.textContent==='Data')!;await act(async()=>dataButton.click());
+ await act(async()=>root.render(<App/>));const open=[...host.querySelectorAll('button')].find(b=>b.textContent?.includes('Treatment response')&&b.className.includes('figure-item'))!;await act(async()=>open.click());const dataButton=[...host.querySelectorAll('button')].find(b=>b.textContent==='Data')!;await act(async()=>dataButton.click());
  const cell=host.querySelector<HTMLInputElement>('input[aria-label="Control, row 1"]')!;expect(cell).not.toBeNull();
  await act(async()=>{cell.value='-28.5';cell.dispatchEvent(new FocusEvent('focusout',{bubbles:true}))});
  const saved=JSON.parse(localStorage.getItem('plotstatlab.project.v1')!);expect(saved.groups[0].observations[0].value).toBe(-28.5);

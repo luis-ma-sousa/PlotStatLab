@@ -1,74 +1,66 @@
-# Prismatica
+# PlotStatLab (PSL)
 
-Aplicação local de gráficos científicos com edição SVG, análise estatística e projetos reeditáveis. Primeira versão funcional, com dados sintéticos de demonstração.
+Free, local scientific plotting and statistics with a live vector editor and multi-dataset workspaces. MIT-licensed. **Development preview**: the repository remains private until the project is finalized.
 
-## Abrir no Mac atual
+## Download, extract, open
 
-Na pasta `Desktop/Prismatica`, abre **Abrir Prismatica.command** com duplo clique. A aplicação abre em **http://127.0.0.1:8765**. Mantém a janela do terminal aberta enquanto trabalhas; Ctrl+C termina o servidor. Se a aplicação já estiver em execução, o atalho abre a instância existente.
+Download **PlotStatLab-0.2.0.zip** from [Releases](https://github.com/luis-ma-sousa/PlotStatLab/releases), extract the complete folder, then open:
 
-Os dados e a gravação automática ficam no navegador deste computador. Usa **Guardar projeto** para obter um ficheiro `.labplot` portátil e **Abrir** para recuperar todas as opções de edição. Abrir a aplicação noutro navegador/origem usa armazenamento separado; o ficheiro do projeto transfere o trabalho.
+| System | Launcher |
+|---|---|
+| Windows 10/11, 64-bit | `Start PlotStatLab.bat` |
+| macOS | `Start PlotStatLab.command` |
+| Linux | `sh start-plotstatlab.sh` |
 
-## O que já funciona
+The first launch needs Internet access and downloads a local Python runtime and pinned packages. You do not need to install Node.js, Python or a compiler yourself. Later launches verify the existing dependencies and start the app. Keep the terminal window open; Ctrl+C stops the local server. If your system asks for permission to execute a downloaded file, inspect the package and use the normal system approval flow.
 
-- 13 tipos: barras com swarm, barras, swarm, box, violino, raincloud, emparelhado, dispersão XY, linhas XY, histograma, densidade, ECDF e heatmap.
-- Clica num ponto para editar apenas essa observação: cor, tamanho, forma, opacidade e contorno. Identificadores estáveis preservam estas exceções.
-- Copia formatação de outro gráfico por inteiro ou só cores, tipografia, eixos ou símbolos. Guarda estilos reutilizáveis no projeto.
-- Tabela editável; CSV/TSV e colagem do Excel, incluindo ponto ou vírgula decimal. CSV com colunas opcionais `Subject` e `X`; as restantes colunas são grupos. Dados XY sem X explícito usam o índice da observação, identificado no editor.
-- Assistente com testes compatíveis e razões para a sugestão; o utilizador define independência ou emparelhamento.
-- Welch, Student, t emparelhado, Mann–Whitney, Wilcoxon, ANOVA, ANOVA de Welch, ANOVA/Tukey HSD, Kruskal–Wallis e Friedman. Correções Holm, Bonferroni e Benjamini–Hochberg.
-- Asteriscos calculados a partir de p ajustado; posição automática, arrastamento, ajuste por coordenadas/setas e reposição automática. Brackets aparecem em gráficos categóricos. Gráficos de distribuição, XY e heatmaps não representam comparações de colunas como se fossem coordenadas XY.
-- Gravação automática, undo/redo e projetos `.labplot` com dados, resultados e estilos. Alterar dados ou opções estatísticas invalida as anotações até ao recálculo.
-- SVG vetorial e PNG de 1× a 4×, sem controlos do editor. O PNG usa dimensões explícitas em pixels; metadados DPI e presets de revistas são trabalho posterior.
+The source download also includes the compiled editor and offline manuals. Extract the whole folder; running inside a ZIP or copying only a launcher will not work. Supported platforms must have binary wheels for the pinned scientific runtime. This release has been clean-install tested on Apple Silicon macOS; Windows/macOS/Linux checks are configured in GitHub Actions and their current results should be checked before treating those systems as verified.
 
-## Exemplo de utilização
+Open the app at **http://127.0.0.1:8765**. It works offline after initial installation. No paid service or cloud account is needed to analyze data. While this repository is private, authorized GitHub access is needed to download private releases; public anonymous distribution is prepared but has not been enabled.
 
-1. Explora os dados sintéticos ou importa um CSV em **Dados**.
-2. Abre **Estatística**, define o desenho, seleciona teste/comparações/correção e calcula.
-3. Em **Editor**, clica em pontos, séries, títulos, eixos ou comparações para os selecionar e usa **Formatar figura**.
-4. Arrasta uma comparação ou usa os ajustes X/Y. **Repor posição automática** remove a exceção manual.
-5. Cria outra figura em **Novo gráfico**, ou usa o seletor no fim da galeria para alterar o tipo atual.
-6. **Aplicar estilo** transfere a aparência entre figuras preservando as exceções individuais. Os dados são partilhados entre as figuras deste projeto.
-7. Guarda o projeto e exporta as figuras.
+## What you can do
 
-As estrelas usam os limiares convencionais p < 0,05 / 0,01 / 0,001 / 0,0001. O alfa selecionado controla quais comparações são consideradas significativas; a legenda estatística do trabalho deve indicar o teste e a correção. Os intervalos das diferenças seguem 1−alfa e, exceto Tukey, são individuais; as barras de IC da média usam 95% e Student-t.
+- Import several CSV/TSV datasets at once. Import adds datasets and preserves existing work.
+- Keep multiple figures per dataset, retain several statistical test results, and compare them side by side in **Overview**.
+- Choose which figures and analyses appear in the overview. Save the entire workspace as `.psl`, including datasets, results, formatting, individual point overrides and panel selections. Legacy `.labplot` projects open as one-dataset workspaces.
+- Use 13 plot families: bar+swarm, bar, swarm, box, violin, raincloud, paired, XY scatter, XY line, histogram, density, ECDF and heatmap.
+- Click an observation to edit only that point. Enter HEX colors for every color control; copy complete or selective styles between figures.
+- Run design-aware statistical comparisons, adjusted p-values and automatic draggable significance brackets.
+- Identify outliers with Grubbs or the published constant-model ROUT method. Review flags before explicitly excluding anything; original values remain saved. Numerical identity to proprietary GraphPad versions has not been certified.
+- Export PNG at exact pixel dimensions or standalone SVG1.1 with editable text and separate vector objects for Illustrator.
+- Toggle autosave. **Save workspace** also creates a portable backup independently of the toggle.
 
-## Desenvolvimento / instalar noutro computador
+## Manuals, included offline
 
-Requer Node.js compatível com Vite 7 (20.19+ ou 22.12+), pnpm e Python 3.12.
+Open **Help** in the app, or read:
+
+- [Super quick guide](docs/QUICK-START.md)
+- [Beginner guide](docs/BEGINNER-GUIDE.md)
+- [Expert guide](docs/EXPERT-GUIDE.md)
+- [SVG and Illustrator](docs/SVG-ILLUSTRATOR.md)
+- [Outlier methods and validation](docs/OUTLIER-METHODS.md)
+- [Updates and recovery](docs/UPDATES.md)
+
+The complete interface and documentation are in English. User-supplied dataset names and imported historical notes retain their original text.
+
+## Updates and previous work
+
+Every normal launch checks the official GitHub releases when online. If a newer supported release is available, PSL verifies its ZIP and file hashes, prepares an isolated dependency environment, checks the staged app, and updates managed program files before opening the editor. Failed checks retain or restore the previous version. Previous dependency environments and program backups are retained.
+
+A running editing session defers replacement until a full restart. Offline or unauthorized checks use the installed version. No scientific dataset, workspace file or browser autosave is uploaded or replaced by the updater. Save portable `.psl` backups; autosave is tied to the browser profile and local URL. Update compatibility is tested with a saved v0.1 project and multi-dataset roundtrips.
+
+## Development and validation
+
+For contributors only: Node24, pnpm11.25 and Python3.12.
 
 ```sh
-pnpm install
+pnpm install --frozen-lockfile
+pnpm test
+pnpm build
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-lock.txt
-pnpm build
-.venv/bin/python scripts/launch.py
+.venv/bin/python -m pytest tests/ -q --ignore=tests/e2e
+.venv/bin/python scripts/package_release.py
 ```
 
-Para desenvolvimento, executar em dois terminais:
-
-```sh
-.venv/bin/python -m uvicorn server.app:app --host 127.0.0.1 --port 8765
-pnpm dev
-```
-
-O editor de desenvolvimento usa `http://127.0.0.1:5173`; a API é encaminhada para a porta 8765.
-
-## Validação
-
-```sh
-pnpm build
-pnpm test
-.venv/bin/python -m pytest tests/test_statistics.py -q
-pnpm exec playwright install chromium
-pnpm test:e2e
-```
-
-Os testes Playwright requerem o servidor de produção na porta 8765. Neste Mac, o sandbox do agente impediu iniciar o Chromium a partir do terminal; a verificação interativa foi realizada no navegador integrado. Não se apresentam esses testes bloqueados como aprovados. Ver `docs/VALIDACAO.md`.
-
-## Próximos marcos
-
-Ver `docs/PLANO.md`: gráficos agrupados de dois fatores, correlação/regressão, dose–resposta, Kaplan–Meier, forest/Bland–Altman/volcano, modelos mistos, composição multipainel, Excel nativo, tipografia científica avançada e instalador desktop. Estes itens ainda não estão implementados. Ficheiros Prism nativos não são importados.
-
-## Arquitetura
-
-React/TypeScript, SVG com funções D3, motor Python/SciPy/FastAPI. O servidor escuta apenas em 127.0.0.1. O ficheiro de projeto JSON é versionado. O repositório contém apenas código e dados sintéticos de exemplo.
+Development uses `pnpm dev` on port5173 and `.venv/bin/python -m uvicorn server.app:app --host 127.0.0.1 --port 8765` for the API. Browser storage is separate for different ports; use a `.psl` file to transfer work. See [Contributing](CONTRIBUTING.md), [validation](docs/VALIDATION.md), [roadmap](docs/ROADMAP.md), [MIT license](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.md).

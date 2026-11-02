@@ -56,7 +56,7 @@ If the environment prevents the browser from starting, record the blocker; do no
 - Style transfer preserves destination point overrides.
 - Stale results do not generate significance annotations.
 - SVG preserves editable text/vector objects without external CSS or editor controls.
-- Saving and reopening a `.labplot` preserves supported properties.
+- Saving and reopening a `.psl` or legacy `.labplot` preserves supported properties.
 
 ### Statistical review criteria
 

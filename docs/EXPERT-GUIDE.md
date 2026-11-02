@@ -6,16 +6,16 @@ This guide describes the current workflow and its limits. The [roadmap](ROADMAP.
 
 ## 1. Project model
 
-A project contains one table of groups, multiple figures, statistical settings/results and reusable styles. All figures share the table. Each figure retains its own chart type, titles, visual settings, per-observation overrides, attached analysis and manual comparison positions.
+A workspace contains multiple datasets, each with its own groups and analysis settings, plus figures, saved analysis runs and reusable styles. Figures linked to the same dataset share that table; different datasets remain independent. Each figure retains its own chart type, titles, visual settings, per-observation overrides, attached analysis and manual comparison positions.
 
 | Artifact | What it preserves |
 |---|---|
-| `.labplot` | The versioned, editable PSL project: data, results, settings and figures |
+| `.psl` | The versioned, editable PSL project: data, results, settings and figures |
 | Browser autosave | A local browser copy, not cloud synchronization or a shared file |
 | SVG | Editable text and vector objects for external graphic editing |
 | PNG | A raster image at explicit pixel dimensions |
 
-Opening a `.labplot` restores a project. Importing CSV replaces the table and removes results/customizations tied to the previous observations. Exporting a figure does not back up the statistical project.
+Opening `.psl` restores a complete workspace. Legacy `.psl` files become single-dataset workspaces. Importing one or several CSV files adds datasets and figures without replacing existing work. Exporting a figure does not back up the statistical project.
 
 ## 2. Data layout and identity
 
@@ -195,7 +195,7 @@ Select a comparison to drag it, edit X/Y offsets or use arrow keys; `Shift` uses
 
 PSL compares current data/options with the fingerprint stored in the analysis. Changes to values, IDs, X coordinates, observations or statistical configuration can make results stale. Stale annotations are hidden, including during export. Appearance-only edits do not recalculate statistics.
 
-Recalculating replaces that figure's results and resets its manual comparison positions. Analyses belong to individual figures; other figures retain their own results, subject to the same freshness check.
+Recalculating updates that figure's attached results and resets its manual comparison positions; the previous run remains in the overview history. Each run is retained in the workspace analysis history, linked to its dataset and recorded configuration. The current figure attaches the latest run made for that figure. Other figures and earlier runs retain their results; data/exclusion changes mark only the affected dataset results stale.
 
 ## 7. Visual overrides and reusable styles
 
@@ -213,7 +213,7 @@ HEX fields accept three or six digits, with or without `#`. Opacity has its own 
 | Axes | Limits, scale, grid and line width |
 | Points | General point size, shape and opacity |
 
-Copying a style preserves data, titles, results and individual overrides. Saved presets belong to the project and travel in `.labplot`.
+Copying a style preserves data, titles, results and individual overrides. Saved presets belong to the project and travel in `.psl`.
 
 ## 8. Editable SVG in Illustrator
 
@@ -222,7 +222,7 @@ SVG export favors a simple, self-contained vector structure: separate primitives
 Recommended workflow:
 
 1. Set dimensions and appearance in PSL.
-2. Save the scientific source as `.labplot`.
+2. Save the scientific source as `.psl`.
 3. Export **SVG**.
 4. In Illustrator, use **File → Open**, rather than treating the figure only as a placed image.
 5. Inspect text, symbols, comparisons and clipping. Use Layers and **Ungroup** when necessary to reach individual objects.
@@ -233,7 +233,7 @@ Editable text depends on available fonts. Converting text to outlines in a later
 
 Clipping groups constrain data to the plotting region. Releasing a clipping mask can reveal objects outside axis limits, so inspect the result before removing one. The contained objects remain vector objects.
 
-Illustrator edits do not modify the `.labplot` data/results, and there is no synchronization back to PSL.
+Illustrator edits do not modify the `.psl` data/results, and there is no synchronization back to PSL.
 
 ## 9. PNG and physical size
 
@@ -243,13 +243,13 @@ Do not assume an editorial DPI preset is embedded. Required pixels = intended wi
 
 ## 10. Persistence and recovery
 
-The `.labplot` format uses `schemaVersion: 1`. Loading validates structure, enums, finite numbers, IDs and formatting. Unsupported schema versions are rejected. Initial-version projects remain on this schema.
+The `.psl` format uses `schemaVersion: 1`. Loading validates structure, enums, finite numbers, IDs and formatting. Unsupported schema versions are rejected. Initial-version projects remain on this schema.
 
-Autosave is scoped to a browser profile and local origin. Disabling it stops subsequent automatic project writes; it does not erase an older stored copy. The toggle preference persists. **Save project** creates a portable file independently of that preference.
+Autosave is scoped to a browser profile and local origin. Disabling it stops subsequent automatic project writes; it does not erase an older stored copy. The toggle preference persists. **Save workspace** creates a portable file independently of that preference.
 
 If a stored browser project is corrupt, recovery attempts to preserve its raw content before starting a demonstration project and reports the issue. If preserving the original fails, automatic saving is suspended rather than silently overwriting it.
 
-Keep explicit versions such as `study-01-data.labplot`, `study-02-analysis.labplot` and `study-03-final-figure.labplot`. PSL is not an immutable audit trail of every scientific decision.
+Keep explicit versions such as `study-01-data.psl`, `study-02-analysis.psl` and `study-03-final-figure.psl`. PSL is not an immutable audit trail of every scientific decision.
 
 ## 11. Offline operation and updates
 
@@ -257,14 +257,23 @@ The distribution includes the compiled interface. Launchers prepare local Python
 
 Online launches check for available GitHub releases. An update is prepared before opening the editor, with package verification and a recovery copy of the previous installation. An interrupted or invalid update should preserve the previously usable version. Updates are deferred when a session is already active to protect unsaved work.
 
-Updates must not replace user `.labplot` files or browser storage. Save your project before closing or changing computers. While the repository is private, authorized GitHub access is required for private release downloads and updates.
+Updates must not replace user `.psl` files or browser storage. Save your project before closing or changing computers. While the repository is private, authorized GitHub access is required for private release downloads and updates.
 
 The server listens on `127.0.0.1`, port 8765. It is not configured as a public network service. Statistical computation is local; chart data do not need to be sent to an external analysis service.
 
 ## 12. Reproducibility and limits
 
-Retain the original measurements and experimental unit; the `.labplot`; the full design, test, comparison family, correction, α and error-bar definition; PSL/engine versions; and data-preparation or external graphic-editing decisions.
+Retain the original measurements and experimental unit; the `.psl`; the full design, test, comparison family, correction, α and error-bar definition; PSL/engine versions; and data-preparation or external graphic-editing decisions.
 
 PSL includes numerical and project tests but does not claim complete GraphPad Prism equivalence or validate a scientific design automatically. Mixed models, two-factor/repeated-measures parametric ANOVA, regression, dose–response, survival and additional specialized charts are future work. See the [roadmap](ROADMAP.md).
 
 Technical references: [SciPy statistical functions](https://docs.scipy.org/doc/scipy/reference/stats.html), [Welch/Student t-tests](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html), [Tukey HSD](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.tukey_hsd.html).
+
+
+## Multiple datasets and side-by-side review
+
+Use **Overview → Import datasets** to select several CSV/TSV files in one operation. Each becomes a named dataset with its own table and initial figure. Imports are validated before they are added; the existing workspace is preserved if a file is invalid. Use the sidebar to select a dataset. Figures retain an explicit dataset link, so applying a style from another dataset transfers the appearance without replacing measurements.
+
+Every successful statistical run is kept in the analysis history, including its dataset, test, correction, alpha, results and timestamp. Run different tests or analyze different datasets, then use **Overview → Choose analyses** to display selected results side by side. Each historical result is checked against its own recorded configuration and current dataset measurements. Changing the assistant's next-test controls does not rewrite previous tests.
+
+Use **Choose figures** to select several figures from the same or different datasets. Preview cards show the dataset name and provide **Edit figure**. The complete selection is saved in **Save workspace → .psl**, along with every dataset, test and figure. Legacy `.labplot` files remain supported and convert to a one-dataset workspace. CSV export contains raw measurements; use `.psl` to preserve exclusions and the complete analysis state.

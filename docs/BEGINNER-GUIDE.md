@@ -32,19 +32,19 @@ Keep the terminal window open while using the app. `Ctrl+C` in that window stops
 | **Editor** | View and format the figure |
 | **Figures**, on the left | Switch between figures in this project |
 | **Format figure** | Edit the selection and general appearance |
-| **Save project / Open** | Save and reopen the complete editable project |
+| **Save workspace / Open** | Save and reopen the complete editable project |
 | **Export** | Create the final SVG or PNG figure |
 
 In a narrow window, use **Format** to open the formatting drawer. Clicking an editable element can also open it.
 
-**All figures in a project share the same data table.** Changing a measurement updates every figure that uses that project table.
+**Each dataset has its own data table.** Figures linked to that dataset share its measurements. Editing one dataset leaves the others unchanged. The workspace stores all datasets, figures, analysis history and selected overview panels.
 
 ## 3. Make your first figure
 
 We will compare three fictional independent groups. This is a software exercise, not a recommended analysis for every experiment.
 
 1. Open **Data**.
-2. Choose **Paste data**.
+2. Choose **Add pasted dataset**.
 3. Paste the complete table, including its first line:
 
 ```csv
@@ -57,13 +57,13 @@ Control,Low dose,High dose
 24,34,46
 ```
 
-4. Choose **Import table**. Importing replaces the project's current table. Save a `.labplot` first if you need to keep the previous work.
+4. Choose **Import table**. Pasting adds a new dataset and preserves previous datasets and figures. Select the new dataset in the sidebar to edit it.
 5. Check that there are three groups, with six observations per group.
 6. Open **Editor**. The bar + swarm figure shows a summary and every observation.
 
 Each column is a group. Each numeric cell is an observation. An empty cell is missing data; **zero is a real value**, not a missing-value marker.
 
-You can also use **Import CSV** for an Excel export. Commas, semicolons and tabs are supported as column separators. For decimal commas, use a separator that keeps columns unambiguous, such as a semicolon:
+You can also use **Import datasets** for an Excel export. Commas, semicolons and tabs are supported as column separators. For decimal commas, use a separator that keeps columns unambiguous, such as a semicolon:
 
 ```csv
 Control;Treatment
@@ -178,11 +178,11 @@ The **Autosave** toggle controls automatic writes to this browser's local storag
 - **On:** changes are saved automatically in this browser and local origin.
 - **Off:** you can try changes without automatically saving the project state. The preference persists between launches.
 
-Switching autosave off does not delete an older saved copy. **Save project** downloads a portable `.labplot` containing data, analyses, figures and customizations. Use it for a backup, a previous version or another computer; autosave is not a replacement for that file.
+Switching autosave off does not delete an older saved copy. **Save workspace** downloads a portable `.psl` containing data, analyses, figures and customizations. Use it for a backup, a previous version or another computer; autosave is not a replacement for that file.
 
-To continue older work, choose **Open** and select its `.labplot`. Individual point styles and manual comparison positions are restored.
+To continue older work, choose **Open** and select its `.psl`. Individual point styles and manual comparison positions are restored.
 
-Clearing browser data can remove autosave. Another browser or local origin uses separate storage. Save a `.labplot` before changing environments.
+Clearing browser data can remove autosave. Another browser or local origin uses separate storage. Save a `.psl` before changing environments.
 
 ## 8. Export PNG or an editable SVG
 
@@ -203,7 +203,7 @@ For PNG, choose 1× to 4×. A figure sized 800 × 560 px exported at 3× becomes
 4. Use the text tool to edit words. Install the original font on that computer; otherwise Illustrator may substitute another font.
 5. Save an `.ai` working copy if you want to continue in Illustrator's native format.
 
-The SVG preserves editable text and vector objects. It is a figure, not a PSL statistical project. Reopen the `.labplot` in PSL to change chart types or recalculate analyses. PNG cannot recover a figure's data or editable objects.
+The SVG preserves editable text and vector objects. It is a figure, not a PSL statistical project. Reopen the `.psl` in PSL to change chart types or recalculate analyses. PNG cannot recover a figure's data or editable objects.
 
 ## 9. Common problems
 
@@ -223,3 +223,12 @@ The SVG preserves editable text and vector objects. It is a figure, not a PSL st
 | A private GitHub update cannot be downloaded | Confirm that you have authorized access; the existing installed version should remain usable |
 
 For a bug report, include OS, PSL version, steps and error text. Prefer a small fictional example over personal or confidential data.
+
+
+## Multiple datasets and side-by-side review
+
+Use **Overview → Import datasets** to select several CSV/TSV files in one operation. Each becomes a named dataset with its own table and initial figure. Imports are validated before they are added; the existing workspace is preserved if a file is invalid. Use the sidebar to select a dataset. Figures retain an explicit dataset link, so applying a style from another dataset transfers the appearance without replacing measurements.
+
+Every successful statistical run is kept in the analysis history, including its dataset, test, correction, alpha, results and timestamp. Run different tests or analyze different datasets, then use **Overview → Choose analyses** to display selected results side by side. Each historical result is checked against its own recorded configuration and current dataset measurements. Changing the assistant's next-test controls does not rewrite previous tests.
+
+Use **Choose figures** to select several figures from the same or different datasets. Preview cards show the dataset name and provide **Edit figure**. The complete selection is saved in **Save workspace → .psl**, along with every dataset, test and figure. Legacy `.labplot` files remain supported and convert to a one-dataset workspace. CSV export contains raw measurements; use `.psl` to preserve exclusions and the complete analysis state.

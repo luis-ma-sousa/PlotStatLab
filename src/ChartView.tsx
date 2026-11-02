@@ -6,7 +6,7 @@ import { area, curveBasis, line } from 'd3-shape';
 import type { AnnotationPosition, Chart, Group, Observation, Selection, Shape } from './types';
 import { annotationMetrics, bracketLevels, densityEstimate, errorSize, expandUpperDomain, heatmapRows, mean, placeBrackets, positiveLogDomain, quantile, significanceLabel, swarmLayout } from './chartMath';
 
-interface Props { chart: Chart; groups: Group[]; selection: Selection; onSelect: (selection: Selection) => void; onAnnotationMove: (id: string, position: AnnotationPosition) => void; analysisStale?: boolean; flaggedIds?: string[] }
+interface Props { svgId?:string; chart: Chart; groups: Group[]; selection: Selection; onSelect: (selection: Selection) => void; onAnnotationMove: (id: string, position: AnnotationPosition) => void; analysisStale?: boolean; flaggedIds?: string[] }
 const categoryTypes = new Set(['bar-swarm', 'bar', 'swarm', 'box', 'violin', 'raincloud', 'paired']);
 const fmt = (v: number) => Math.abs(v) >= 10000 || (Math.abs(v) > 0 && Math.abs(v) < .001) ? v.toExponential(1) : Number(v.toPrecision(4)).toLocaleString('en-US', {maximumFractionDigits: 4});
 function marker(shape: Shape, x: number, y: number, radius: number, props: React.SVGProps<SVGElement>): ReactNode {
@@ -16,7 +16,7 @@ function marker(shape: Shape, x: number, y: number, radius: number, props: React
   return <circle {...props as React.SVGProps<SVGCircleElement>} cx={x} cy={y} r={radius} />;
 }
 
-export default function ChartView({chart, groups, selection, onSelect, onAnnotationMove, analysisStale = false, flaggedIds = []}: Props) {
+export default function ChartView({svgId="chart-svg",chart, groups, selection, onSelect, onAnnotationMove, analysisStale = false, flaggedIds = []}: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const suppressRootClick = useRef(false);
   const drag = useRef<{id: string; startX: number; startY: number; position: AnnotationPosition} | null>(null);
@@ -162,7 +162,7 @@ export default function ChartView({chart, groups, selection, onSelect, onAnnotat
   if (useLog && allValues.some(v => v <= 0)) warnings.push('Values ≤ 0 are not shown on a logarithmic scale.');
   if (chart.type === 'paired' && groups.some(g => g.observations.some(o => !o.subject))) warnings.push('Lines connect only observations with matching subject IDs.');
   if (bracketCount > 5) warnings.push('Many comparisons: increase the height or select fewer pairs.');
-  return <svg ref={svgRef} id="chart-svg" xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={chart.title || 'Scientific chart'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background, touchAction: 'none'}} onClick={() => {if (suppressRootClick.current) {suppressRootClick.current = false; return;} onSelect({kind: 'chart'});}} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={() => {drag.current = null; suppressRootClick.current = false; setPreview(null);}}>
+  return <svg ref={svgRef} id={svgId} xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={chart.title || 'Scientific chart'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background, touchAction: 'none'}} onClick={() => {if (suppressRootClick.current) {suppressRootClick.current = false; return;} onSelect({kind: 'chart'});}} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={() => {drag.current = null; suppressRootClick.current = false; setPreview(null);}}>
     <rect width={width} height={height} fill={style.background} />
     <defs><clipPath id={`plot-clip-${chart.id}`}><rect x={plotLeft - 1} y={plotTop - 1} width={plotWidth + 2} height={plotHeight + 2} /></clipPath></defs>
     <text data-edit="title" x={width / 2} y={39} textAnchor="middle" fill={style.axisColor} fontSize={style.titleSize} fontWeight={600} style={{cursor: 'pointer'}} onClick={e => {e.stopPropagation(); onSelect({kind: 'title'});}}>{chart.title}</text>

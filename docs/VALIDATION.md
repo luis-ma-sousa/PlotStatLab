@@ -30,3 +30,17 @@ This record covers the original functional workbench, now named PlotStatLab (PSL
 The included Playwright end-to-end suite did not pass its startup stage in that environment: the macOS agent sandbox prevented Chromium's MachPort service from starting from the terminal. Those tests were not counted as passing. The interactive checks above used the integrated browser.
 
 Specialized publication cases, large datasets and planned analyses still require additional validation. This record does not establish complete GraphPad Prism equivalence or claim that Illustrator interoperability was tested in the initial version.
+
+## PlotStatLab 0.2.0 workspace and distribution validation
+
+The current revision adds multi-dataset workspaces, analysis history, selected overview panels, outlier detection, an English interface, editable SVG1.1, local installers and transactional updates.
+
+Automated coverage includes legacy project opening with unchanged measurement/analysis fingerprints, independent editing of several datasets, globally unique imported observation IDs, multiple tests/figure styles/layout roundtrips, Grubbs/NIST references, the published constant-model ROUT equations and masking cases, per-point formatting, automatic/manual comparison geometry, autosave OFF/ON/manual saving, negative decimal input, SVG XML/fonts/objects/paint/clipping, bootstrap dependency probes, isolated runtime changes, checksum/path protection, update rollback, interrupted recovery and concurrent launch protection.
+
+A ready-to-use ZIP was extracted into a fresh directory containing spaces on Apple Silicon macOS. The launcher downloaded pinned uv and managed Python, installed all runtime dependencies, and passed its import/version probe. A second launch with `UV_OFFLINE=1`, `--offline --check --no-update` passed using the cached installation.
+
+Interactive verification in the local browser imported two CSV files together while preserving the original dataset, ran Welch on one imported dataset and Mann–Whitney on the other, identified the known ROUT example outlier, selected two figures and two analyses, saved the complete workspace, and reopened three datasets/four figures/three historical analyses with the selected2×2 panels restored. A short unprefixed HEX value `0a7` became `#00aa77` on only the selected point. The exported SVG contained editable text,12 independent point objects, no raster images or external resources, and the HEX override.
+
+Direct verification inside Illustrator is deferred at the user's request. Structural compatibility tests do not claim certification for every Illustrator version. Numerical identity between PSL's ROUT optimizer and a proprietary Prism version remains unverified; see the outlier methods guide.
+
+Windows/macOS/Linux CI jobs and Playwright browser workflows are configured. Platform or workflow results must be read from the actual GitHub run; configuration alone is not a pass. Local Chromium CLI automation was blocked by the macOS sandbox in the original setup; browser verification used the integrated browser.

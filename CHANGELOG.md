@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0
+## 0.2.0 — development preview
 
 - Renamed the application **PlotStatLab (PSL)**.
 - Added MIT licensing and user/contributor documentation.
@@ -22,3 +22,9 @@ This is a development release. Publication, supported-platform claims and new st
 - Result-linked significance marks, automatic layout and persistent manual positioning.
 - CSV/TSV import, editable data, `.labplot` projects, autosave and undo/redo.
 - SVG and PNG export.
+
+- Multi-dataset workspaces, multi-file import, independent data editing and dataset-linked figures.
+- Persistent analysis history and selectable side-by-side figure/result panels.
+- Portable `.psl` workspace files with legacy `.labplot` compatibility.
+- Local cross-platform bootstrap, dependency-keyed runtime caches and transactional GitHub updates with rollback.
+- Offline English HTML manuals, dependency notices and CI/release workflows.

@@ -1,29 +1,29 @@
-# SVG editável no Adobe Illustrator
+# Editable SVG in Adobe Illustrator
 
-O PlotStatLab exporta SVG 1.1 autónomo. Os pontos, barras, linhas, eixos, legendas e comparações mantêm objetos vetoriais separados. Os rótulos continuam a ser texto editável; a aplicação não os transforma em curvas nem coloca uma fotografia do gráfico dentro do SVG.
+PlotStatLab exports self-contained SVG1.1. Points, bars, paths, axes, legends and comparisons remain separate vector objects. Labels remain editable text: PSL does not outline the text or embed a photograph of the chart.
 
-## Abrir e editar
+## Open and edit
 
-1. No PSL, finaliza a figura e escolhe **Exportar → SVG → Exportar SVG**.
-2. No Illustrator, usa **File → Open / Ficheiro → Abrir** e seleciona o SVG. Abrir o ficheiro permite aceder diretamente aos objetos; se o colocares como ficheiro ligado noutro documento, terás de o incorporar antes de editar o conteúdo.
-3. Abre **Window → Layers / Janela → Camadas**. Os grupos têm nomes como `PSL-data`, `PSL-point-…`, `PSL-statistics` e `PSL-axis-labels`. Podem aparecer como grupos dentro de uma camada, conforme a versão do Illustrator.
-4. Usa **Direct Selection / Seleção direta** para selecionar uma forma ou ponto. Usa a ferramenta de texto para alterar os rótulos.
-5. Para preservar a edição do Illustrator, guarda também uma cópia `.ai`.
+1. In PSL, finish a figure and choose **Export → SVG → Export SVG**.
+2. In Illustrator, choose **File → Open** and select the SVG. Opening provides direct access to objects. A file placed as a linked image in another document must be embedded before its contents can be edited.
+3. Open **Window → Layers**. Groups have names such as `PSL-data`, `PSL-point-…`, `PSL-statistics` and `PSL-axis-labels`. Depending on Illustrator, they may appear as groups within a layer.
+4. Use **Direct Selection** to select a shape or observation, or the text tool to edit a label. Expand the group hierarchy as needed. A plot clipping group is intentional; release it only if you want to change the clipping behavior.
+5. Save a separate `.ai` copy to preserve subsequent Illustrator editing.
 
-## O que a exportação preserva
+## What survives export
 
-- Texto Unicode, fonte, tamanho, peso, alinhamento e rotação.
-- Preenchimentos e contornos como atributos SVG explícitos, incluindo ausência de preenchimento nas linhas abertas.
-- Cores hex, opacidade, dimensões, posições e exceções de pontos individuais.
-- Grupos, caminhos e recortes geométricos necessários para manter o gráfico dentro dos eixos.
-- As posições automáticas ou manuais das comparações que estão válidas no momento da exportação.
+- Unicode text, font family, size, weight, alignment and rotation.
+- Explicit SVG fill and stroke attributes, including `fill="none"` on open lines.
+- HEX colors, opacity, dimensions, positions and observation-specific overrides.
+- Groups, paths and geometric clipping needed to keep data within the axes.
+- Automatic or manually positioned statistical comparisons that are current at export time.
 
-O ficheiro não depende de folhas CSS, scripts, recursos externos, símbolos de uma biblioteca, `foreignObject` ou imagens rasterizadas. Os contornos de seleção, áreas invisíveis de clique e outros controlos do editor são removidos.
+The file has no CSS dependency, external resources, scripts, raster images, `foreignObject` or library marker symbols. Invisible hit targets and selection outlines are removed. Each observation has its own editable object ID. Objects are grouped without changing paint order or transforms.
 
-## Limites práticos
+## Practical limits
 
-A fonte utilizada precisa de existir na máquina onde abres o Illustrator; caso contrário, este pode substituí-la. O PSL mantém texto editável de propósito. Converter texto em contornos no Illustrator pode ser útil no último ficheiro a enviar para impressão, mas perde a edição como texto.
+The chosen font must be installed where Illustrator opens the file; otherwise it may be substituted. PSL deliberately keeps text editable. Converting text to outlines in Illustrator may be useful for a final print-delivery file but removes text editing.
 
-As edições feitas no Illustrator não atualizam os dados nem os testes do PSL. Guarda o `.labplot` como projeto científico editável e o SVG/AI como figura para apresentação. Um SVG não substitui o projeto.
+Illustrator edits do not update PSL data or statistics. Keep the `.psl` scientific workspace and the SVG/AI presentation files. SVG is not a substitute for the workspace, nor does it contain a native `.ai` editing session. A raw SVG group is not guaranteed to become a separate native Illustrator layer.
 
-A estrutura SVG é validada automaticamente, mas o comportamento de importação pode variar entre versões do Illustrator. A compatibilidade não significa que cada grupo SVG seja convertido numa camada nativa do Illustrator ou que o ficheiro contenha uma sessão de edição `.ai`.
+Structural tests validate XML, objects, text, fonts, strokes, transforms and clipping. Import behavior can still vary between Illustrator versions. See [Adobe's SVG presentation-attribute guidance](https://helpx.adobe.com/illustrator/using/saving-artwork.html).
