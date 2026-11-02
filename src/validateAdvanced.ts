@@ -3,7 +3,7 @@ const object=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&
 const finite=(v:unknown)=>typeof v==='number'&&Number.isFinite(v);
 export function validAdvancedRows(value:unknown,pointIds:Set<string>):value is AdvancedRow[]{
  if(!Array.isArray(value)||value.length>100000)return false;const ids=new Set<string>();
- return value.every(row=>{if(!object(row)||typeof row.id!=='string'||ids.has(row.id)||!pointIds.has(row.id)||!finite(row.y))return false;ids.add(row.id);return ['x','lower','upper','p'].every(k=>row[k]===undefined||finite(row[k]))&&['groupId','group','factorA','factorB','subject','label'].every(k=>row[k]===undefined||typeof row[k]==='string'&&(row[k] as string).length<=100000)&&['event','excluded'].every(k=>row[k]===undefined||typeof row[k]==='boolean')&&!(finite(row.lower)&&finite(row.upper)&&(row.lower as number)>(row.upper as number));});
+ return value.every(row=>{if(!object(row)||typeof row.id!=='string'||ids.has(row.id)||!pointIds.has(row.id)||!finite(row.y))return false;ids.add(row.id);return ['x','lower','upper','p'].every(k=>row[k]===undefined||finite(row[k]))&&['groupId','group','factorA','factorB','subject','label'].every(k=>row[k]===undefined||typeof row[k]==='string'&&(row[k] as string).length<=100000)&&(row.labels===undefined||object(row.labels)&&Object.entries(row.labels).every(([key,value])=>key.length>0&&key.length<=100000&&typeof value==='string'&&value.length<=100000))&&['event','excluded'].every(k=>row[k]===undefined||typeof row[k]==='boolean')&&!(finite(row.lower)&&finite(row.upper)&&(row.lower as number)>(row.upper as number));});
 }
 export function validAdvancedResult(value:unknown):value is AdvancedResult{
  if(!object(value))return false;

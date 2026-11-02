@@ -40,6 +40,7 @@ class AnalysisConfig(BaseModel):
     correction: Literal["holm", "bonferroni", "bh", "none"] = "holm"
     control: str
     alpha: float = Field(default=0.05, gt=0, lt=1, allow_inf_nan=False)
+    groupIds: list[str] | None = Field(default=None, min_length=1, max_length=30)
 
 
 class SuggestRequest(BaseModel):
@@ -215,6 +216,14 @@ def _pair_result(a: np.ndarray, b: np.ndarray, test: str):
 
 
 def analyze(request: AnalyzeRequest) -> dict:
+    selected_ids = request.config.groupIds
+    if selected_ids is not None:
+        if len(set(selected_ids)) != len(selected_ids):
+            raise ValueError("Selected group identifiers must be unique.")
+        available_ids = {g.id for g in request.groups}
+        if not set(selected_ids).issubset(available_ids):
+            raise ValueError("A selected group no longer exists. Select the columns again.")
+        request = request.model_copy(update={"groups": [g for g in request.groups if g.id in selected_ids]})
     excluded_count = sum(p.excluded for g in request.groups for p in g.observations)
     request = request.model_copy(update={"groups": _included_groups(request.groups)})
     config = request.config
@@ -331,4 +340,4 @@ def analyze(request: AnalyzeRequest) -> dict:
                 notes.append(text)
     if test not in {"anova-tukey", "anova-dunnett"} and any("ci" in p for p in pair_data) and len(pair_data) > 1:
         notes.append("Difference intervals are individual; adjusted p-values apply the correction to the selected comparison family.")
-    return {"test": test, "testLabel": LABELS[test], "engine": f"SciPy {scipy.__version__}", "statistic": statistic, "p": pvalue, "comparisons": pair_data, "summaries": summaries, "warnings": notes, "fingerprint": request.fingerprint, "config": config.model_dump(), "createdAt": datetime.now(timezone.utc).isoformat()}
+    return {"test": test, "testLabel": LABELS[test], "engine": f"SciPy {scipy.__version__}", "statistic": statistic, "p": pvalue, "comparisons": pair_data, "summaries": summaries, "warnings": notes, "fingerprint": request.fingerprint, "config": config.model_dump(exclude_none=True), "createdAt": datetime.now(timezone.utc).isoformat()}

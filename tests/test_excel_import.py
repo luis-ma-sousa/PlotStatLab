@@ -190,7 +190,7 @@ def test_misleading_dimension_does_not_allocate_or_import_a_giant_empty_grid():
     assert read_rows(excel.import_excel(encoded(raw))) == [["Control", "Treatment"], ["1.25", "2.5"], ["2.75", "4"]]
 
 
-@pytest.mark.parametrize("filename", ["data.xls", "data.xlsm", "data.xlsb", "data.ods", "data.xltx", None])
+@pytest.mark.parametrize("filename", ["data.xls", "data.xlsb", "data.xltx", None])
 def test_unsupported_workbook_formats_explain_conversion(filename):
     with pytest.raises(ValueError, match=r"Save the workbook as Excel Workbook \(.xlsx\)"):
         excel.import_excel(encoded(workbook_bytes()), filename)
@@ -207,10 +207,11 @@ def test_empty_workbook_is_rejected():
         excel.import_excel(encoded(workbook_bytes(lambda _workbook: None)))
 
 
-def test_disguised_macro_enabled_content_is_rejected():
-    raw = modify_zip(workbook_bytes(), lambda name, content: content.replace(b"spreadsheetml.sheet.main+xml", b"ms-excel.sheet.macroEnabled.main+xml") if name == "[Content_Types].xml" else content)
-    with pytest.raises(ValueError, match="macro-enabled"):
-        excel.import_excel(encoded(raw))
+def test_macro_enabled_content_imports_saved_values_without_running_macros():
+    raw = modify_zip(workbook_bytes(), lambda name, content: content.replace(b"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml", b"application/vnd.ms-excel.sheet.macroEnabled.main+xml") if name == "[Content_Types].xml" else content)
+    result = excel.import_excel(encoded(raw), 'values.xlsm')
+    assert read_rows(result)[1] == ['1.25', '2.5']
+    assert any('never executed' in warning for warning in result['warnings'])
 
 
 @pytest.mark.parametrize("utf16", [False, True])

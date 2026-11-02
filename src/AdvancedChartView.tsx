@@ -15,6 +15,7 @@ interface Props {
   result?: AdvancedResult;
   selection: Selection;
   onSelect: (selection: Selection) => void;
+  onContextMenu?: (event: React.MouseEvent, selection: Selection) => void;
   analysisStale?: boolean;
   flaggedIds?: string[];
 }
@@ -29,7 +30,7 @@ function marker(shape: Shape, x: number, y: number, radius: number, props: SVGPr
 }
 
 /** Each plotted measurement keeps the same stable ID and point overrides as the standard editor. */
-export default function AdvancedChartView({svgId = 'chart-svg', chart, groups, rows, result, selection, onSelect, analysisStale = false, flaggedIds = []}: Props) {
+export default function AdvancedChartView({svgId = 'chart-svg', chart, groups, rows, result, selection, onSelect, onContextMenu, analysisStale = false, flaggedIds = []}: Props) {
   const {style} = chart, options = chart.advancedOptions ?? {};
   const width = style.width, height = style.height;
   const margin = {left: chart.type === 'forest' ? Math.min(width * .29, 200) : 88, right: 40, top: style.legend ? 104 : 79, bottom: 89};
@@ -49,17 +50,18 @@ export default function AdvancedChartView({svgId = 'chart-svg', chart, groups, r
   let xTicks: {value: number; label: string}[] = [], yTicks: {value: number; label: string}[] = [];
   let content: ReactNode, legend = groupNames.map((name, index) => ({name, color: color(index)}));
 
+  function contextMenu(event: React.MouseEvent, target: Selection) {if (!onContextMenu) return; event.preventDefault(); event.stopPropagation(); onSelect(target); onContextMenu(event,target);}
   function point(row: AdvancedRow, x: number, y: number, index = seriesIndex(row), censor = false) {
     const own = chart.pointStyles[row.id] ?? {}, radius = ownRadius(row.id), selected = selection.kind === 'point' && selection.id === row.id;
     const select = (event: React.MouseEvent | React.KeyboardEvent) => {event.stopPropagation(); onSelect({kind: 'point', id: row.id, groupId: groupId(row)});};
-    return <g key={row.id} data-point-id={row.id} data-group-id={groupId(row)} role="button" tabIndex={0} aria-label={`${row.label || row.id}, ${rowGroupName(row)}: ${row.y}${censor ? ', right-censored' : ''}`} onClick={select} onKeyDown={event => {if (event.key === 'Enter' || event.key === ' ') {event.preventDefault(); select(event);}}} style={{cursor: 'pointer'}}>
+    return <g key={row.id} data-point-id={row.id} data-group-id={groupId(row)} data-excluded={row.excluded || undefined} role="button" aria-pressed={selected} tabIndex={0} aria-label={`${row.label || row.id}, ${rowGroupName(row)}: ${row.y}${censor ? ', right-censored' : ''}${row.excluded ? ', excluded from analysis' : ''}`} onClick={select} onContextMenu={event=>contextMenu(event,{kind:'point',id:row.id,groupId:groupId(row)})} onKeyDown={event => {if (event.key === 'Enter' || event.key === ' ') {event.preventDefault(); select(event);}}} style={{cursor: 'pointer'}}>
       <title>{`${row.label || row.id} · ${rowGroupName(row)}\n${row.x === undefined ? '' : `X: ${row.x}\n`}Y: ${row.y}${row.subject ? `\nSubject: ${row.subject}` : ''}${censor ? '\nRight-censored' : ''}${row.excluded ? '\nExcluded from analysis' : ''}`}</title>
-      {marker(own.shape ?? style.pointShape, x, y, radius, {fill: own.color ?? color(index), stroke: own.stroke ?? '#ffffff', strokeWidth: own.strokeWidth ?? 1.15, opacity: row.excluded ? .24 : own.opacity ?? style.pointOpacity})}
+      {marker(own.shape ?? style.pointShape, x, y, radius, {fill: row.excluded ? style.background : own.color ?? color(index), stroke: row.excluded ? own.color ?? color(index) : own.stroke ?? '#ffffff', strokeWidth: own.strokeWidth ?? 1.15, opacity: row.excluded ? .65 : own.opacity ?? style.pointOpacity})}
       {censor && <path d={`M${x},${y-radius-2}V${y+radius+2}`} stroke={own.color ?? color(index)} strokeWidth={Math.max(1, style.lineWidth)} pointerEvents="none"/>}
       {flaggedIds.includes(row.id) && !row.excluded && <circle cx={x} cy={y} r={radius+3} fill="none" stroke="#c88b30" strokeWidth={1.5} pointerEvents="none"/>}
-      {row.excluded && <path d={`M${x-radius},${y-radius}L${x+radius},${y+radius}M${x+radius},${y-radius}L${x-radius},${y+radius}`} stroke={style.axisColor} strokeWidth={1.1} opacity={.45} pointerEvents="none"/>}
+      {row.excluded && <path d={`M${x-radius},${y-radius}L${x+radius},${y+radius}M${x+radius},${y-radius}L${x-radius},${y+radius}`} stroke={style.axisColor} strokeWidth={1.1} opacity={.65} pointerEvents="none"/>}
       {selected && <circle data-editor-only="true" cx={x} cy={y} r={radius+4} fill="none" stroke="#224e47" strokeWidth={1.8} strokeDasharray="3 2"/>}
-      <circle data-editor-only="true" cx={x} cy={y} r={Math.max(7, radius)} fill="transparent"/>
+      <circle data-editor-only="true" cx={x} cy={y} r={radius + .75} fill="transparent"/>
     </g>;
   }
   function selectText(event: React.MouseEvent, kind: 'title' | 'xaxis' | 'yaxis') {event.stopPropagation(); onSelect({kind});}
@@ -210,18 +212,18 @@ export default function AdvancedChartView({svgId = 'chart-svg', chart, groups, r
   if (analysisStale && result) notes.push('The recorded analysis is out of date. Run it again to display fitted results.');
   const textStyle = {fill: style.axisColor, fontSize: style.fontSize};
   const axisStyle = {fill: 'none', stroke: style.axisColor, strokeWidth: 1.2};
-  return <svg id={svgId} xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="group" aria-roledescription="interactive scientific chart" aria-label={chart.title || 'Scientific chart'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background}} onClick={() => onSelect({kind: 'chart'})}>
+  return <svg id={svgId} xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="group" aria-roledescription="interactive scientific chart" aria-label={chart.title || 'Scientific chart'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background}} onClick={() => onSelect({kind: 'chart'})} onContextMenu={event=>contextMenu(event,{kind:'chart'})}>
     <rect width={width} height={height} fill={style.background}/>
     <defs><clipPath id={`advanced-clip-${chart.id}`} clipPathUnits="userSpaceOnUse"><rect x={left-1} y={top-1} width={plotWidth+2} height={plotHeight+2}/></clipPath></defs>
-    <text data-edit="title" x={width/2} y={39} textAnchor="middle" fill={style.axisColor} fontSize={style.titleSize} fontWeight={600} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'title')}><ScientificText text={chart.title}/></text>
+    <text data-edit="title" x={width/2} y={39} textAnchor="middle" fill={style.axisColor} fontSize={style.titleSize} fontWeight={600} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'title')} onContextMenu={event=>contextMenu(event,{kind:'title'})}><ScientificText text={chart.title}/></text>
     {style.legend && <g transform={`translate(${left},66)`}>{legend.map((item, index) => {const spacing = plotWidth/Math.max(1, legend.length); return <g key={`${item.name}-${index}`} transform={`translate(${index*spacing},0)`}><circle cx={4} cy={-4} r={3.7} fill={item.color}/><text x={15} fill={style.axisColor} fontSize={Math.max(10,style.fontSize-2)}>{item.name.length > 22 ? `${item.name.slice(0,20)}…` : item.name}</text></g>;})}</g>}
     {style.grid && yTicks.map((tick, index) => <line key={index} x1={left} x2={right} y1={tick.value} y2={tick.value} stroke={style.axisColor} strokeOpacity={.09} strokeWidth={.8}/>)}
     <g clipPath={`url(#advanced-clip-${chart.id})`}>{content}</g>
     <path d={`M${left},${top}V${bottom}H${right}`} {...axisStyle}/>
     {yTicks.map((tick, index) => <g key={index}><line x1={left-5} x2={left} y1={tick.value} y2={tick.value} {...axisStyle}/><text x={left-11} y={tick.value+style.fontSize*.34} textAnchor="end" {...textStyle}>{tick.label}</text></g>)}
     {xTicks.map((tick, index) => <g key={index}><line x1={tick.value} x2={tick.value} y1={bottom} y2={bottom+5} {...axisStyle}/><text x={tick.value} y={bottom+24} textAnchor="middle" {...textStyle}>{tick.label}</text></g>)}
-    <text data-edit="xaxis" x={(left+right)/2} y={height-24} textAnchor="middle" {...textStyle} fontSize={style.fontSize+1} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'xaxis')}><ScientificText text={horizontalLabel}/></text>
-    <text data-edit="yaxis" transform={`translate(25,${(top+bottom)/2}) rotate(-90)`} textAnchor="middle" {...textStyle} fontSize={style.fontSize+1} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'yaxis')}><ScientificText text={verticalLabel}/></text>
+    <text data-edit="xaxis" x={(left+right)/2} y={height-24} textAnchor="middle" {...textStyle} fontSize={style.fontSize+1} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'xaxis')} onContextMenu={event=>contextMenu(event,{kind:'xaxis'})}><ScientificText text={horizontalLabel}/></text>
+    <text data-edit="yaxis" transform={`translate(25,${(top+bottom)/2}) rotate(-90)`} textAnchor="middle" {...textStyle} fontSize={style.fontSize+1} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'yaxis')} onContextMenu={event=>contextMenu(event,{kind:'yaxis'})}><ScientificText text={verticalLabel}/></text>
     {notes.length > 0 && <text data-editor-only="true" x={left} y={height-5} fontSize={9} fill="#9a6b2b">{notes.join(' ')}</text>}
   </svg>;
 }

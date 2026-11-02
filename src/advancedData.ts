@@ -4,8 +4,8 @@ import type {Dataset,Group} from './types';
 
 export function rowsForDataset(dataset:Dataset):AdvancedRow[]{
  const anchors=new Map(dataset.groups.flatMap(g=>g.observations.map(o=>[o.id,{o,g}] as const)));
- if(dataset.advancedRows)return dataset.advancedRows.flatMap(row=>{const anchor=anchors.get(row.id);return anchor?[{...row,y:anchor.o.value,...(row.p!==undefined?{p:anchor.o.value}:{}),x:anchor.o.x??row.x,subject:anchor.o.subject??row.subject,excluded:anchor.o.excluded??false,groupId:anchor.g.id}]:[]});
- return dataset.groups.flatMap(g=>g.observations.map(o=>({id:o.id,groupId:g.id,group:g.name,factorA:g.name,y:o.value,x:o.x,subject:o.subject,excluded:o.excluded})));
+ if(dataset.advancedRows)return dataset.advancedRows.flatMap(row=>{const anchor=anchors.get(row.id);return anchor?[{...row,y:anchor.o.value,...(row.p!==undefined?{p:anchor.o.value}:{}),x:anchor.o.x??row.x,subject:anchor.o.subject??row.subject,labels:anchor.o.labels??row.labels,excluded:anchor.o.excluded??false,groupId:anchor.g.id}]:[]});
+ return dataset.groups.flatMap(g=>g.observations.map(o=>({id:o.id,groupId:g.id,group:g.name,factorA:g.name,y:o.value,x:o.x,subject:o.subject,labels:o.labels,excluded:o.excluded})));
 }
 export function advancedFingerprint(rows:AdvancedRow[]):string{
  const canonical=JSON.stringify(rows.map(r=>Object.fromEntries(Object.entries(r).filter(([k,v])=>k!=='groupId'&&v!==undefined&&!(k==='excluded'&&v===false)).sort(([a],[b])=>a.localeCompare(b)))));
@@ -13,13 +13,14 @@ export function advancedFingerprint(rows:AdvancedRow[]):string{
 }
 export function groupsFromAdvanced(rows:AdvancedRow[]):Group[]{
  const groups=new Map<string,Group>();
- for(const row of rows){const name=row.factorA??row.group??'Series 1';let group=groups.get(name);if(!group){group={id:row.groupId??`long-group-${groups.size+1}`,name,observations:[]};groups.set(name,group)}group.observations.push({id:row.id,value:row.y,x:row.x,subject:row.subject,...(row.excluded?{excluded:true}:{})})}
+ for(const row of rows){const name=row.factorA??row.group??'Series 1';let group=groups.get(name);if(!group){group={id:row.groupId??`long-group-${groups.size+1}`,name,observations:[]};groups.set(name,group)}group.observations.push({id:row.id,value:row.y,x:row.x,subject:row.subject,...(row.labels?{labels:row.labels}:{}),...(row.excluded?{excluded:true}:{})})}
  if(!groups.size)throw new Error('Add at least one observation.');return [...groups.values()];
 }
 const aliases:Record<string,string>={value:'y',response:'y',time:'y',estimate:'y',p:'y',pvalue:'y',p_value:'y',factor_a:'factorA',factora:'factorA',factor_b:'factorB',factorb:'factorB',condition:'factorA',treatment:'factorA',subjectid:'subject',subject_id:'subject',censored:'censored',status:'event',lo:'lower',hi:'upper'};
 export function isAdvancedCsv(text:string):boolean{
  const header=Papa.parse<string[]>(text,{preview:1}).data[0]??[];
- return header.some(v=>/^group$/i.test(v.trim()))&&header.some(v=>/^(value|response|y)$/i.test(v.trim()))||header.some(v=>/^(factor[ _]?[ab]|event|time|estimate|lower|upper|p|pvalue|p_value)$/i.test(v.trim()))||header.some(v=>/^y$/i.test(v.trim()))&&header.some(v=>/^x$/i.test(v.trim()));
+ const numericY=header.some(v=>/^(y|value|response|time|estimate|p|pvalue|p_value)$/i.test(v.trim()));
+ return numericY&&header.some(v=>/^(group|factor[ _]?[ab]|event|lower|upper|x)$/i.test(v.trim()));
 }
 export function parseAdvancedCsv(text:string):AdvancedRow[]{
  const parsed=Papa.parse<string[]>(text.replace(/^\uFEFF/,''),{skipEmptyLines:'greedy'});
@@ -29,7 +30,8 @@ export function parseAdvancedCsv(text:string):AdvancedRow[]{
  if(new Set(keys).size!==keys.length)throw new Error('Column names must be unique (including aliases).');
  if(!keys.includes('y'))throw new Error('A numeric Y, response, time, estimate or p column is required.');
  const recognized=new Set(['id','x','y','factora','factorb','factorA','factorB','subject','event','group','lower','upper','label','excluded','censored']);
- const unknown=keys.filter(k=>!recognized.has(k));if(unknown.length)throw new Error(`Unknown columns: ${unknown.join(', ')}. Use X, Y, factorA, factorB, subject, event, group, lower, upper, label or excluded.`);
+ // Additional descriptive columns are labels, never candidate numeric axes.
+ const unknown=keys.filter(k=>!recognized.has(k));
  const numeric=(raw:string,key:string,row:number)=>{const cleaned=raw.trim().replace(',','.');if(!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(cleaned)||!Number.isFinite(Number(cleaned)))throw new Error(`Row ${row}: ${key} must be a finite number.`);return Number(cleaned)};
  const boolean=(raw:string,key:string,row:number)=>{if(/^(1|true|yes|event|dead)$/i.test(raw))return true;if(/^(0|false|no|censored|alive)$/i.test(raw))return false;throw new Error(`Row ${row}: ${key} must be 1/0 or true/false.`)};
  const ids=new Set<string>();
@@ -37,10 +39,12 @@ export function parseAdvancedCsv(text:string):AdvancedRow[]{
   if(cells.length>keys.length)throw new Error(`Row ${i+2} has too many columns.`);
   const row:Record<string,unknown>={id:`row-${i+1}`};
   keys.forEach((key,j)=>{const raw=(cells[j]??'').trim();if(!raw){if(key==='y')throw new Error(`Row ${i+2}: Y is missing. Remove the missing observation or supply its value.`);return}
+   if(unknown.includes(key)){row.labels={...(row.labels as Record<string,string>??{}),[header[j]]:raw};return}
    if(['x','y','lower','upper'].includes(key))row[key]=numeric(raw,key,i+2);
    else if(['event','excluded','censored'].includes(key)){const value=boolean(raw,key,i+2);row[key==='censored'?'event':key]=key==='censored'?!value:value}
    else row[key]=raw;
   });
+  if(!row.label&&row.labels)row.label=Object.values(row.labels as Record<string,string>).join(' · ');
   if(ids.has(row.id as string))throw new Error('Observation IDs must be unique.');ids.add(row.id as string);
   if(typeof row.lower==='number'&&typeof row.upper==='number'&&row.lower>row.upper)throw new Error(`Row ${i+2}: lower exceeds upper.`);
   if(header.some(h=>/^(p|pvalue|p_value)$/i.test(h.trim())))row.p=row.y;return row as unknown as AdvancedRow;

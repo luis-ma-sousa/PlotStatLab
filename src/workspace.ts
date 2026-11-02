@@ -38,11 +38,13 @@ export function syncWorkspace(previous:Project,next:Project):Project {
  p.analysisRuns=runs;
  const chartIds=new Set(p.charts.map(c=>c.id)),runIds=new Set(runs.map(r=>r.id));
  p.workspaceLayout={advancedAnalysisIds:p.workspaceLayout?.advancedAnalysisIds,chartIds:[...new Set([...(p.workspaceLayout?.chartIds??[]),...p.charts.filter(c=>!oldCharts.has(c.id)).map(c=>c.id)])].filter(id=>chartIds.has(id)),analysisIds:[...new Set([...(p.workspaceLayout?.analysisIds??[]),...runs.filter(r=>!oldRuns.has(r.id)).map(r=>r.id)])].filter(id=>runIds.has(id))};
- const selected=p.charts.find(c=>c.id===p.activeChartId);return selected?.datasetId!==p.activeDatasetId?activateChart(p,p.activeChartId):p;
+ // A dataset selection is independent of the previously selected figure.
+ // Only an explicit figure selection should change the active dataset.
+ return p.activeChartId!==previous.activeChartId?activateChart(p,p.activeChartId):p;
 }
 export function appendDatasets(project:Project,imports:{name:string;groups:Group[];advancedRows?:AdvancedRow[]}[],makeChart:(dataset:Dataset)=>Chart):Project {
  const p=normalizeWorkspace(project);
- const added=imports.map(item=>{const datasetId=uuid();const groups=item.groups.map(g=>({...g,id:`${datasetId}-${g.id}`,observations:g.observations.map(o=>({...o,id:`${datasetId}-${o.id}`}))}));const advancedRows=item.advancedRows?.map(row=>({...row,id:`${datasetId}-${row.id}`,groupId:groups.find(g=>g.name===(row.factorA??row.group??'Series 1'))?.id}));return {advancedRows,id:datasetId,name:item.name.trim()||'Imported dataset',groups,analysisConfig:{...p.analysisConfig,test:groups.length>2?'welch-anova':'welch',design:'independent' as const,control:groups[0].id}}});
+ const added=imports.map(item=>{const datasetId=uuid();const groups=item.groups.map(g=>({...g,id:`${datasetId}-${g.id}`,observations:g.observations.map(o=>({...o,id:`${datasetId}-${o.id}`}))}));const advancedRows=item.advancedRows?.map(row=>({...row,id:`${datasetId}-${row.id}`,groupId:groups.find(g=>g.name===(row.factorA??row.group??'Series 1'))?.id}));return {advancedRows,id:datasetId,name:item.name.trim()||'Imported dataset',groups,analysisConfig:{...p.analysisConfig,groupIds:undefined,test:groups.length>2?'welch-anova':'welch',design:'independent' as const,control:groups[0].id}}});
  const charts=added.map(d=>({...makeChart(d),datasetId:d.id}));
  const next={...p,datasets:[...p.datasets!,...added],charts:[...p.charts,...charts]};
  return added.length?activateDataset({...next,workspaceLayout:{advancedAnalysisIds:p.workspaceLayout?.advancedAnalysisIds,chartIds:[...p.workspaceLayout!.chartIds,...charts.map(c=>c.id)],analysisIds:p.workspaceLayout!.analysisIds}},added[0].id):next;

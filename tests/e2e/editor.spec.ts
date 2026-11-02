@@ -14,10 +14,11 @@ test('individual point styling, computed brackets, drag, portable roundtrip, sta
  await expect(first.locator('circle').first()).toHaveAttribute('r','10');
  await expect(page.locator('[data-point-id="point-1-2"] circle').first()).not.toHaveAttribute('fill','#ff0000');
  await page.getByRole('button',{name:'Analyze data',exact:true}).click();
- await expect(page.getByRole('button',{name:'Analyze and annotate chart'})).toBeEnabled();
- await page.getByRole('button',{name:'Analyze and annotate chart'}).click();
+ await expect(page.getByRole('button',{name:'Run and save new analysis'})).toBeEnabled();
+ await page.getByRole('button',{name:'Run and save new analysis'}).click();
  await expect(page.locator('.results-card').last()).toBeVisible();
- await page.getByRole('button',{name:'View chart',exact:true}).click();
+ await page.getByRole('button',{name:'Add stars / ns to figure',exact:true}).click();
+ await page.getByRole('button',{name:'Open figure',exact:true}).click();
  const brackets=page.locator('[data-annotation-id]');
  expect(await brackets.count()).toBeGreaterThan(0);
  const boxes=await brackets.evaluateAll(els=>els.map(el=>{const boxes=[...el.querySelectorAll('path,text')].map(e=>(e as SVGGraphicsElement).getBBox());const x=Math.min(...boxes.map(b=>b.x)),y=Math.min(...boxes.map(b=>b.y));return {x,y,w:Math.max(...boxes.map(b=>b.x+b.width))-x,h:Math.max(...boxes.map(b=>b.y+b.height))-y}}));
@@ -53,7 +54,7 @@ test('all chart families render; styles transfer while individual point override
  for(const type of types){await page.getByRole('button',{name:'New chart',exact:true}).first().click();await page.getByLabel('Current chart type').selectOption(type);await expect(page.locator('#chart-svg')).toBeVisible();const invalid=await page.locator('#chart-svg').evaluate(el=>el.outerHTML.includes('NaN')||el.outerHTML.includes('Infinity'));expect(invalid,`invalid coordinates in ${type}`).toBe(false)}
  await expect(page.locator('[data-point-id="point-1-1"] circle').first()).toHaveAttribute('fill','#cc2288');
  await page.getByRole('button',{name:'Apply style',exact:true}).click();await page.getByLabel('Copy style from').selectOption({index:1});await page.getByRole('button',{name:/Apply to Treatment response/}).click();await expect(page.locator('[data-point-id="point-1-1"] circle').first()).toHaveAttribute('fill','#cc2288');
- await page.getByRole('button',{name:'Data',exact:true}).last().click();await page.getByRole('button',{name:'Delete row 1',exact:true}).click();await page.reload();await page.locator('.figure-item').first().click();await expect(page.locator('#chart-svg')).toBeVisible();await expect(page.locator('[data-point-id]')).toHaveCount(44);
+ await page.getByRole('button',{name:'Data',exact:true}).last().click();await page.getByLabel('Control, row 1',{exact:true}).click({button:'right'});await page.getByRole('menuitem',{name:'Clear row values',exact:true}).click();await page.reload();await page.locator('.figure-item').first().click();await expect(page.locator('#chart-svg')).toBeVisible();await expect(page.locator('[data-point-id]')).toHaveCount(44);
 });
 
 test('multiple datasets, independent analyses and chosen panels survive a workspace file roundtrip',async({page})=>{
@@ -64,14 +65,14 @@ test('multiple datasets, independent analyses and chosen panels survive a worksp
  ]);
  await expect(page.locator('.dataset-navigation>button')).toHaveCount(3);
  await page.getByRole('button',{name:'Statistics',exact:true}).last().click();
- await expect(page.getByRole('button',{name:'Analyze and annotate chart'})).toBeEnabled();
- await page.getByRole('button',{name:'Analyze and annotate chart'}).click();
- await expect(page.getByRole('button',{name:'View chart',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Run and save new analysis'})).toBeEnabled();
+ await page.getByRole('button',{name:'Run and save new analysis'}).click();
+ await expect(page.getByRole('button',{name:'Open figure',exact:true})).toBeVisible();
  await page.locator('.dataset-navigation>button').filter({hasText:'Study C'}).click();
  await page.getByRole('button',{name:'Statistics',exact:true}).last().click();
  await page.locator('.test-option').filter({hasText:'Mann–Whitney U'}).click();
- await page.getByRole('button',{name:'Analyze and annotate chart'}).click();
- await expect(page.getByRole('button',{name:'View chart',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Run and save new analysis'}).click();
+ await expect(page.getByRole('button',{name:'Open figure',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Overview',exact:true}).last().click();
  await expect(page.locator('.workspace-figure-card')).toHaveCount(4);
  await expect(page.locator('.workspace-analysis-card')).toHaveCount(2);

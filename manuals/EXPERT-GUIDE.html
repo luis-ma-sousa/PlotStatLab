@@ -1,8 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PlotStatLab — expert guide</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#263d34;max-width:900px;margin:50px auto;padding:0 26px;background:#fcfdf9}a{color:#286651}h1,h2,h3{line-height:1.25;color:#244c3c}h1{font-size:34px}h2{margin-top:40px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #dfe6d9;padding:9px;text-align:left}pre{background:#edf2e7;padding:16px;overflow:auto;border-radius:6px}code{font-size:.9em}img{max-width:100%}.masthead{font-size:13px;letter-spacing:1px;color:#7c9473;border-bottom:1px solid #dfe6d9;padding-bottom:16px}blockquote{border-left:3px solid #a8bca0;padding-left:16px;color:#6e825f}@media print{body{margin:0;max-width:none}a{color:inherit}pre{white-space:pre-wrap}}</style></head><body><div class="masthead">PlotStatLab · PSL · <a href="/">Return to app</a> · <a href="QUICK-START.html">Quick start</a></div><h1>PlotStatLab — expert guide</h1>
-<p><strong>PSL 0.3.0 · Data, statistics, vector editing and reproducibility</strong></p>
+<p><strong>Data, statistics, vector editing and reproducibility</strong></p>
 <p>This guide describes the current workflow and its limits. The <a href="ROADMAP.html">roadmap</a> separates implemented functions from planned work. For the basic clicks, use the <a href="BEGINNER-GUIDE.html">beginner&#39;s guide</a>.</p>
 <h2>1. Project model</h2>
 <p>A workspace contains multiple datasets, each with its own groups and analysis settings, plus figures, saved analysis runs and reusable styles. Figures linked to the same dataset share that table; different datasets remain independent. Each figure retains its own chart type, titles, visual settings, per-observation overrides, attached analysis and manual comparison positions.</p>
+<p>The workflow separates three actions: edit a dataset, calculate and save a result, then attach that result to a chosen figure. A figure explicitly selects its source dataset and plotted columns; an analysis separately selects its input columns. A t-test can therefore use two columns from a wider dataset while another figure or analysis uses more columns. See the <a href="UX-WORKFLOW.html">workflow reference</a> for the object model.</p>
 <table>
 <thead>
 <tr>
@@ -19,6 +20,10 @@
 <td>A local browser copy, not cloud synchronization or a shared file</td>
 </tr>
 <tr>
+<td>Results CSV / JSON</td>
+<td>A selected analysis&#39;s report or structured result; not the complete dataset/workspace</td>
+</tr>
+<tr>
 <td>SVG</td>
 <td>Editable text and vector objects for external graphic editing</td>
 </tr>
@@ -27,10 +32,11 @@
 <td>A raster image at explicit pixel dimensions</td>
 </tr>
 </tbody></table>
-<p>Opening <code>.psl</code> restores a complete workspace. Legacy <code>.labplot</code> files become single-dataset workspaces. Importing one or several CSV files adds datasets and figures without replacing existing work. Exporting a figure does not back up the statistical project.</p>
+<p>Opening <code>.psl</code> restores a complete workspace. Legacy <code>.labplot</code> files become single-dataset workspaces. <strong>Switch / new workspace</strong> opens the local workspace library and checkpoints current work before switching. The same action is available by clicking the workspace name at the top. Importing tables adds datasets without replacing the open workspace. Exporting a figure does not back up the statistical project.</p>
 <h2>2. Data layout and identity</h2>
 <h3>Wide input format</h3>
-<p>The importer expects headers and one numeric column per group. An optional subject column and X column have special meanings:</p>
+<p>Use <strong>New dataset → Create blank table</strong> to enter data without importing. Rename numeric column headings and type into cells, or paste a rectangular range starting at a chosen cell. Direct grid paste takes values without headings and updates the selected range; validation happens before any range is applied. Existing observation IDs and exclusion flags survive value edits. <strong>Paste table / Paste new dataset</strong> takes a complete table with headers and adds a dataset.</p>
+<p>Wide table import expects headers and one numeric column per measurement group. Subject, X and label columns have separate meanings:</p>
 <pre><code class="language-csv">Subject,X,Control,Treatment
 A01,0,12.2,13.1
 A02,5,14.0,18.8
@@ -52,14 +58,23 @@ A03,10,11.7,20.4
 <td>X coordinate shared by values in that row</td>
 </tr>
 <tr>
-<td>Other columns</td>
+<td>Text-only columns</td>
+<td>Retained label metadata; not statistical measurement groups</td>
+</tr>
+<tr>
+<td>Conventional label headings, such as <code>Label</code>, <code>Sample</code>, <code>Sex</code>, <code>Notes</code></td>
+<td>Label metadata even when labels contain numeric codes</td>
+</tr>
+<tr>
+<td>Remaining numeric columns</td>
 <td>Groups of Y observations</td>
 </tr>
 </tbody></table>
-<p>The importer also recognizes common ID header variants, including <code>Subject ID</code>, <code>ID</code> and the legacy localized aliases supported by the parser. Headers must be nonempty and unique. When an X column exists, rows containing observations require an X value.</p>
-<p>Comma, semicolon and tab delimiters are supported. Decimal commas require an unambiguous delimiter, such as semicolon. Scientific notation is accepted; nonnumeric and nonfinite values are rejected.</p>
+<p>The importer recognizes subject-ID header variants, including <code>Subject ID</code>, <code>ID</code> and legacy localized aliases. Explicit subject IDs are checked for duplicates. Without an explicit subject-ID column, label text supplies a row label, with disambiguation where necessary. Generated or disambiguated labels organize the table; they do not establish valid pairing. Blank headings receive column names; headings must be unique. When an X column exists, rows containing observations require an X value.</p>
+<p>CSV, TSV, TXT, JSON, XLSX, XLSM and ODS are supported. Visible nonempty workbook sheets become separate datasets. XLSM imports read stored cell values without executing macros. Legacy XLS/XLSB require conversion to XLSX or CSV. JSON accepts arrays of row records, named arrays of numbers, or a <code>groups</code> structure with <code>values</code>/<code>observations</code>. Use <strong>Open</strong> for a <code>.psl</code> workspace and <strong>Import files</strong> for a JSON data table.</p>
+<p>Comma, semicolon and tab delimiters are supported. Decimal commas require an unambiguous delimiter, such as semicolon. Scientific notation is accepted. An unrecognized column that mixes numeric measurements and unrelated text is rejected with the row/column location and guidance. It is not silently converted to missing data or a label column. Move metadata into a clearly named label column, or correct the invalid measurement.</p>
 <h3>Missing values and zeros</h3>
-<p>An empty cell does not create an observation. Zero creates a measurement equal to zero. Independent groups may have unequal sample sizes. Import requires at least one number per group, and the implemented group tests require at least two observations per group.</p>
+<p>Blank, <code>NA</code>, <code>N/A</code>, <code>null</code>, <code>missing</code> and <code>NaN</code> wide-table cells do not create observations. Zero creates a measurement equal to zero. Nonfinite values are not valid measurements. Independent groups may have unequal sample sizes. Import requires at least one number per measurement group; a new editable table may remain empty until data are entered. Implemented group tests require at least two included observations per selected group.</p>
 <p>The app does not impute missing observations or automatically discard incomplete pairs. Do not replace missing values with zeros.</p>
 <h3>Pairing</h3>
 <p>Paired analyses require the same complete set of subjects in every group, with a nonempty, unique subject ID per group. The engine aligns observations by subject ID, not row order.</p>
@@ -73,7 +88,9 @@ P04,24.1,26.2
 <p>A paired chart can connect matching IDs even when the data are not suitable for a paired statistical test. Visual connections and valid assumptions are separate questions.</p>
 <h3>Internal observation identity</h3>
 <p>Each observation also has an internal stable ID, separate from group names and subject labels. Visual overrides attach to that ID. Editing an existing measurement preserves its identity; deleting an observation removes orphan visual overrides when the project is reconciled/saved. A fresh import must not be used to transfer old point overrides to unrelated measurements.</p>
+<p>Text-label metadata are retained with observations and stored in <code>.psl</code>. They do not become numeric covariates, factors or analysis inputs automatically. The advanced table has explicit scientific roles when a model requires them.</p>
 <h2>3. Charts and conventions</h2>
+<p>Every <strong>New chart</strong> dialog exposes <strong>Dataset for the new figure</strong> and <strong>Columns to plot</strong>. The editor also exposes the source link and plotted-column selection. Changing plotted columns does not change the dataset or other figures. Relinking a figure to a different dataset clears its old attached results and individual observation overrides; saved analysis history and other figures remain in the workspace.</p>
 <table>
 <thead>
 <tr>
@@ -165,7 +182,7 @@ P04,24.1,26.2
 <p>Fewer than two observations do not yield an estimated sample error. These summaries use arithmetic means of stored values; selecting a log axis does not produce geometric means or a transformed-data analysis.</p>
 <p>Graphical mean intervals use 95%. Intervals for differences in statistical results use the analysis&#39;s selected <code>1−α</code> level. These settings are distinct.</p>
 <h2>5. Statistical assistant</h2>
-<p>Compatibility checks cover group/sample counts, selected design, pairing identity and degenerate cases. The default suggestion favors Welch for compatible independent mean comparisons and a paired procedure when that design is declared.</p>
+<p>In Statistics, first choose the dataset and input columns. Compatibility checks use those selected columns, included sample counts, selected design, pairing identity and degenerate cases. Two selected columns expose t-tests even when the dataset contains additional columns. The default suggestion favors Welch for compatible independent mean comparisons and a paired procedure when that design is declared.</p>
 <p>A suggestion does <strong>not</strong> validate sampling, independence, pseudoreplication, normality, symmetry, residual distributions or scientific relevance. PSL does not choose a test by automatically dichotomizing a preliminary normality test.</p>
 <h3>Implemented procedures</h3>
 <table>
@@ -217,9 +234,19 @@ P04,24.1,26.2
 <td>All pairs, equal-variance model, Tukey family adjustment and simultaneous intervals</td>
 </tr>
 <tr>
+<td>One-way ANOVA + Dunnett</td>
+<td>Three or more independent groups</td>
+<td>Treatment-versus-control comparisons under an equal-variance model, with Dunnett family adjustment</td>
+</tr>
+<tr>
 <td>Kruskal–Wallis + Mann–Whitney</td>
 <td>Three or more independent groups</td>
 <td>Global rank test; pairs use Mann–Whitney with the chosen correction</td>
+</tr>
+<tr>
+<td>Kruskal–Wallis + Dunn</td>
+<td>Three or more independent groups</td>
+<td>Global rank test; pairwise Dunn tests use pooled ranks and the selected correction</td>
 </tr>
 <tr>
 <td>Friedman + Wilcoxon</td>
@@ -234,6 +261,7 @@ P04,24.1,26.2
 <li><strong>Each group versus control:</strong> selected reference versus every other group; correction applies to that family.</li>
 <li><strong>All pairs:</strong> correction applies to all group combinations.</li>
 <li><strong>Tukey HSD:</strong> always uses all pairs and its own adjustment; it does not apply a second Holm/Bonferroni/BH correction.</li>
+<li><strong>Dunnett:</strong> uses control comparisons and its own family adjustment.</li>
 </ul>
 <p>The chosen family should reflect the scientific question. PSL calculates the selected pairs without requiring a significant omnibus p-value first; plan and report your inferential strategy.</p>
 <h3>Multiple testing</h3>
@@ -264,10 +292,13 @@ P04,24.1,26.2
 <p>The adjustment covers the selected family, not every analysis performed across projects. Repeatedly trying analyses and selecting results afterwards is not automatically corrected.</p>
 <h3>Results and intervals</h3>
 <p>The results table includes individual and adjusted p-values, test statistic, mean difference and intervals when available. A mean difference is descriptive in a rank-based test; it is not necessarily the parameter tested.</p>
+<p><strong>Run and save new analysis</strong> creates a separate run, retaining dataset identity, selected columns, design, test, correction, alpha, engine, timestamp and fingerprint. Runs persist when leaving the Statistics view and are included in <code>.psl</code>. <strong>Open saved result</strong> selects among runs for the current dataset; <strong>Result name</strong> renames one. Changing next-test settings does not modify a previous calculation.</p>
+<p><strong>Results CSV</strong> exports a selected run&#39;s settings, comparison rows, summaries and warnings. <strong>Results JSON</strong> preserves its structured representation with dataset identity and group-name metadata. These are reporting exports, not substitutes for a complete <code>.psl</code> file. Use Overview&#39;s selected analyses for side-by-side review across datasets.</p>
 <p>Difference intervals from t-tests are individual intervals even when the associated p-values are adjusted across multiple pairs. Do not describe them as simultaneous adjusted intervals. Tukey intervals already correspond to its comparison family. Read the notes attached to each analysis.</p>
 <p>Constant inputs, inadequate sample sizes, overflow and nonfinite results are rejected rather than returned as apparently valid analyses. Check the original measurements and the error explanation.</p>
 <h2>Outliers, flags and exclusions</h2>
-<p>Use <strong>Find outliers</strong> to choose <strong>ROUT</strong> or <strong>Grubbs</strong>, then <strong>Detect outliers</strong>. ROUT exposes <strong>Q (false discovery rate)</strong> at 0.1%, 1%, 5% or 10%; Grubbs exposes <strong>Alpha</strong> at 0.05 or 0.01. Results list flagged observations by group; current flags have an amber ring. Detection does not automatically exclude observations. The selected-point <strong>Exclude from analysis</strong> checkbox is explicit and reversible: original measurements remain stored and excluded points are faded/crossed. Data or exclusion edits make detection results stale, requiring a new detection run.</p>
+<p>Use <strong>Find outliers</strong> to choose <strong>ROUT</strong> or <strong>Grubbs</strong>, then <strong>Detect outliers</strong>. ROUT exposes <strong>Q (false discovery rate)</strong> at 0.1%, 1%, 5% or 10%; Grubbs exposes <strong>Alpha</strong> at 0.05 or 0.01. Results list flagged observations by group; current flags have an amber ring. Detection does not automatically exclude observations.</p>
+<p>Exclusion is explicit and reversible: right-click a table value or plotted point to exclude/restore it, or use the selected-point <strong>Exclude from analysis</strong> checkbox. The table row menu can exclude/restore all values in a row; <strong>Restore all</strong> restores the dataset&#39;s excluded observations. Original values and IDs remain stored. Excluded cells are crossed out and plotted observations remain hollow/crossed and selectable. Exclusions belong to the dataset, not a single figure, and affect summaries and future calculations. Paired tests still require complete included subject sets; excluding one member of a pair does not silently create or impute its missing counterpart. Data or exclusion edits make affected stored results stale.</p>
 <p>An outlier procedure identifies observations that deserve review under a specified model. It does not establish that a measurement is erroneous. A flag, a visual highlight and an exclusion have different consequences:</p>
 <table>
 <thead>
@@ -292,6 +323,7 @@ P04,24.1,26.2
 <p>Do not infer exclusion from opacity, symbol color or whether a point is easy to see. Review exclusions explicitly and report the rule, method, threshold, affected observations and results with/without exclusions when appropriate.</p>
 <p>Named outlier methods are not interchangeable. Grubbs tests and ROUT use different assumptions and procedures. A result should identify the method actually implemented and its parameters; do not assume equivalence to GraphPad&#39;s implementation from a similar name or interface. Published-method references, numerical cases and current implementation limits are recorded in the outlier-method and validation guides; consult those records before choosing a detection method. Never delete original measurements automatically as part of review.</p>
 <h2>6. Significance annotations</h2>
+<p>Select a saved result, choose <strong>Target figure</strong>, then <strong>Add stars / ns to figure</strong>. Compatible targets use the same dataset and a categorical chart type. Attachment adds any missing compared columns to the figure&#39;s plotted selection and enables significance and non-significant labels, so a valid nonsignificant test has a visible <code>ns</code> result. You can subsequently turn <strong>Show non-significant</strong> off. A result can be attached to more than one compatible figure; running a test alone does not replace another figure&#39;s annotations.</p>
 <p>Each comparison retains the identity of its two groups. Labels use <code>adjustedP</code>, including the original p-value when no adjustment is applied. Conventional thresholds are strict:</p>
 <table>
 <thead>
@@ -324,12 +356,13 @@ P04,24.1,26.2
 <p>The selected α controls filtering, not the conventional star thresholds. For example, α = 0.01 can hide a comparison with adjusted p = 0.03 even though its conventional label would be <code>*</code>. Prefer numeric labels and a clear caption where needed.</p>
 <p>Brackets appear on categorical charts: bar, bar + swarm, swarm, box, violin, raincloud and paired. They are not projected onto arbitrary XY coordinates or histogram bins.</p>
 <p>Automatic layout reserves space above data/error bars and separates comparisons into levels. Point size and outline width contribute to clearance. Many comparisons can require a larger figure or a more focused comparison family. Inspect manual axis limits and manual offsets before export.</p>
-<p>Select a comparison to drag it, edit X/Y offsets or use arrow keys; <code>Shift</code> uses larger arrow-key steps. X moves the label while endpoints remain anchored to groups; Y moves the bracket. Resetting removes the manual override.</p>
+<p>Select a comparison to drag it, edit X/Y offsets or use arrow keys; <code>Shift</code> uses larger arrow-key steps. X moves the label while endpoints remain anchored to groups; Y moves the bracket. Right-click <strong>Reset automatic position</strong>, or the formatting panel&#39;s reset action, removes the manual override.</p>
 <h3>Result freshness</h3>
-<p>PSL compares current dataset measurements with each analysis&#39;s recorded configuration and fingerprint. Changes to values, IDs, X coordinates, observations or exclusions make affected results stale. Selecting the next test in the assistant does not rewrite or invalidate a historical run; each run retains its own configuration. Stale annotations are hidden, including during export. Appearance-only edits do not recalculate statistics.</p>
-<p>Recalculating updates that figure&#39;s attached results and resets its manual comparison positions; the previous run remains in the overview history. Each run is retained in the workspace analysis history, linked to its dataset and recorded configuration. The current figure attaches the latest run made for that figure. Other figures and earlier runs retain their results; data/exclusion changes mark only the affected dataset results stale.</p>
+<p>PSL compares current measurements in the selected input columns with each analysis&#39;s recorded configuration and fingerprint. Changes to values, IDs, X coordinates, observations or exclusions in those columns make results stale. Edits to unrelated, unselected measurement columns do not invalidate that run. Selecting the next test in the assistant does not rewrite or invalidate a historical run; each run retains its own configuration. Stale annotations are hidden, including during export. Appearance-only edits do not recalculate statistics.</p>
+<p>Recalculation creates another saved run. Explicitly attaching it updates the chosen figure&#39;s result and resets manual comparison offsets; the earlier run remains in history. Other figures retain their attached result until you choose to replace it. This keeps statistical calculation, result review and visual presentation separate.</p>
 <h2>7. Visual overrides and reusable styles</h2>
 <p>General formatting covers palette, typography, axes, symbols, opacity, bar width, lines, dimensions and error settings. Point-level overrides can change color, size, shape, outline, outline width and opacity.</p>
+<p>Click an individual point or right-click <strong>Format this point</strong> to open its controls. Right-click also provides exclusion/restore and data-table navigation. Dataset and figure entries have contextual navigation actions. A point&#39;s context action uses its stable observation ID, including after a value edit or reversible exclusion.</p>
 <p>The precedence is <strong>figure/group style → observation override</strong>. Applying a style preserves destination observation overrides. <strong>Reset to group style</strong> removes the selected point&#39;s exception.</p>
 <p>HEX fields accept three or six digits, with or without <code>#</code>. Opacity has its own control; do not use an alpha HEX value as a substitute.</p>
 <table>
@@ -382,12 +415,13 @@ P04,24.1,26.2
 <h2>10. Persistence and recovery</h2>
 <p>The <code>.psl</code> format uses <code>schemaVersion: 1</code>. Loading validates structure, enums, finite numbers, IDs and formatting. Unsupported schema versions are rejected. Initial-version projects remain on this schema.</p>
 <p>Autosave is scoped to a browser profile and local origin. Disabling it stops subsequent automatic project writes; it does not erase an older stored copy. The toggle preference persists. <strong>Save workspace</strong> creates a portable file independently of that preference.</p>
+<p>The local workspace library stores separate workspaces in that same browser/origin. <strong>Switch / new workspace</strong> checkpoints the current project before opening another entry or creating a blank workspace. This explicit save also occurs when Autosave is off. Opening a <code>.psl</code> uses the same switching flow, preserving the previous workspace in the local library. If checkpointing fails, switching stops and the current work remains open; download a <code>.psl</code> backup before proceeding.</p>
 <p>If a stored browser project is corrupt, recovery attempts to preserve its raw content before starting a demonstration project and reports the issue. If preserving the original fails, automatic saving is suspended rather than silently overwriting it.</p>
 <p>Keep explicit versions such as <code>study-01-data.psl</code>, <code>study-02-analysis.psl</code> and <code>study-03-final-figure.psl</code>. PSL is not an immutable audit trail of every scientific decision.</p>
 <h2>11. Offline operation and updates</h2>
-<p>The distribution includes the compiled interface. Launchers prepare local Python dependencies without requiring Node.js from end users. Initial setup and update downloads require Internet; a prepared installation can run offline.</p>
+<p>The distribution includes the compiled interface. Launchers prepare local Python dependencies without requiring Node.js from end users. A complete offline package supports first setup without Internet; the smaller universal ZIP downloads dependencies during its first setup. Update downloads require Internet; a prepared installation can run offline.</p>
 <p>Online launches check for available GitHub releases. An update is prepared before opening the editor, with package verification and a recovery copy of the previous installation. An interrupted or invalid update should preserve the previously usable version. Updates are deferred when a session is already active to protect unsaved work.</p>
-<p>Updates must not replace user <code>.psl</code> files or browser storage. Save your project before closing or changing computers. While the repository is private, authorized GitHub access is required for private release downloads and updates.</p>
+<p>Updates must not replace user <code>.psl</code> files or browser storage. Save your project before closing or changing computers. Releases are available from the public GitHub repository without a PSL account.</p>
 <p>The server listens on <code>127.0.0.1</code>, port 8765. It is not configured as a public network service. Statistical computation is local; chart data do not need to be sent to an external analysis service.</p>
 <h2>12. Reproducibility and limits</h2>
 <p>Retain the original measurements and experimental unit; the <code>.psl</code>; the full design, test, comparison family, correction, α and error-bar definition; PSL/engine versions; and data-preparation or external graphic-editing decisions.</p>

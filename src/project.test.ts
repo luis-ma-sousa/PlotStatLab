@@ -1,6 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {afterEach,describe,it,expect,vi} from 'vitest';
-import {applyStyle,createProject,dataFingerprint,getLoadWarning,loadProject,parseCsv,parseProject,reconcileProject,saveProject,serializeProject} from './project';
+import {applyStyle,createChart,createProject,dataFingerprint,getLoadWarning,loadProject,parseCsv,parseDataTable,parseProject,reconcileProject,saveProject,serializeProject} from './project';
+import {appendDatasets,normalizeWorkspace} from './workspace';
 import type {Project} from './types';
 
 function addAnalysis(project:Project):void {
@@ -11,6 +12,39 @@ function addAnalysis(project:Project):void {
 afterEach(()=>vi.unstubAllGlobals());
 
 describe('editable project persistence',()=>{
+  it('validates figure column selections against their own dataset and requires a nonempty unique selection',()=>{
+    const project=appendDatasets(normalizeWorkspace(createProject()),[{name:'Other data',groups:parseCsv('Other\n1\n2')}],()=>createChart());
+    project.charts[0].groupIds=[project.datasets![0].groups[0].id];
+    expect(()=>parseProject(JSON.stringify(project))).not.toThrow();
+    project.charts[0].groupIds=[];expect(()=>parseProject(JSON.stringify(project))).toThrow('at least one column');
+    project.charts[0].groupIds=[project.datasets![0].groups[0].id,project.datasets![0].groups[0].id];expect(()=>parseProject(JSON.stringify(project))).toThrow('duplicate chart columns');
+    project.charts[0].groupIds=[project.datasets![1].groups[0].id];expect(()=>parseProject(JSON.stringify(project))).toThrow('missing column');
+  });
+  it('reconciles removed columns and cross-dataset point overrides without mutating the original chart',()=>{
+    const project=appendDatasets(normalizeWorkspace(createProject()),[{name:'Other data',groups:parseCsv('Other\n1\n2')}],()=>createChart());
+    const chart=project.charts[0],own=project.datasets![0].groups[0],foreign=project.datasets![1].groups[0];
+    chart.groupIds=[own.id,'removed'];chart.pointStyles[own.observations[0].id]={color:'#aabbcc'};chart.pointStyles[foreign.observations[0].id]={color:'#ccaaee'};
+    const reconciled=reconcileProject(project);expect(reconciled.charts[0].groupIds).toEqual([own.id]);expect(reconciled.charts[0].pointStyles).toEqual({[own.observations[0].id]:{color:'#aabbcc'}});
+    expect(chart.groupIds).toEqual([own.id,'removed']);chart.groupIds=['removed'];expect(reconcileProject(project).charts[0].groupIds).toBeUndefined();
+  });
+  it('validates stored analysis links and accepts semantically equal results independent of JSON key order',()=>{
+    const project=normalizeWorkspace(createProject());addAnalysis(project);const chart=project.charts[0],result=structuredClone(chart.analysis!);
+    project.analysisRuns=[{id:'saved-run',datasetId:project.activeDatasetId!,name:'First analysis',result}];chart.analysisRunId='saved-run';
+    chart.analysis=Object.fromEntries(Object.entries(result).reverse()) as typeof result;
+    expect(parseProject(JSON.stringify(project)).charts[0].analysisRunId).toBe('saved-run');
+    chart.analysisRunId='missing';expect(()=>parseProject(JSON.stringify(project))).toThrow('missing saved analysis');
+    chart.analysisRunId='saved-run';project.analysisRuns[0].datasetId='missing';expect(()=>parseProject(JSON.stringify(project))).toThrow('analysis dataset');
+    project.analysisRuns[0].datasetId=project.activeDatasetId!;chart.analysis.statistic=7;expect(()=>parseProject(JSON.stringify(project))).toThrow('does not match');
+    const detached=reconcileProject(project);expect(detached.charts[0].analysisRunId).toBeUndefined();expect(detached.charts[0].analysis?.statistic).toBe(7);expect(project.analysisRuns[0].result.statistic).toBe(2);
+    const other=appendDatasets(project,[{name:'Second dataset',groups:parseCsv('Other\n1\n2')}],()=>createChart());other.analysisRuns![0].datasetId=other.activeDatasetId!;expect(()=>parseProject(JSON.stringify(other))).toThrow('different dataset');
+  });
+  it('keeps historical selected columns and linked results after measurements or groups are removed',()=>{
+    const project=normalizeWorkspace(createProject());addAnalysis(project);const chart=project.charts[0],removed=project.groups[0].id;
+    chart.analysis!.config.groupIds=[removed,project.groups[2].id];chart.groupIds=[removed];
+    project.analysisRuns=[{id:'saved-run',datasetId:project.activeDatasetId!,name:'First analysis',result:structuredClone(chart.analysis!)}];chart.analysisRunId='saved-run';
+    project.groups=project.groups.slice(1);project.datasets![0].groups=project.groups;
+    const reopened=parseProject(serializeProject(project));expect(reopened.charts[0].groupIds).toBeUndefined();expect(reopened.charts[0].analysisRunId).toBe('saved-run');expect(reopened.analysisRuns![0].result.config.groupIds).toContain(removed);
+  });
   it('round-trips individual point overrides, manual bracket positions, and original measurements',()=>{
     const project=createProject(),chart=project.charts[0],point=project.groups[0].observations[0];
     chart.pointStyles[point.id]={color:'#ee1133',size:8,shape:'diamond',stroke:'#111111',opacity:.7};
@@ -67,6 +101,29 @@ describe('editable project persistence',()=>{
 });
 
 describe('CSV import',()=>{
+  it('detects descriptive columns, keeps their original text and accepts missing measurements',()=>{
+    const groups=parseCsv('Mouse code;Sex;Control;Treatment\nM1;female;1,5;3\nM2;male;NA;4,2\nM3;female;2,5;N/A');
+    expect(groups.map(g=>g.name)).toEqual(['Control','Treatment']);
+    expect(groups[0].observations.map(o=>[o.value,o.subject])).toEqual([[1.5,'M1 · female'],[2.5,'M3 · female']]);
+    expect(groups[0].observations[0].labels).toEqual({'Mouse code':'M1',Sex:'female'});
+    expect(groups[1].observations.map(o=>o.value)).toEqual([3,4.2]);
+  });
+  it('retains explicit IDs, multiple label columns and repeated descriptive labels',()=>{
+    const groups=parseCsv('Subject,Label,Batch,Control,Treated\nS1,mouse,alpha,1,2\nS2,mouse,alpha,3,4');
+    expect(groups[0].observations.map(o=>o.subject)).toEqual(['S1','S2']);
+    expect(groups[1].observations[0].labels).toEqual({Label:'mouse',Batch:'alpha'});
+    expect(parseCsv('Label,A\nmouse,1\nmouse,2')[0].observations.map(o=>o.subject)).toEqual(['mouse','mouse [row 2]']);
+  });
+  it('handles a blank row-label header and explains text inside measurement columns',()=>{
+    expect(parseCsv('\tControl\nMouse A\t2\nMouse B\t3')[0].observations[0].subject).toBe('Mouse A');
+    expect(()=>parseCsv('Label,A\nmouse1,1\nmouse2,broken')).toThrow('mixes numbers and text');
+  });
+  it('imports JSON records, named arrays and groups without dropping labels or exclusions',()=>{
+    expect(parseDataTable('[{"Label":"A","Control":1,"Treated":2},{"Label":"B","Control":3,"Treated":4}]')[1].observations[1].subject).toBe('B');
+    expect(parseDataTable('{"Control":[1,null,3],"Treated":[2,4,6]}')[0].observations.map(o=>o.subject)).toEqual(['row-1','row-3']);
+    expect(parseDataTable('{"groups":[{"name":"A","observations":[{"value":2,"label":"mouse","excluded":true,"labels":{"Sex":"female"}}]}]}')[0].observations[0]).toMatchObject({value:2,subject:'mouse',excluded:true,labels:{Sex:'female'}});
+    expect(()=>parseDataTable('{"Control":[1,"oops"]}')).toThrow('Invalid numeric value');
+  });
   it('keeps row identity when different columns have blanks, preventing shifted pairing',()=>{
     const [a,b]=parseCsv('Control,Treated\n10,20\n,21\n12,\n13,23\n');
     expect(a.observations.map(o=>[o.value,o.subject])).toEqual([[10,'row-1'],[12,'row-3'],[13,'row-4']]);
