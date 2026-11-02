@@ -10,6 +10,10 @@ PSL is free software under the MIT license. Use the application downloads under 
 
 The small installers include the compiled editor and offline manuals. Their first setup downloads a local Python runtime and pinned dependencies; allow Internet access for that setup. Later use is independent of Internet access. See [offline operation](OFFLINE.md).
 
+## Complete offline package
+
+Download the ZIP containing **offline** and your operating system/architecture in its filename for a first launch without Internet access. It includes Python, uv and exact binary wheels. Extract the complete folder and use the normal launcher; `--offline --no-update` explicitly skips startup network checks too. The small installers/portable ZIP below remain options for users who prefer a smaller download and online initial setup.
+
 ## Portable download
 
 Extract `PlotStatLab-VERSION.zip` completely. Open `Start PlotStatLab.bat` on Windows, `Start PlotStatLab.command` on macOS, or run `sh start-plotstatlab.sh` on Linux. Keep the reserved `.psl` folder beside the launchers. You do not need to preinstall Node.js, Python, package managers or compilers. A moved installation may need to recreate its local environment; keep its runtime cache if you intend to move it without Internet.

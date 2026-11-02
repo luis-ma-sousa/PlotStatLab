@@ -127,6 +127,20 @@ def activate_runtime(root: Path, python: Path) -> None:
     os.replace(temporary, pointer)
 
 
+def bundled_wheels(root: Path, requirements: dict[str, str]) -> Path | None:
+    folder = runtime_root(root) / 'wheels'
+    available = set()
+    if not folder.is_dir():
+        return None
+    for path in folder.glob('*.whl'):
+        parts = path.name.split('-')
+        if len(parts) >= 5:
+            available.add((re.sub(r'[-_.]+', '-', parts[0]).lower(), parts[1]))
+    if all((re.sub(r'[-_.]+', '-', name).lower(), version) in available for name, version in requirements.items()):
+        return folder
+    return None
+
+
 def ensure_runtime(root: Path = ROOT, uv: str | None = None, offline: bool = False) -> Path:
     if not (root / 'dist' / 'index.html').is_file():
         raise RuntimeError('The compiled editor is missing. Extract the complete PlotStatLab ZIP again; do not copy only the launcher files.')
@@ -148,15 +162,19 @@ def ensure_runtime(root: Path = ROOT, uv: str | None = None, offline: bool = Fal
         venv = python.parents[1]
         if venv.is_symlink():
             raise RuntimeError('The runtime environment is a symbolic link. Extract a fresh PlotStatLab ZIP to install a local environment.')
-        print('PlotStatLab: preparing the local environment. The first installation needs an Internet connection.', flush=True)
+        wheelhouse = bundled_wheels(root, requirements)
+        print('PlotStatLab: preparing the local environment from bundled wheels.' if wheelhouse else 'PlotStatLab: preparing the local environment. The first installation needs an Internet connection.', flush=True)
         if not python_compatible(python):
             # Keep older and damaged environments for recovery; never delete a cache entry.
             if venv.exists():
                 venv.rename(venv.with_name(venv.name + '.recovery-' + uuid.uuid4().hex[:8]))
             subprocess.run([uv_path, 'venv', '--python', '3.12', '--managed-python', str(venv)],
                            env=env, check=True, cwd=root)
-        subprocess.run([uv_path, 'pip', 'sync', '--python', str(python), '--only-binary', ':all:',
-                        str(root / 'requirements-runtime.txt')], env=env, check=True, cwd=root)
+        command = [uv_path, 'pip', 'sync', '--python', str(python), '--only-binary', ':all:']
+        if wheelhouse:
+            command.extend(['--no-index', '--find-links', str(wheelhouse)])
+        command.append(str(root / 'requirements-runtime.txt'))
+        subprocess.run(command, env=env, check=True, cwd=root)
         if not probe_runtime(python, requirements):
             raise RuntimeError('Installation finished, but dependency verification failed. Run the launcher again with an Internet connection.')
     stamp = python.parents[1] / '.psl-runtime.json'

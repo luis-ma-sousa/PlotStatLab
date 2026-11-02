@@ -13,7 +13,7 @@ The 0.3 line implements the scientific and publication stages below. A checked i
 | Publication | Aligned multipanel layouts, A/B/C labels, shared fonts, scientific scripts/italics/bold, journal size templates, mm/DPI and batch export | Editable multipanel SVG, unique clipping IDs, ZIP CRC, PNG resolution metadata and UI tests |
 | Import | CSV/TSV, long XY/factor/censoring schemas, native Excel multi-sheet import | Real OOXML fixtures including formulas/caches, malformed archives, limits and no silent missing-response conversion |
 | Accessibility/performance | Keyboard point/annotation editing, modal focus containment/restoration, paginated tables, optimized exact swarm | Keyboard browser tests, 10,000-point identity/finite-coordinate test, tied heterogeneous-marker collision test |
-| Distribution | Small portable ZIP, per-user Windows graphical installer, drag-to-Applications macOS DMG/application, hidden runtime components | Native Windows/macOS build + actual install/start and cached offline start in CI; portable macOS/Windows/Linux checks |
+| Distribution | Small portable ZIP, complete per-platform offline runtime ZIP, per-user Windows graphical installer, drag-to-Applications macOS DMG/application, hidden runtime components | Native Windows/macOS build + actual install/start and cached offline start in CI; portable macOS/Windows/Linux checks; fresh offline runtime relocation tests |
 | Updates/recovery | Startup release checks, offline fallback, isolated dependency preparation, verified staged app, atomic promotion, rollback/crash recovery, schema-1 compatibility | Updater transaction/security/recovery tests and previous-format fixtures |
 
 ## Release gate
@@ -23,7 +23,7 @@ Before changing repository visibility, require all scientific/unit checks, the b
 ## External validation and publisher credentials
 
 - SVG exports are checked as standalone editable vectors and live text. Actual Illustrator testing is deferred at the user's request; no Illustrator access is assumed. Further checks across Illustrator releases can be recorded when the user provides feedback.
-- The macOS application has an ad-hoc local integrity signature. Windows trusted publisher signing and Apple Developer ID/notarization require publisher credentials that are not available. These must not be described as completed or silently substituted with checksums. The owner decides whether the free, unsigned/ad-hoc-signed distribution is sufficient for initial public release.
+- The macOS application has an ad-hoc local integrity signature. Windows trusted publisher signing and Apple Developer ID/notarization require publisher credentials that are not available. These must not be described as completed or silently substituted with checksums. The owner explicitly chose the free distribution without publisher certificates, Apple/Microsoft publishing accounts or notarization on 2026-11-02. Those external credentials are excluded from the initial public-release gate.
 - Native GraphPad project import was an investigation item rather than an approved implemented file format. PSL currently reopens its own `.psl`/legacy `.labplot` projects. PNG/SVG cannot reconstruct missing measurements or analysis history.
 
 ## Explicit scientific boundaries

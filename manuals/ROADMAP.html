@@ -55,8 +55,8 @@
 </tr>
 <tr>
 <td>Distribution</td>
-<td>Small portable ZIP, per-user Windows graphical installer, drag-to-Applications macOS DMG/application, hidden runtime components</td>
-<td>Native Windows/macOS build + actual install/start and cached offline start in CI; portable macOS/Windows/Linux checks</td>
+<td>Small portable ZIP, complete per-platform offline runtime ZIP, per-user Windows graphical installer, drag-to-Applications macOS DMG/application, hidden runtime components</td>
+<td>Native Windows/macOS build + actual install/start and cached offline start in CI; portable macOS/Windows/Linux checks; fresh offline runtime relocation tests</td>
 </tr>
 <tr>
 <td>Updates/recovery</td>
@@ -69,7 +69,7 @@
 <h2>External validation and publisher credentials</h2>
 <ul>
 <li>SVG exports are checked as standalone editable vectors and live text. Actual Illustrator testing is deferred at the user&#39;s request; no Illustrator access is assumed. Further checks across Illustrator releases can be recorded when the user provides feedback.</li>
-<li>The macOS application has an ad-hoc local integrity signature. Windows trusted publisher signing and Apple Developer ID/notarization require publisher credentials that are not available. These must not be described as completed or silently substituted with checksums. The owner decides whether the free, unsigned/ad-hoc-signed distribution is sufficient for initial public release.</li>
+<li>The macOS application has an ad-hoc local integrity signature. Windows trusted publisher signing and Apple Developer ID/notarization require publisher credentials that are not available. These must not be described as completed or silently substituted with checksums. The owner explicitly chose the free distribution without publisher certificates, Apple/Microsoft publishing accounts or notarization on 2026-11-02. Those external credentials are excluded from the initial public-release gate.</li>
 <li>Native GraphPad project import was an investigation item rather than an approved implemented file format. PSL currently reopens its own <code>.psl</code>/legacy <code>.labplot</code> projects. PNG/SVG cannot reconstruct missing measurements or analysis history.</li>
 </ul>
 <h2>Explicit scientific boundaries</h2>

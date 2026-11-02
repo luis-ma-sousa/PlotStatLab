@@ -23,3 +23,6 @@ node_modules
 .updates/
 
 native-release/
+offline-seed/
+offline-release/
+First offline launch with spaces/

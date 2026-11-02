@@ -37,6 +37,8 @@ if [ ! -x "$PSL_UV" ]; then
     --output "$PSL_INSTALLER"
   UV_UNMANAGED_INSTALL="$PSL_UV_DIR" sh "$PSL_INSTALLER"
 fi
-"$PSL_UV" python install 3.12 --no-bin --no-registry
-PSL_PYTHON=$("$PSL_UV" python find --managed-python 3.12)
+if ! PSL_PYTHON=$("$PSL_UV" python find --managed-python 3.12 2>/dev/null); then
+  "$PSL_UV" python install 3.12 --no-bin --no-registry
+  PSL_PYTHON=$("$PSL_UV" python find --managed-python 3.12)
+fi
 exec "$PSL_PYTHON" "$PSL_ROOT/scripts/bootstrap.py" --uv "$PSL_UV" "$@"

@@ -11,6 +11,12 @@ from .advanced import analyze_advanced
 from .statistics import AnalyzeRequest, SuggestRequest, analyze, suggest
 
 app = FastAPI(title="PlotStatLab Statistics", version=APP_VERSION)
+@app.middleware("http")
+async def local_resource_policy(request, call_next):
+    response = await call_next(request)
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 app.add_middleware(CORSMiddleware, allow_origins=["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:4173", "http://localhost:4173"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 
 

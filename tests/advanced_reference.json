@@ -4,7 +4,8 @@
     "methods": [
       "MixedLM REML (lbfgs)",
       "anova_lm typ=3 with Sum contrasts",
-      "AnovaRM"
+      "AnovaRM",
+      "dense GLS covariance using reference variance components"
     ]
   },
   "mixed": {
@@ -152,14 +153,14 @@
       0.2593506143754115,
       0.2593343880464087
     ],
-    "residualVariance": 0.242985611134934,
-    "interceptVariance": 7.183069085705427,
-    "restrictedLogLikelihood": -31.839997474632682,
     "conditionalGLSStandardErrors": [
       0.963460864334948,
       0.25932788763199943,
       0.2593278876319995
-    ]
+    ],
+    "residualVariance": 0.242985611134934,
+    "interceptVariance": 7.183069085705427,
+    "restrictedLogLikelihood": -31.839997474632682
   },
   "twoWay": {
     "rows": [

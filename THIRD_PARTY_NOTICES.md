@@ -24,7 +24,7 @@ PlotStatLab code is MIT-licensed. Dependencies retain their own licenses. Comple
 
 ## Installed runtime
 
-The launcher obtains uv from the official Astral distribution (MIT / Apache-2.0), managed CPython (Python Software Foundation license), and the pinned PyPI packages listed in requirements-runtime.txt. Their licenses are supplied by their respective distributions. SciPy and NumPy include additional notices for bundled numerical libraries; see the full copied notices. No Python interpreter or compiled scientific wheel is embedded in the source ZIP.
+The launcher obtains uv from the official Astral distribution (MIT / Apache-2.0), managed CPython (Python Software Foundation license), and the pinned PyPI packages listed in requirements-runtime.txt. Their licenses are supplied by their respective distributions. SciPy and NumPy include additional notices for bundled numerical libraries; see the full copied notices. No Python interpreter or compiled scientific wheel is embedded in the source or small universal ZIP. Complete per-platform offline ZIPs additionally contain official managed CPython, uv and pinned binary wheels; their upstream license texts/metadata remain in those distributions.
 
 Native Excel import additionally uses openpyxl 3.1.5 (MIT), et-xmlfile 2.0.0 (MIT) and defusedxml 0.7.1 (PSF). Full texts are included in licenses/python.
 

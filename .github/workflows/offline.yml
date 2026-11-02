@@ -1,0 +1,74 @@
+name: Complete offline packages
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  offline:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare small seed and local runtime
+        shell: bash
+        run: |
+          python scripts/package_release.py --output releases
+          python -c "import json,zipfile;v=json.load(open('package.json'))['version'];zipfile.ZipFile('releases/PlotStatLab-'+v+'.zip').extractall('offline-seed')"
+      - name: Install seed runtime (macOS/Linux)
+        if: runner.os != 'Windows'
+        run: sh "offline-seed/PlotStatLab/Start PlotStatLab.command" --check --no-update
+      - name: Install seed runtime (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          & "offline-seed/PlotStatLab/Start PlotStatLab.bat" --check --no-update
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Download exact binary wheels for this platform
+        run: python -m pip download --only-binary=:all: -r requirements-runtime.txt --dest offline-seed/PlotStatLab/.psl/.runtime/wheels
+      - name: Package complete relocatable runtime
+        shell: bash
+        run: |
+          VERSION=$(python -c "import json;print(json.load(open('package.json'))['version'])")
+          python scripts/package_offline.py --seed "releases/PlotStatLab-$VERSION.zip" --runtime offline-seed/PlotStatLab/.psl/.runtime --output offline-release
+          python -c "from pathlib import Path;import zipfile;archive=next(Path('offline-release').glob('*.zip'));z=zipfile.ZipFile(archive);root=Path('First offline launch with spaces');z.extractall(root);[(root/i.filename).chmod((i.external_attr>>16)&0o777) for i in z.infolist() if not i.is_dir() and (i.external_attr>>16)&0o111]"
+      - name: First launch after relocation without any cached environment (macOS/Linux)
+        if: runner.os != 'Windows'
+        env:
+          UV_OFFLINE: '1'
+          PSL_NO_UPDATE: '1'
+        run: sh "First offline launch with spaces/PlotStatLab/Start PlotStatLab.command" --check --offline --no-update
+      - name: First launch after relocation without any cached environment (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        env:
+          UV_OFFLINE: '1'
+          PSL_NO_UPDATE: '1'
+        run: |
+          & "First offline launch with spaces/PlotStatLab/Start PlotStatLab.bat" --check --offline --no-update
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PlotStatLab-offline-${{ runner.os }}
+          path: offline-release/*
+          retention-days: 14
+      - name: Attach offline package to tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for RETRY in 1 2 3 4 5 6; do
+            if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then break; fi
+            sleep 10
+          done
+          gh release upload "$GITHUB_REF_NAME" offline-release/* --clobber

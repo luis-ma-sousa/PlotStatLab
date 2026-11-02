@@ -4,7 +4,7 @@ Free, local scientific plotting and statistics with a live vector editor and mul
 
 ## Download, extract, open
 
-Download **PlotStatLab-0.2.0.zip** from [Releases](https://github.com/luis-ma-sousa/PlotStatLab/releases), extract the complete folder, then open:
+Download **PlotStatLab-0.3.0.zip** from [Releases](https://github.com/luis-ma-sousa/PlotStatLab/releases), extract the complete folder, then open:
 
 | System | Launcher |
 |---|---|
@@ -12,7 +12,7 @@ Download **PlotStatLab-0.2.0.zip** from [Releases](https://github.com/luis-ma-so
 | macOS | `Start PlotStatLab.command` |
 | Linux | `sh start-plotstatlab.sh` |
 
-The first launch needs Internet access and downloads a local Python runtime and pinned packages. You do not need to install Node.js, Python or a compiler yourself. Later launches verify the existing dependencies and start the app. Keep the terminal window open; Ctrl+C stops the local server. If your system asks for permission to execute a downloaded file, inspect the package and use the normal system approval flow.
+**For first launch without Internet, choose the complete offline ZIP for your system/CPU.** It includes Python and pinned scientific wheels. The small universal ZIP instead needs Internet access on first launch to download a local Python runtime and pinned packages. You do not need to install Node.js, Python or a compiler yourself. Later launches verify the existing dependencies and start the app. Keep the terminal window open; Ctrl+C stops the local server. If your system asks for permission to execute a downloaded file, inspect the package and use the normal system approval flow.
 
 The user download shows the launchers and a quick guide; application components live in a reserved `.psl` folder. Keep that folder with the launchers. Developer source is distributed separately through the repository. Extract the whole folder; running inside a ZIP or copying only a launcher will not work. Supported platforms must have binary wheels for the pinned scientific runtime. Clean installation and cached offline launch have passed on macOS, Windows and Linux in GitHub Actions, in addition to local Apple Silicon macOS testing. See the validation guide for the recorded run.
 

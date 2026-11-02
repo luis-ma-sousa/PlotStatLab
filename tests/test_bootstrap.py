@@ -209,3 +209,11 @@ def test_user_package_shows_launchers_and_hides_developer_material(app_root,tmp_
         assert all('/src/' not in name and '/tests/' not in name and '/.git/' not in name for name in names)
         assert archive.getinfo('PlotStatLab/.psl/').external_attr & 2
         assert all(name.startswith('PlotStatLab/.psl/') or name.split('/')[-1] in {'Start PlotStatLab.bat','Start PlotStatLab.command','start-plotstatlab.sh','LICENSE','Quick start.html','Read me.txt'} for name in names)
+
+def test_complete_bundled_wheels_remove_index_dependency_and_partial_sets_fall_back(app_root):
+    folder=app_root/'.runtime'/'wheels';folder.mkdir(parents=True)
+    (folder/'numpy-2.5.4-cp312-cp312-test.whl').write_bytes(b'wheel')
+    assert bootstrap.bundled_wheels(app_root,{'numpy':'2.5.4'})==folder
+    assert bootstrap.bundled_wheels(app_root,{'numpy':'2.5.4','scipy':'1.18.1'}) is None
+    (folder/'scipy-1.18.1-cp312-cp312-test.whl').write_bytes(b'wheel')
+    assert bootstrap.bundled_wheels(app_root,{'numpy':'2.5.4','scipy':'1.18.1'})==folder
