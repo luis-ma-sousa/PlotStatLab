@@ -57,7 +57,7 @@ test('label columns, selected-pair tests, saved results, stars, point context ed
  await expect(page.getByLabel('Control, row 1',{exact:true})).toHaveValue('1');
  await statistics(page).click();await expect(page.getByText('Data changed after this result was calculated.',{exact:false})).toBeVisible();
  await page.getByRole('button',{name:'Run and save new analysis',exact:true}).click();await resultCount(page,3);
- const p=await saved(page),last=p.analysisRuns.at(-1);expect(last.result.summaries.find((s:any)=>s.group==='Control').n).toBe(4);
+ const p=await saved(page),last=p.analysisRuns.at(-1);expect(last.result.summaries.find((s:any)=>s.group===dataset.groups[0].id).n).toBe(4);
  expect(p.datasets.find((d:any)=>d.id===dataset.id).groups[0].observations.find((o:any)=>o.id===pointId).excluded).toBe(true);
  await page.getByRole('button',{name:'Add stars / ns to figure',exact:true}).click();await page.getByRole('button',{name:'Open figure',exact:true}).click();
  await expect(page.locator('#chart-svg [data-annotation-id]')).toHaveCount(1);
