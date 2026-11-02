@@ -137,7 +137,7 @@
     "tests/test_bootstrap.py": "1f56ee404c1b64bf416147e15d578ef01fe2c7804aa1ced721ca2cf75c722f6e",
     "tests/test_outliers.py": "443ce4524dfdb17e7590cadfbbf2101f18d34d7c1217edb224c977fe71199cc0",
     "tests/test_statistics.py": "90d026cad99740fa491a9705a1979d15b2e1ce3a42c78e39765dba411c63906b",
-    "tests/test_updater.py": "bfbef049404181413e07b6041b81ebc7fdfbb2a622207b5f65ad41bfeab6fd2e",
+    "tests/test_updater.py": "6314bd121162785d4d7ef7a7630df96e7a2bb50c394a5248691d56b0ff60cdf4",
     "tsconfig.json": "c44f36374906be9ee959564fa2bf3d12361b8e0acc03eaf278d9e1ca14561ec6",
     "vite.config.ts": "1420969122e987e0960009222adcaa72457e6f5e80271c2e6010355f5d51033a",
     "vitest.config.ts": "17e4e50e8ed2805adbdb94482b699b6be3cdf9653a76e88d60547bd86a4f4596"

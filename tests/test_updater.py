@@ -23,7 +23,7 @@ def release_tree(root: Path, version='0.2.0', requirements='numpy==2.5.4\n'):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(value, encoding='utf-8')
     manifest = {'schemaVersion': 1, 'application': 'PlotStatLab', 'version': version,
-                'projectSchemaVersions': [1], 'files': {name: hashlib.sha256(value.encode()).hexdigest() for name, value in contents.items()}}
+                'projectSchemaVersions': [1], 'files': {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in contents}}
     (root / 'release-manifest.json').write_text(json.dumps(manifest), encoding='utf-8')
     return manifest
 
