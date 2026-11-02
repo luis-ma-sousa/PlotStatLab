@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Editable SVG in Adobe Illustrator</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#263d34;max-width:900px;margin:50px auto;padding:0 26px;background:#fcfdf9}a{color:#286651}h1,h2,h3{line-height:1.25;color:#244c3c}h1{font-size:34px}h2{margin-top:40px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #dfe6d9;padding:9px;text-align:left}pre{background:#edf2e7;padding:16px;overflow:auto;border-radius:6px}code{font-size:.9em}img{max-width:100%}.masthead{font-size:13px;letter-spacing:1px;color:#7c9473;border-bottom:1px solid #dfe6d9;padding-bottom:16px}blockquote{border-left:3px solid #a8bca0;padding-left:16px;color:#6e825f}@media print{body{margin:0;max-width:none}a{color:inherit}pre{white-space:pre-wrap}}</style></head><body><div class="masthead">PlotStatLab · PSL · <a href="/">Return to app</a> · <a href="QUICK-START.html">Quick start</a></div><h1>Editable SVG in Adobe Illustrator</h1>
+<p>PlotStatLab exports self-contained SVG1.1. Points, bars, paths, axes, legends and comparisons remain separate vector objects. Labels remain editable text: PSL does not outline the text or embed a photograph of the chart.</p>
+<h2>Open and edit</h2>
+<ol>
+<li>In PSL, finish a figure and choose <strong>Export → SVG → Export SVG</strong>.</li>
+<li>In Illustrator, choose <strong>File → Open</strong> and select the SVG. Opening provides direct access to objects. A file placed as a linked image in another document must be embedded before its contents can be edited.</li>
+<li>Open <strong>Window → Layers</strong>. Groups have names such as <code>PSL-data</code>, <code>PSL-point-…</code>, <code>PSL-statistics</code> and <code>PSL-axis-labels</code>. Depending on Illustrator, they may appear as groups within a layer.</li>
+<li>Use <strong>Direct Selection</strong> to select a shape or observation, or the text tool to edit a label. Expand the group hierarchy as needed. A plot clipping group is intentional; release it only if you want to change the clipping behavior.</li>
+<li>Save a separate <code>.ai</code> copy to preserve subsequent Illustrator editing.</li>
+</ol>
+<h2>What survives export</h2>
+<ul>
+<li>Unicode text, font family, size, weight, alignment and rotation.</li>
+<li>Explicit SVG fill and stroke attributes, including <code>fill=&quot;none&quot;</code> on open lines.</li>
+<li>HEX colors, opacity, dimensions, positions and observation-specific overrides.</li>
+<li>Groups, paths and geometric clipping needed to keep data within the axes.</li>
+<li>Automatic or manually positioned statistical comparisons that are current at export time.</li>
+</ul>
+<p>The file has no CSS dependency, external resources, scripts, raster images, <code>foreignObject</code> or library marker symbols. Invisible hit targets and selection outlines are removed. Each observation has its own editable object ID. Objects are grouped without changing paint order or transforms.</p>
+<h2>Practical limits</h2>
+<p>The chosen font must be installed where Illustrator opens the file; otherwise it may be substituted. PSL deliberately keeps text editable. Converting text to outlines in Illustrator may be useful for a final print-delivery file but removes text editing.</p>
+<p>Illustrator edits do not update PSL data or statistics. Keep the <code>.psl</code> scientific workspace and the SVG/AI presentation files. SVG is not a substitute for the workspace, nor does it contain a native <code>.ai</code> editing session. A raw SVG group is not guaranteed to become a separate native Illustrator layer.</p>
+<p>Structural tests validate XML, objects, text, fonts, strokes, transforms and clipping. Import behavior can still vary between Illustrator versions. See <a href="https://helpx.adobe.com/illustrator/using/saving-artwork.html">Adobe&#39;s SVG presentation-attribute guidance</a>.</p>
+<hr><p>PlotStatLab · MIT License · Documentation included for offline use.</p></body></html>

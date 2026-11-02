@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PlotStatLab — current scope and roadmap</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#263d34;max-width:900px;margin:50px auto;padding:0 26px;background:#fcfdf9}a{color:#286651}h1,h2,h3{line-height:1.25;color:#244c3c}h1{font-size:34px}h2{margin-top:40px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #dfe6d9;padding:9px;text-align:left}pre{background:#edf2e7;padding:16px;overflow:auto;border-radius:6px}code{font-size:.9em}img{max-width:100%}.masthead{font-size:13px;letter-spacing:1px;color:#7c9473;border-bottom:1px solid #dfe6d9;padding-bottom:16px}blockquote{border-left:3px solid #a8bca0;padding-left:16px;color:#6e825f}@media print{body{margin:0;max-width:none}a{color:inherit}pre{white-space:pre-wrap}}</style></head><body><div class="masthead">PlotStatLab · PSL · <a href="/">Return to app</a> · <a href="QUICK-START.html">Quick start</a></div><h1>PlotStatLab — current scope and roadmap</h1>
+<p>This page distinguishes implemented functionality from planned work. Priority can change with user needs and scientific validation.</p>
+<h2>Current 0.2 line</h2>
+<ul>
+<li>Thirteen charts: bar + swarm, bar, swarm, box, violin, raincloud, paired, XY scatter, XY lines, histogram, density, ECDF and heatmap.</li>
+<li>Per-observation styling, selective style transfer and project presets.</li>
+<li>Outlier review with ROUT/Grubbs options, preserved original measurements, visual flags and explicit reversible exclusions; method-specific validation must be reported.</li>
+<li>Ten group procedures: Welch, Student, paired t, Mann–Whitney, Wilcoxon, one-way ANOVA, Welch ANOVA, ANOVA/Tukey HSD, Kruskal–Wallis and Friedman, with pairwise methods named explicitly in the expert guide.</li>
+<li>Holm/Bonferroni/BH or Tukey&#39;s own adjustment, automatic significance annotations and manual positioning.</li>
+<li>CSV/TSV, editable tables, versioned projects, controllable autosave and PNG/editable SVG export.</li>
+<li>Setup/launch workflows, compiled interface and documentation for use under MIT.</li>
+</ul>
+<h2>Broader experimental designs</h2>
+<ul>
+<li>Two-factor tables and grouped charts.</li>
+<li>Two-way ANOVA and parametric repeated-measures ANOVA.</li>
+<li>Mixed models with explicit missing-observation policy.</li>
+<li>Correlation, linear regression and diagnostics.</li>
+<li>Independent validation of each analysis, result format and recommendation.</li>
+</ul>
+<h2>Specialized charts and analyses</h2>
+<ul>
+<li>Dose–response and nonlinear regression.</li>
+<li>Kaplan–Meier and survival comparisons.</li>
+<li>Forest, Bland–Altman and volcano plots.</li>
+<li>Additional post-tests with their own names/assumptions, including evaluation of Dunn and Dunnett.</li>
+<li>Further validation and reporting of outlier detection, flagging and explicit exclusion workflows; preserving original measurements is required.</li>
+</ul>
+<p>These specialized chart/analysis items are not part of the 13-chart catalog.</p>
+<h2>Publication workflows</h2>
+<ul>
+<li>Multipanel layouts with alignment and A/B/C labels.</li>
+<li>Batch export, physical dimensions and journal presets.</li>
+<li>Broader scientific typography, including superscripts and subscripts.</li>
+<li>Vector interoperability tests across more versions/platforms.</li>
+</ul>
+<h2>Data and distribution</h2>
+<ul>
+<li>Native Excel import and more flexible XY schemas.</li>
+<li>Larger-dataset and accessibility testing.</li>
+<li>Signed desktop packages and graphical installation, complementing current launchers.</li>
+<li>Format migrations, recovery and verified update behavior across more environments.</li>
+</ul>
+<p>Importing native GraphPad Prism projects requires separate investigation. PNG and SVG cannot reconstruct an earlier figure&#39;s underlying data and analysis automatically.</p>
+<hr><p>PlotStatLab · MIT License · Documentation included for offline use.</p></body></html>

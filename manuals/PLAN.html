@@ -1,0 +1,62 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PlotStatLab — product and execution plan</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#263d34;max-width:900px;margin:50px auto;padding:0 26px;background:#fcfdf9}a{color:#286651}h1,h2,h3{line-height:1.25;color:#244c3c}h1{font-size:34px}h2{margin-top:40px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #dfe6d9;padding:9px;text-align:left}pre{background:#edf2e7;padding:16px;overflow:auto;border-radius:6px}code{font-size:.9em}img{max-width:100%}.masthead{font-size:13px;letter-spacing:1px;color:#7c9473;border-bottom:1px solid #dfe6d9;padding-bottom:16px}blockquote{border-left:3px solid #a8bca0;padding-left:16px;color:#6e825f}@media print{body{margin:0;max-width:none}a{color:inherit}pre{white-space:pre-wrap}}</style></head><body><div class="masthead">PlotStatLab · PSL · <a href="/">Return to app</a> · <a href="QUICK-START.html">Quick start</a></div><h1>PlotStatLab — product and execution plan</h1>
+<p>This plan records the initial scientific workbench scope. The current application is named <strong>PlotStatLab (PSL)</strong>. It uses its own implementation and identity while drawing inspiration from the GraphPad Prism workflow.</p>
+<p>Approved priorities: figure quality, click-based editing, a broad chart catalog, assisted statistics, automatic significance annotations with manual adjustment, PNG/SVG export and fully editable saved projects.</p>
+<h2>Incorporated requirements</h2>
+<ol>
+<li>Transfer formatting between figures and save presets. Apply the full style or selected colors, typography, axes or points without replacing data, analyses or individual visual exceptions.</li>
+<li>Provide a broad catalog: bar + swarm is a minimum. The first delivery includes bar, swarm, box, violin, raincloud, paired, XY scatter, XY lines, histogram, density, ECDF and heatmap. Dose–response, Kaplan–Meier, forest, Bland–Altman, volcano, grouped two-factor charts and multipanel figures are later stages.</li>
+<li>Give every observation a stable ID. Preserve individual color, shape, size, opacity and outline editing in saved projects. Appearance changes must not alter scientific values.</li>
+<li>Suggest compatible tests and request experimental-design information explicitly. Do not infer pairing, independence or validity from numbers alone, and do not choose a test using an automatic preliminary normality decision.</li>
+<li>Derive significance marks from real comparisons, using adjusted p-values and an explicit correction method. Provide automatic bracket spacing/headroom, dragging, numeric offsets and a reset to automatic placement. Data/configuration changes make previous results stale.</li>
+<li>Save data, settings, results, styles, observation overrides and manual positions in a versioned <code>.psl</code> workspace. Provide autosave, undo/redo and portable files.</li>
+<li>Export vector SVG and dimension-controlled PNG. Editor selections and controls must not appear in exports.</li>
+</ol>
+<h2>Stages and completion criteria</h2>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Delivery and completion criterion</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Foundation</td>
+<td>React/TypeScript + SVG, local Python/SciPy engine, visual identity and project format. Navigate between data, figures and analyses.</td>
+</tr>
+<tr>
+<td>Functional workflow</td>
+<td>Initial catalog, editable/imported data, style transfer, analysis, annotations, export and reopening. Complete the full workflow with real input.</td>
+</tr>
+<tr>
+<td>Broader science</td>
+<td>Two-factor designs, mixed models, correlation/regression, dose–response and survival. Add each only with its own validated analysis and interface.</td>
+</tr>
+<tr>
+<td>Publication</td>
+<td>Multipanel layouts, advanced scientific typography, journal presets and batch export.</td>
+</tr>
+<tr>
+<td>Distribution</td>
+<td>Desktop installation, migrations/recovery, accessibility and larger-dataset performance.</td>
+</tr>
+</tbody></table>
+<h2>Initial statistical scope</h2>
+<p>Independent Welch and Student t-tests, paired t, Mann–Whitney, Wilcoxon, one-way ANOVA, Welch ANOVA, ANOVA/Tukey, Kruskal–Wallis and Friedman where validated. Planned pairwise comparisons use the named pair tests and Holm/Bonferroni/BH adjustment; Tukey uses its own family adjustment. Paired analyses require subject identities.</p>
+<h2>Validation</h2>
+<p>Use independent numerical references and invalid-input cases. Verify pairing by ID, multiple-testing adjustment, point/bracket collisions, persistent individual edits, project round trips and style transfer without data changes. Stale analyses must not generate annotations. Manual positions must survive saving/reopening. Exports must match dimensions and exclude editor controls. Verify the complete workflow in a browser.</p>
+<h2>Explicit limits of the initial delivery</h2>
+<p>The initial version was a local browser application without a native installer. Its own project format preserves editability; PNG, SVG or Prism files cannot guarantee reconstruction of data and analysis. Specialized charts and analyses above were planned work, not completed functions. Data/autosave remain local; GitHub receives source and synthetic demonstration data.</p>
+<p>The 0.2 revision adds the PlotStatLab identity, MIT licensing, English guides, autosave control, HEX color entry, Illustrator-oriented SVG and distribution/update preparation. Consult the current <a href="ROADMAP.html">roadmap</a>, <a href="../CHANGELOG.md">changelog</a> and validation records for implementation status.</p>
+<h2>References</h2>
+<ul>
+<li><a href="https://docs.scipy.org/doc/scipy/reference/stats.html">SciPy statistical functions</a></li>
+<li><a href="https://www.graphpad.com/guides/prism/latest/user-guide/simple_pairwise_comparisons.htm">Prism pairwise-comparison annotations</a></li>
+<li><a href="https://www.graphpad.com/guides/prism/latest/statistics/stat_exact_p_values_from_multiple_c.htm">Prism adjusted comparison p-values</a></li>
+<li><a href="https://react.dev/learn/responding-to-events">React event handling</a></li>
+<li><a href="https://vite.dev/guide/">Vite guide</a></li>
+</ul>
+<h2>Multiple datasets and side-by-side review</h2>
+<p>Use <strong>Overview → Import datasets</strong> to select several CSV/TSV files in one operation. Each becomes a named dataset with its own table and initial figure. Imports are validated before they are added; the existing workspace is preserved if a file is invalid. Use the sidebar to select a dataset. Figures retain an explicit dataset link, so applying a style from another dataset transfers the appearance without replacing measurements.</p>
+<p>Every successful statistical run is kept in the analysis history, including its dataset, test, correction, alpha, results and timestamp. Run different tests or analyze different datasets, then use <strong>Overview → Choose analyses</strong> to display selected results side by side. Each historical result is checked against its own recorded configuration and current dataset measurements. Changing the assistant&#39;s next-test controls does not rewrite previous tests.</p>
+<p>Use <strong>Choose figures</strong> to select several figures from the same or different datasets. Preview cards show the dataset name and provide <strong>Edit figure</strong>. The complete selection is saved in <strong>Save workspace → .psl</strong>, along with every dataset, test and figure. Legacy <code>.labplot</code> files remain supported and convert to a one-dataset workspace. CSV export contains raw measurements; use <code>.psl</code> to preserve exclusions and the complete analysis state.</p>
+<hr><p>PlotStatLab · MIT License · Documentation included for offline use.</p></body></html>

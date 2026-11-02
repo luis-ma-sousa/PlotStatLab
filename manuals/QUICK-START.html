@@ -1,0 +1,72 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PlotStatLab: super quick guide</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#263d34;max-width:900px;margin:50px auto;padding:0 26px;background:#fcfdf9}a{color:#286651}h1,h2,h3{line-height:1.25;color:#244c3c}h1{font-size:34px}h2{margin-top:40px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #dfe6d9;padding:9px;text-align:left}pre{background:#edf2e7;padding:16px;overflow:auto;border-radius:6px}code{font-size:.9em}img{max-width:100%}.masthead{font-size:13px;letter-spacing:1px;color:#7c9473;border-bottom:1px solid #dfe6d9;padding-bottom:16px}blockquote{border-left:3px solid #a8bca0;padding-left:16px;color:#6e825f}@media print{body{margin:0;max-width:none}a{color:inherit}pre{white-space:pre-wrap}}</style></head><body><div class="masthead">PlotStatLab · PSL · <a href="/">Return to app</a> · <a href="QUICK-START.html">Quick start</a></div><h1>PlotStatLab: super quick guide</h1>
+<p><strong>Download → extract the complete folder → open the launcher.</strong> Windows: <code>Start PlotStatLab.bat</code>; macOS: <code>Start PlotStatLab.command</code>; Linux: <code>sh start-plotstatlab.sh</code>. The first launch installs local dependencies and needs Internet. Later work can be offline.</p>
+<table>
+<thead>
+<tr>
+<th>I want to…</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Add several datasets</td>
+<td><strong>Overview → Import datasets</strong>, then select multiple CSV/TSV files. Existing work stays intact.</td>
+</tr>
+<tr>
+<td>Paste a table</td>
+<td><strong>Data → Add pasted dataset</strong>. First row contains group names; optional <code>Subject</code> and <code>X</code> columns preserve identities/coordinates.</td>
+</tr>
+<tr>
+<td>Switch datasets</td>
+<td>Choose the dataset in the left sidebar. Changes affect that dataset only.</td>
+</tr>
+<tr>
+<td>Make a chart</td>
+<td>Select a dataset, then <strong>New chart → chart type</strong>. Multiple figures can use one dataset.</td>
+</tr>
+<tr>
+<td>Compare figures</td>
+<td><strong>Overview → Choose figures</strong>. Selected figures appear together; <strong>Edit figure</strong> opens one for detailed editing.</td>
+</tr>
+<tr>
+<td>Run statistics</td>
+<td><strong>Statistics</strong> → experimental design → compatible test → comparisons/correction → <strong>Analyze and annotate chart</strong>.</td>
+</tr>
+<tr>
+<td>Compare different tests</td>
+<td>Run each test on its dataset. <strong>Overview → Choose analyses</strong> shows saved results side by side.</td>
+</tr>
+<tr>
+<td>Find outliers</td>
+<td><strong>Statistics → Find outliers</strong> → ROUT/Q or Grubbs/alpha → <strong>Detect outliers</strong>. Review flags; exclusion is explicit and retains original values.</td>
+</tr>
+<tr>
+<td>Edit one point</td>
+<td>Click it in the editor; change its color/HEX, shape, size, opacity or outline.</td>
+</tr>
+<tr>
+<td>Reuse formatting</td>
+<td><strong>Apply style</strong> copies another figure&#39;s style. <strong>Save reusable style</strong> creates a preset.</td>
+</tr>
+<tr>
+<td>Move stars</td>
+<td>Drag a comparison bracket, or select it and change <strong>X offset / Y offset</strong>. <strong>Reset automatic position</strong> restores automatic placement.</td>
+</tr>
+<tr>
+<td>Export to Illustrator</td>
+<td><strong>Export → SVG → Export SVG</strong>. In Illustrator use <strong>File → Open</strong>; text and vector objects remain editable. The chosen font must be installed.</td>
+</tr>
+<tr>
+<td>Export an image</td>
+<td><strong>Export → PNG</strong>, choose pixel scale, export.</td>
+</tr>
+<tr>
+<td>Save all work</td>
+<td><strong>Save workspace</strong> downloads one <code>.psl</code> with datasets, tests, figures and selected panels. <strong>Open</strong> restores it or a legacy <code>.labplot</code>.</td>
+</tr>
+<tr>
+<td>Control autosave</td>
+<td>Use the <strong>Autosave</strong> switch. OFF stops automatic browser writes; save explicitly before closing.</td>
+</tr>
+</tbody></table>
+<p>A <code>.psl</code> is the scientific workspace. SVG/PNG are presentation figures. Flags do not prove laboratory error, and suggestions do not establish experimental assumptions. Use portable workspace backups when moving browsers or computers. Detailed help is available offline under <strong>Help</strong>.</p>
+<hr><p>PlotStatLab · MIT License · Documentation included for offline use.</p></body></html>
