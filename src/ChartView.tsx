@@ -18,6 +18,7 @@ function marker(shape: Shape, x: number, y: number, radius: number, props: React
 
 export default function ChartView({chart, groups, selection, onSelect, onAnnotationMove, analysisStale = false}: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const suppressRootClick = useRef(false);
   const drag = useRef<{id: string; startX: number; startY: number; position: AnnotationPosition} | null>(null);
   const [preview, setPreview] = useState<{id: string; position: AnnotationPosition} | null>(null);
   const {style} = chart, width = style.width, height = style.height;
@@ -70,7 +71,16 @@ export default function ChartView({chart, groups, selection, onSelect, onAnnotat
   function pointerPosition(e: ReactPointerEvent) { const svg = svgRef.current; if (!svg) return {x: 0, y: 0}; const matrix = svg.getScreenCTM(); if (!matrix) return {x: 0, y: 0}; const point = new DOMPoint(e.clientX, e.clientY).matrixTransform(matrix.inverse()); return {x: point.x, y: point.y}; }
   function startDrag(e: ReactPointerEvent, id: string) { e.stopPropagation(); onSelect({kind: 'annotation', id}); const point = pointerPosition(e), position = chart.annotationPositions[id] ?? {dx: 0, dy: 0}; drag.current = {id, startX: point.x, startY: point.y, position}; svgRef.current?.setPointerCapture(e.pointerId); }
   function moveDrag(e: ReactPointerEvent) { if (!drag.current) return; const p = pointerPosition(e), d = drag.current; setPreview({id: d.id, position: {dx: d.position.dx + p.x - d.startX, dy: d.position.dy + p.y - d.startY}}); }
-  function endDrag(e: ReactPointerEvent) { const d = drag.current; if (!d) return; const p = pointerPosition(e); onAnnotationMove(d.id, {dx: d.position.dx + p.x - d.startX, dy: d.position.dy + p.y - d.startY}); drag.current = null; setPreview(null); if (svgRef.current?.hasPointerCapture(e.pointerId)) svgRef.current.releasePointerCapture(e.pointerId); }
+  function endDrag(e: ReactPointerEvent) {
+    const d = drag.current; if (!d) return; const p = pointerPosition(e);
+    const dx = p.x - d.startX, dy = p.y - d.startY;
+    // SVG pointer capture retargets the following click to the SVG itself.
+    suppressRootClick.current = true;
+    if (Math.hypot(dx, dy) > 1) onAnnotationMove(d.id, {dx: d.position.dx + dx, dy: d.position.dy + dy});
+    onSelect({kind: 'annotation', id: d.id});
+    drag.current = null; setPreview(null);
+    if (svgRef.current?.hasPointerCapture(e.pointerId)) svgRef.current.releasePointerCapture(e.pointerId);
+  }
   function annotationKey(e: React.KeyboardEvent, id: string) { const delta = e.shiftKey ? 10 : 2, current = chart.annotationPositions[id] ?? {dx: 0, dy: 0}; const vectors: Record<string, [number, number]> = {ArrowLeft: [-delta, 0], ArrowRight: [delta, 0], ArrowUp: [0, -delta], ArrowDown: [0, delta]}; if (vectors[e.key]) {e.preventDefault(); const [dx, dy] = vectors[e.key]; onAnnotationMove(id, {dx: current.dx + dx, dy: current.dy + dy});} }
 
   const axisProps = {stroke: style.axisColor, strokeWidth: 1.2, fill: 'none'}, textProps = {fill: style.axisColor, fontSize: style.fontSize};
@@ -150,7 +160,7 @@ export default function ChartView({chart, groups, selection, onSelect, onAnnotat
   if (useLog && allValues.some(v => v <= 0)) warnings.push('Valores ≤ 0 não são representados na escala logarítmica.');
   if (chart.type === 'paired' && groups.some(g => g.observations.some(o => !o.subject))) warnings.push('Ligações apenas para observações com o mesmo ID de indivíduo.');
   if (bracketCount > 5) warnings.push('Muitas comparações: aumente a altura ou selecione menos pares.');
-  return <svg ref={svgRef} id="chart-svg" xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={chart.title || 'Gráfico científico'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background, touchAction: 'none'}} onClick={() => onSelect({kind: 'chart'})} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={() => {drag.current = null; setPreview(null);}}>
+  return <svg ref={svgRef} id="chart-svg" xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={chart.title || 'Gráfico científico'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background, touchAction: 'none'}} onClick={() => {if (suppressRootClick.current) {suppressRootClick.current = false; return;} onSelect({kind: 'chart'});}} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={() => {drag.current = null; suppressRootClick.current = false; setPreview(null);}}>
     <rect width={width} height={height} fill={style.background} />
     <defs><clipPath id={`plot-clip-${chart.id}`}><rect x={plotLeft - 1} y={plotTop - 1} width={plotWidth + 2} height={plotHeight + 2} /></clipPath></defs>
     <text data-edit="title" x={width / 2} y={39} textAnchor="middle" fill={style.axisColor} fontSize={style.titleSize} fontWeight={600} style={{cursor: 'pointer'}} onClick={e => {e.stopPropagation(); onSelect({kind: 'title'});}}>{chart.title}</text>

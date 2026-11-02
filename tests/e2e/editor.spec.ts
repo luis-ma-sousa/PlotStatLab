@@ -19,7 +19,7 @@ test('individual point styling, computed brackets, drag, portable roundtrip, sta
  await page.getByRole('button',{name:'Ver no gráfico',exact:true}).click();
  const brackets=page.locator('[data-annotation-id]');
  expect(await brackets.count()).toBeGreaterThan(0);
- const boxes=await brackets.evaluateAll(els=>els.map(el=>{const b=(el as SVGGraphicsElement).getBBox();return {x:b.x,y:b.y,w:b.width,h:b.height}}));
+ const boxes=await brackets.evaluateAll(els=>els.map(el=>{const boxes=[...el.querySelectorAll('path,text')].map(e=>(e as SVGGraphicsElement).getBBox());const x=Math.min(...boxes.map(b=>b.x)),y=Math.min(...boxes.map(b=>b.y));return {x,y,w:Math.max(...boxes.map(b=>b.x+b.width))-x,h:Math.max(...boxes.map(b=>b.y+b.height))-y}}));
  for(const b of boxes){expect(b.y).toBeGreaterThan(45);expect(b.x).toBeGreaterThan(0);expect(b.x+b.w).toBeLessThan(801)}
  for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const a=boxes[i],b=boxes[j];expect(a.y+a.h<=b.y||b.y+b.h<=a.y||a.x+a.w<=b.x||b.x+b.w<=a.x).toBeTruthy()}
  const bracket=brackets.first(),box=await bracket.boundingBox();expect(box).not.toBeNull();

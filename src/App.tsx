@@ -56,7 +56,7 @@ export default function App(){
  useEffect(()=>{if(!notice)return;const t=setTimeout(()=>setNotice(''),4500);return()=>clearTimeout(t)},[notice]);
  function commit(next:Project|((p:Project)=>Project)){setProject(p=>{const n=typeof next==='function'?next(p):next;setPast(h=>[...h.slice(-69),p]);setFuture([]);return reconcileProject({...n,updatedAt:new Date().toISOString()})})}
  function updateChart(patch:Partial<Chart>){commit(p=>({...p,charts:p.charts.map(c=>c.id===chart.id?{...c,...patch}:c)}))}
- function style(patch:Partial<ChartStyle>){updateChart({style:{...chart.style,...patch}})}
+ function style(patch:Partial<ChartStyle>){const next={...chart.style,...patch};if(next.yMin!==null&&next.yMax!==null&&next.yMin>=next.yMax){setError('O mínimo do eixo Y deve ser inferior ao máximo.');return}if(next.yScale==='log'&&((next.yMin!==null&&next.yMin<=0)||(next.yMax!==null&&next.yMax<=0))){setError('Os limites da escala logarítmica devem ser positivos. Usa Auto ou introduz limites positivos.');return}updateChart({style:next})}
  function updateConfig(patch:Partial<AnalysisConfig>){commit(p=>({...p,analysisConfig:{...p.analysisConfig,...patch}}))}
  function undo(){if(!past.length)return;setFuture(f=>[project,...f]);setProject(past[past.length-1]);setPast(p=>p.slice(0,-1))}
  function redo(){if(!future.length)return;setPast(p=>[...p,project]);setProject(future[0]);setFuture(f=>f.slice(1))}
