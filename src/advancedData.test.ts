@@ -6,6 +6,13 @@ import {defaultPublication} from './publication';
 import type {AdvancedResult} from './advancedTypes';
 const result:AdvancedResult={method:'linear-regression',methodLabel:'Linear regression',engine:'Reference',fingerprint:'abc',createdAt:'2026-11-02T12:00:00Z',parameters:{alpha:.05},tables:[{title:'Fit',columns:['Term','Estimate'],rows:[['Slope',2]]}],estimates:{slope:2},warnings:[],reference:'https://docs.scipy.org/',series:[{name:'Fit',kind:'fit',points:[{x:1,y:2},{x:2,y:4}]}]};
 describe('advanced data and compatibility',()=>{
+ it('retains extra descriptive label columns in advanced tables and saved projects',()=>{
+  const rows=parseAdvancedCsv('Group,X,Y,Mouse name,Sex\nA,1,2,Mouse one,female\nB,2,4,Mouse two,male');
+  expect(rows[0].labels).toEqual({'Mouse name':'Mouse one',Sex:'female'});
+  const groups=groupsFromAdvanced(rows);expect(groups[1].observations[0].labels).toEqual({'Mouse name':'Mouse two',Sex:'male'});
+  expect(rowsForDataset({id:'d',name:'d',groups,advancedRows:rows,analysisConfig:createProject().analysisConfig})[0].label).toBe('Mouse one · female');
+  expect(isAdvancedCsv('Time,Control,Treated\nDay 1,2,3')).toBe(false);
+ });
  it('loads every scientific example with finite explicit response fields',()=>{for(const sample of Object.values(advancedExamples)){expect(isAdvancedCsv(sample.text)).toBe(true);const rows=parseAdvancedCsv(sample.text);expect(rows.length).toBeGreaterThan(2);expect(rows.every(r=>Number.isFinite(r.y))).toBe(true)}});
  it('parses censoring explicitly and never flips event coding',()=>{const rows=parseAdvancedCsv('time,event,group\n3,1,A\n4,0,B');expect(rows.map(r=>r.event)).toEqual([true,false]);expect(parseAdvancedCsv('time,censored\n3,true')[0].event).toBe(false)});
  it('rejects ambiguous headers, malformed numbers and silent row loss',()=>{expect(()=>parseAdvancedCsv('Y,response\n1,2')).toThrow(/unique/);expect(()=>parseAdvancedCsv('X,Y\n1,')).toThrow(/missing/);expect(()=>parseAdvancedCsv('X,Y\n2,123abc')).toThrow(/finite/);expect(()=>parseAdvancedCsv('Y,event\n2,maybe')).toThrow(/1\/0/);expect(()=>parseAdvancedCsv('estimate,lower,upper\n2,4,1')).toThrow(/lower/)});

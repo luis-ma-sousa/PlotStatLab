@@ -1,244 +1,225 @@
 # PlotStatLab — beginner's guide
 
-**PSL 0.3.0 · From download to your first figure, without programming**
+**From download to a saved analysis and figure, without programming**
 
-This guide uses fictional data so you can learn the workflow before entering your own measurements. If you only need the clicks, use the [quick start](QUICK-START.md). For methods and file formats, use the [expert guide](EXPERT-GUIDE.md).
+This guide uses fictional measurements. For the shortest list of clicks, use the [quick guide](QUICK-START.md). For method details, see the [expert guide](EXPERT-GUIDE.md).
 
 ## 1. Download and open
 
-1. Download a package from [PlotStatLab Releases](https://github.com/luis-ma-sousa/PlotStatLab/releases/latest). Choose the **complete offline ZIP** matching your system and CPU for first launch without Internet. The smaller universal ZIP downloads dependencies during initial setup. Windows Setup and macOS DMG are also available; see the [installation guide](INSTALLATION.md).
-2. **Extract the ZIP** into a folder where you can save files. Do not run the launcher from inside the ZIP.
-3. Open the launcher for your operating system:
+1. Download a package from [PlotStatLab Releases](https://github.com/luis-ma-sousa/PlotStatLab/releases/latest). Choose the **complete offline ZIP** matching your system and CPU for first launch without Internet. The small universal ZIP needs Internet during initial setup. Windows Setup and macOS DMG are also available; see [installation](INSTALLATION.md).
+2. Extract the complete ZIP into a writable folder. Do not run the launcher from inside the ZIP.
+3. Open `Start PlotStatLab.bat` on Windows, `Start PlotStatLab.command` on macOS, or `start-plotstatlab.sh` on Linux.
+4. Let setup finish. The app opens in your browser at `http://127.0.0.1:8765`. Keep the launcher's terminal window open while working.
 
-| System | Launcher |
+Later launches reuse installed dependencies. Editing, statistical calculations, imports and exports run locally after setup. Online launches check GitHub for updates; an already running session is protected from being updated mid-session. You need no PSL account, subscription or separate Node.js installation. The source is licensed under [MIT](../LICENSE).
+
+## 2. Understand the three things you work with
+
+A **dataset** is a table of measurements. An **analysis** is a saved statistical result from selected columns of that dataset. A **figure** displays selected columns, with its own styling. Your **workspace** keeps all datasets, analyses and figures together.
+
+| Area | Use it to… |
 |---|---|
-| Windows | `Start PlotStatLab.bat` |
-| macOS | `Start PlotStatLab.command` |
-| Linux | `start-plotstatlab.sh` |
+| **Data** | Type, paste, import and review measurements |
+| **Statistics** | Select columns, run tests and reopen saved results |
+| **Editor** | Choose a figure's source data and format its appearance |
+| **Overview** | See several figures and analyses together |
+| **Publication** | Arrange figures into a multi-panel layout |
+| Workspace name / **Switch / new workspace** | Open another workspace or create a blank one |
+| **Save workspace / Open** | Download or restore a portable `.psl` file |
+| **Export** | Save the current figure as SVG or PNG |
 
-4. On the first run, let local setup finish. The complete offline package needs no Internet; the small universal ZIP needs Internet for that first setup. The package includes the compiled interface; using it does not require a separate Node.js installation.
-5. The app opens in your browser at `http://127.0.0.1:8765`.
+Select a dataset in the sidebar, or in the **Dataset** selector above Data and Statistics. Selecting another dataset leaves the others in the workspace. Figure cards show their linked dataset name.
 
-Later launches reuse compatible installed dependencies. After initial setup, the installed version can run offline. Online launches check GitHub for available updates; a change in dependencies may require another setup step. If a session is already running, updates are deferred until a later full start to protect unfinished work.
+## 3. Enter data without importing a file
 
-Keep the terminal window open while using the app. `Ctrl+C` in that window stops the local server. You do not need a PlotStatLab account. The source is licensed under [MIT](../LICENSE); no paid account or subscription is required.
+### Type into a blank table
 
-## 2. Find your way around
+1. Choose **New dataset**, enter a name such as `Dose experiment`, then **Create blank table**.
+2. In **Data**, rename `Group A` to `Control` and `Group B` to `Low dose` by editing their column headings.
+3. Choose **+ Column** and name the extra column `High dose`.
+4. Click a numeric cell and type a measurement. Press Enter to continue down the column; Tab moves between fields.
+5. Use **+ Rows** when you need more space.
 
-| Area | Purpose |
-|---|---|
-| **Data** | Import and edit measurements |
-| **Statistics** | Describe the experiment and run an analysis |
-| **Editor** | View and format the figure |
-| **Figures**, on the left | Switch between figures in this project |
-| **Format figure** | Edit the selection and general appearance |
-| **Save workspace / Open** | Save and reopen the complete editable project |
-| **Export** | Create the final SVG or PNG figure |
+Each measurement column represents a group. **Row label / Subject ID** identifies a row; use genuine subject IDs if the same experimental units were measured in several conditions. Row order alone does not establish valid pairing.
 
-In a narrow window, use **Format** to open the formatting drawer. Clicking an editable element can also open it.
+### Copy and paste a range from Excel
 
-**Each dataset has its own data table.** Figures linked to that dataset share its measurements. Editing one dataset leaves the others unchanged. The workspace stores all datasets, figures, analysis history and selected overview panels.
+You can paste straight into the table, as you would in a spreadsheet:
 
-## 3. Make your first figure
+1. Copy a rectangular range of numbers **without its headings**.
+2. Click the starting numeric cell in PSL.
+3. Press `Ctrl+V` on Windows or `⌘V` on Mac.
+4. Review the pasted values. The range can extend into new rows and columns.
 
-We will compare three fictional independent groups. This is a software exercise, not a recommended analysis for every experiment.
+To paste row IDs as well, include them as the first column and start in **Row label / Subject ID**. Existing text-label columns also occupy their own positions in the table. If you copied column headings, use the complete-table option below.
 
-1. Open **Data**.
-2. Choose **Add pasted dataset**.
-3. Paste the complete table, including its first line:
+### Paste a complete table with headings
+
+Choose **Paste new dataset** or **Paste table**, paste the complete table, then **Import table**. This creates a new dataset and keeps earlier work. Try this fictional example:
 
 ```csv
-Control,Low dose,High dose
-20,30,41
-22,33,45
-19,28,39
-23,35,47
-21,31,43
-24,34,46
+Sample,Control,Low dose,High dose
+Mouse 1,20,30,41
+Mouse 2,22,33,45
+Mouse 3,19,28,39
+Mouse 4,23,35,47
+Mouse 5,21,31,43
+Mouse 6,24,34,46
 ```
 
-4. Choose **Import table**. Pasting adds a new dataset and preserves previous datasets and figures. Select the new dataset in the sidebar to edit it.
-5. Check that there are three groups, with six observations per group.
-6. Open **Editor**. The bar + swarm figure shows a summary and every observation.
+`Sample` remains a label column; the three numeric columns become measurement groups. Check that each group has six observations.
 
-Each column is a group. Each numeric cell is an observation. An empty cell is missing data; **zero is a real value**, not a missing-value marker.
+### Import existing files
 
-You can also use **Import datasets** for an Excel export. Commas, semicolons and tabs are supported as column separators. For decimal commas, use a separator that keeps columns unambiguous, such as a semicolon:
+Use **Import files** and select one or several CSV, TSV, TXT, JSON, XLSX, XLSM or ODS files. Visible nonempty workbook sheets become separate datasets. XLSM imports read stored values; PSL does not run macros. Convert older `.xls`/`.xlsb` workbooks to `.xlsx` or CSV first.
+
+Text-only columns are retained as labels, rather than being forced into statistical measurements. Conventional names such as `Sample`, `Label`, `Sex` and `Notes` identify label columns even when some labels contain numbers. Extra labels remain visible in the data grid.
+
+Blank, `NA`, `N/A`, `null`, `missing` and `NaN` cells mean missing measurements. **Zero is a real measurement.** A column that mixes numbers with unrelated text needs review: move the labels to a separate label column or correct the cell. The import reports the location instead of silently dropping it.
+
+Commas, semicolons and tabs are supported as separators. For decimal commas, use an unambiguous separator, for example:
 
 ```csv
-Control;Treatment
-20,5;31,2
-22,1;33,4
+Sample;Control;Treatment
+A;20,5;31,2
+B;22,1;33,4
 ```
 
-## 4. Choose a chart
+## 4. Choose a dataset and columns for each figure
 
-Choose **New chart**, then a chart in the gallery. The new figure appears in the sidebar and uses the same project data.
+1. Choose **New chart** or **Create figure from this data**.
+2. Check **Dataset for the new figure**.
+3. Select the **Columns to plot**.
+4. Choose a chart type, for example **Bar + swarm**.
 
-To change the current figure instead of adding another one, open the gallery and use **Change current figure type** at the bottom.
+One dataset can have several figures. Each figure keeps its own dataset link and chosen columns. In the Editor, use the figure's dataset selector and column checkboxes to review or change that link. Switching a figure to another dataset clears its former analysis and point-specific styling, because those belonged to different observations. Other figures and saved analysis runs remain available.
 
-| I want to show… | A useful starting point |
+To change only the current figure's type, open **New chart** and use **Change current chart type** at the bottom of the gallery.
+
+| I want to show… | A starting point |
 |---|---|
-| Observations and a group summary | **Bar + swarm** or **Swarm** |
+| Every observation and a summary | **Bar + swarm** or **Swarm** |
 | Median and spread | **Box plot** |
 | Distribution shape | **Violin**, **Raincloud** or **Density** |
-| Counts within intervals | **Histogram** |
-| A relationship between X and Y | **XY scatter** |
+| Counts in intervals | **Histogram** |
+| A relationship between X and Y | **XY scatter** or **Regression** |
 | Values ordered by X | **XY lines** |
-| Changes in the same individuals | **Paired**, using real subject IDs |
+| Changes in the same individuals | **Paired**, using genuine subject IDs |
 | Cumulative probability | **ECDF** |
 | A matrix of measurements | **Heatmap** |
 
-This version has 20 chart families. Grouped, regression, dose–response, Kaplan–Meier, forest, Bland–Altman and volcano charts use explicit scientific columns; see [advanced methods](ADVANCED-METHODS.md).
+There are 20 chart families. Grouped, regression, dose–response, Kaplan–Meier, forest, Bland–Altman and volcano charts use explicit scientific columns; see [advanced methods](ADVANCED-METHODS.md).
 
-## 5. Format the figure
+## 5. Run and keep several statistical tests
 
-Use **Format figure** for titles, axes, colors, fonts, symbols, error bars and dimensions.
+For this exercise, assume the three fictional columns are independent groups. This is a software example, not a recommended analysis for every experiment.
 
-Pick a color visually or enter its **HEX** value beside the color picker. For example, `#0072B2` is blue. The fields accept three- or six-digit HEX, with or without `#`, and normalize valid values when applied.
+1. Open **Statistics** and check the **Dataset** selector.
+2. Under **Choose columns and design**, select `Control`, `Low dose` and `High dose`.
+3. Choose **Independent groups** and a compatible test. For this example, choose **Welch ANOVA + Welch t-tests**.
+4. Choose **Each selected group versus control**, with `Control` as reference. Keep **Holm** correction and alpha **0.05** for this exercise.
+5. Choose **Run and save new analysis**.
+6. Scroll to **Saved results** to review the calculated comparison table, timestamp and method notes.
 
-### Change just one point
+The result remains in this workspace when you leave Statistics. To run a t-test on just two of the columns, select those two columns, choose a compatible t-test and **Run and save new analysis** again. Both results remain available in **Open saved result**; a new run does not overwrite the previous one. Rename a result with **Result name** if that helps organize it.
 
-1. Click the point.
-2. Check its group and subject in **Selected observation**.
-3. Change its color, size, shape, outline or opacity.
-4. Confirm that neighboring points kept their appearance.
+**Results CSV** exports a readable results table; **Results JSON** exports the structured result. To preserve datasets, all runs and figures together, also use **Save workspace**.
 
-**Reset to group style** removes that point's visual overrides. Changing how a point looks does not change its measurement and does not exclude it from an analysis.
+The app suggests tests compatible with the selected columns and design. It cannot infer independence, pseudoreplication, valid pairing or scientific assumptions from numbers alone. For paired tests, every selected column needs the same complete set of unique subject IDs representing the same experimental units.
 
-### Choose error bars
+## 6. Add stars to the figure you choose
 
-| Option | Meaning |
-|---|---|
-| **SD** | Sample standard deviation |
-| **SEM** | Standard error of the mean |
-| **95% CI** | A 95% confidence interval for the mean |
-| **None** | No error bars |
+Running a test and drawing its comparisons are separate actions:
 
-SD, SEM and CI answer different questions. State which one you used in the figure caption.
+1. In **Saved results**, select the run you want.
+2. Under **Add comparisons to a figure**, choose **Target figure**.
+3. Choose **Add stars / ns to figure**.
+4. Choose **Open figure** to inspect the result.
 
-### Reuse formatting
+The figure must use the same dataset. If it currently hides a compared column, adding the result also adds that column to the figure. Group figures such as Bar + swarm support comparison brackets; XY plots and histograms do not use these categorical brackets. Create an appropriate figure if the target list is empty.
 
-1. Format a source figure.
-2. Open the figure that should receive its style.
-3. Choose **Apply style**.
-4. Select the source in **Copy style from**.
-5. Choose everything, or just colors, typography, axes or point symbols.
-6. Apply the style.
+Significance marks use adjusted p-values where a correction applies:
 
-Individual point overrides in the destination figure are preserved. **Save reusable style** stores a preset inside the project.
-
-## 6. Run statistics and add significance marks
-
-For this fictional exercise, assume **independent groups**: different individuals belong to each group.
-
-1. Open **Statistics**.
-2. Select **Independent groups**.
-3. Read the explanations under **Compatible tests**. For this exercise, choose **Welch ANOVA + Welch t-tests**.
-4. Select **Each group versus control** as the comparison family.
-5. Select **Control** as the reference group.
-6. Keep **Holm** correction and α = **0.05** for the exercise.
-7. Choose **Analyze and annotate chart**.
-8. Read the results and notes, then choose **View on chart**.
-
-The app suggests procedures compatible with the number of groups and the design you selected. **It cannot infer independence, valid pairing or scientific assumptions just from the numbers.** For real work, use your experimental design and analysis plan.
-
-Significance marks use the adjusted p-value when a correction applies:
-
-| Result | Mark |
+| Adjusted p-value | Mark |
 |---|---|
 | p < 0.05 | `*` |
 | p < 0.01 | `**` |
 | p < 0.001 | `***` |
 | p < 0.0001 | `****` |
-| Otherwise, under these conventional thresholds | `ns` |
+| Otherwise | `ns` |
 
-Non-significant comparisons are hidden by default. Use **Show non-significant** to include them, or choose numeric p-values in **Display**. A mark belongs to a comparison, not to an isolated column.
+The attach action includes `ns`, so a successful nonsignificant test does not leave an unexplained blank chart. Use **Show non-significant** to hide them if preferred, or **Display** to show numeric adjusted p-values. A bracket identifies a comparison between two groups.
 
-### Move a comparison
+Drag a bracket to move it. You can also click it and adjust **X offset / Y offset**, or use arrow keys (`Shift` for larger steps). Horizontal movement shifts the label while the bracket ends stay anchored. Right-click → **Reset automatic position** restores the calculated layout.
 
-Click a bracket or its mark, then drag it or use **X offset / Y offset**. **Reset automatic position** removes the manual offset.
+If measurements or exclusions change, old results remain saved and become out of date. Their old brackets are hidden. Run a new analysis, review it and attach that new result. Merely changing the next-test controls does not rewrite a saved result.
 
-The horizontal adjustment moves the label; the bracket ends stay attached to the compared groups. If data or statistical options change, old significance annotations are hidden until you recalculate.
+## 7. Edit or exclude an individual point
 
-### Find and review outliers
+### Change just one point's appearance
 
-1. Choose **Find outliers** and select **ROUT** or **Grubbs**.
-2. For ROUT, choose **Q (false discovery rate)**: 0.1%, 1%, 5% or 10%. For Grubbs, choose **Alpha**: 0.05 or 0.01.
-3. Choose **Detect outliers** and review the flagged observations by group. Current flags receive an amber ring in the figure.
-4. Decide whether a flagged measurement is scientifically justified. Detection does **not** exclude it automatically.
-5. To explicitly exclude a point, select it and use **Exclude from analysis**. The original value is retained; excluded points are faded and crossed.
+Click a point, or right-click → **Format this point**. Check its label in **Selected observation**, then change color, HEX code, size, shape, outline or opacity. The formatting panel opens for that point. **Reset to group style** removes only its visual overrides.
 
-An unusual-looking point is not automatically an error. Preserve the original measurement, record any exclusion reason and report it with the analysis. Color or opacity alone is never an exclusion. Editing data or exclusions makes detection results stale; run detection again. The methods are local implementations, not a claim of exact GraphPad equivalence. See the [expert guide](EXPERT-GUIDE.md#outliers-flags-and-exclusions).
+Pick colors visually or type a three- or six-digit HEX code, with or without `#`. Styling a point does not change its measurement or exclude it.
 
-## 7. Save your work and control autosave
+### Exclude without deleting
 
-The **Autosave** toggle controls automatic writes to this browser's local storage:
+Right-click a numeric cell in **Data** → **Exclude value from analysis**, or right-click its plotted point → **Exclude from analysis**. The original value stays in the dataset. Table values are crossed out; plotted points stay visible as hollow, crossed markers. Right-click again to restore the value. The Data table also offers **Restore all**.
 
-- **On:** changes are saved automatically in this browser and local origin.
-- **Off:** you can try changes without automatically saving the project state. The preference persists between launches.
+A table row menu can exclude or restore an entire row. Exclusions apply to the dataset, so linked figures and future analyses use the same inclusion state. Old analyses remain as historical results and are marked out of date. Run a new analysis after changing exclusions.
 
-Switching autosave off does not delete an older saved copy. **Save workspace** downloads a portable `.psl` containing data, analyses, figures and customizations. Use it for a backup, a previous version or another computer; autosave is not a replacement for that file.
+### Review outliers
 
-To continue older work, choose **Open** and select its `.psl`. Individual point styles and manual comparison positions are restored.
+Under **Statistics → Find outliers**, choose ROUT with its **Q** threshold or Grubbs with **Alpha**, then **Detect outliers**. Current flags receive an amber ring. A flag does not exclude the point automatically. Review the measurement and scientific reason before excluding it, and record/report that reason. See [outlier methods](OUTLIER-METHODS.md) for implementation limits.
 
-Clearing browser data can remove autosave. Another browser or local origin uses separate storage. Save a `.psl` before changing environments.
+## 8. Finish the appearance and reuse it
 
-## 8. Export PNG or an editable SVG
+**Format figure** controls titles, axes, colors, fonts, symbols, error bars and dimensions. In a narrow window, choose **Format** to open the drawer.
 
-Choose **Export**, then the format:
-
-| Format | Use it for… |
+| Error-bar option | Meaning |
 |---|---|
-| **PNG** | Slides, documents and sharing an image |
-| **SVG** | Vector quality and editing objects in Illustrator |
+| SD | Sample standard deviation |
+| SEM | Standard error of the mean |
+| 95% CI | 95% confidence interval for the mean |
+| None | No error bars |
 
-For PNG, choose 1× to 4×. A figure sized 800 × 560 px exported at 3× becomes 2400 × 1680 px.
+State the error-bar definition in the caption. To copy a style, open the destination figure → **Apply style** → choose a source figure and scope → apply. Destination point overrides remain intact. **Save reusable style** stores a preset in the workspace.
 
-### Continue in Adobe Illustrator
+## 9. Switch workspaces and save a backup
 
-1. Export **SVG** from PSL.
-2. In Illustrator, use **File → Open** and select the SVG.
-3. Select objects to change their colors or shapes. Use **Ungroup** if needed to reach individual elements.
-4. Use the text tool to edit words. Install the original font on that computer; otherwise Illustrator may substitute another font.
-5. Save an `.ai` working copy if you want to continue in Illustrator's native format.
+Click the workspace name at the top or **Switch / new workspace** in the sidebar. Choose a saved workspace, or enter a name and **Create blank workspace**. The current work is checkpointed on this device before switching, including when Autosave is off. **Open workspace file** loads a portable `.psl` into the same workflow.
 
-The SVG preserves editable text and vector objects. It is a figure, not a PSL statistical project. Reopen the `.psl` in PSL to change chart types or recalculate analyses. PNG cannot recover a figure's data or editable objects.
+**Autosave On** saves edits automatically in this browser. **Autosave Off** stops automatic edit checkpoints; explicit save and workspace switching still save the current work. Switching it off does not erase an earlier saved copy.
 
-## 9. Common problems
+Use **Save workspace** regularly. It downloads one `.psl` with datasets, exclusions, saved tests, figures, styles and panel choices. **Open** restores it, including individual point styling and comparison positions. Legacy `.labplot` files are supported.
+
+The workspace library belongs to this browser profile and local address. Clearing browser data or changing browser/computer can make it unavailable. A `.psl` file is your portable backup; SVG/PNG and result CSV/JSON exports do not replace it.
+
+## 10. Export a figure or publication layout
+
+Choose **Export → PNG** for images or **Export → SVG** for vector editing. PNG offers 1× to 4×; 800 × 560 px at 3× becomes 2400 × 1680 px.
+
+For Illustrator, export SVG, then use **File → Open** in Illustrator. Text remains text and points remain separate vector objects. Use Layers/Ungroup as needed and keep the original font installed. Save an `.ai` copy if desired. External changes do not update the PSL dataset or analysis; reopen `.psl` in PSL to recalculate.
+
+For several panels, use **Publication** to select/order figures across datasets, choose columns and print dimensions, and export the layout. Scientific titles accept `H_{2}O`, `X^{2}`, `*italic*` and `**bold**`.
+
+## 11. Common problems
 
 | Situation | What to check |
 |---|---|
-| First setup does not finish | Internet, a writable extracted folder and messages in the terminal |
-| Browser does not open | Keep the server running and try `http://127.0.0.1:8765` |
-| Port is occupied | Close the previous PSL session or the other program using the port; the launcher should not terminate unrelated programs |
-| CSV is rejected | Unique headers, aligned columns and numeric group values |
-| A test is unavailable | Number of groups, at least two observations per group and selected design |
-| Paired data are rejected | Missing/duplicate subject IDs or different subjects between groups |
-| Significance marks disappeared | Data/options changed; recalculate the analysis |
-| A point disappears on a log axis | Zero and negative values cannot be represented on that scale |
-| A point stays different after style transfer | It has an individual override; use **Reset to group style** |
-| Illustrator changes the font | Install the original font or choose one available in both applications |
-| You are offline | Use the already prepared installation; updates wait for a connection |
-| A private GitHub update cannot be downloaded | Confirm that you have authorized access; the existing installed version should remain usable |
+| A whole-table paste reports text in a measurement cell | Use **Paste table** for headings; paste only values directly into numeric cells |
+| Labels are treated as data | Give the label column a clear name such as `Sample` or `Label`; keep measurements in separate columns |
+| A mixed column is rejected | The error identifies the cell; move unrelated text to a label column or leave a missing measurement blank |
+| A t-test is unavailable with many columns | Select only the two columns to compare in Statistics |
+| A saved result seems to have disappeared | Check **Dataset**, then **Open saved result**; the result belongs to its source dataset |
+| No target figure is offered | Use a group figure from the same dataset containing every compared column |
+| A successful test shows `ns` | The comparison did not cross the selected significance threshold; inspect its adjusted p-value |
+| Stars disappeared after editing data | The attached result is out of date; run and attach a new result |
+| A point disappears on a log axis | Zero and negative values cannot be represented on that scale; they remain in Data |
+| A point stays different after style transfer | Use **Reset to group style** to remove its individual override |
+| The wrong measurements appear in a figure | Check its dataset selector and plotted-column checkboxes |
+| A workspace is missing on another computer | Use **Open** to load its saved `.psl` file |
+| The browser does not open | Keep the launcher running and try `http://127.0.0.1:8765` |
+| Illustrator changes text spacing | Install the original font and review the figure after substitution |
 
-For a bug report, include OS, PSL version, steps and error text. Prefer a small fictional example over personal or confidential data.
-
-
-## Multiple datasets and side-by-side review
-
-Use **Overview → Import datasets** to select several CSV/TSV files in one operation. Each becomes a named dataset with its own table and initial figure. Imports are validated before they are added; the existing workspace is preserved if a file is invalid. Use the sidebar to select a dataset. Figures retain an explicit dataset link, so applying a style from another dataset transfers the appearance without replacing measurements.
-
-Every successful statistical run is kept in the analysis history, including its dataset, test, correction, alpha, results and timestamp. Run different tests or analyze different datasets, then use **Overview → Choose analyses** to display selected results side by side. Each historical result is checked against its own recorded configuration and current dataset measurements. Changing the assistant's next-test controls does not rewrite previous tests.
-
-Use **Choose figures** to select several figures from the same or different datasets. Preview cards show the dataset name and provide **Edit figure**. The complete selection is saved in **Save workspace → .psl**, along with every dataset, test and figure. Legacy `.labplot` files remain supported and convert to a one-dataset workspace. CSV export contains raw measurements; use `.psl` to preserve exclusions and the complete analysis state.
-
-## Advanced figures and publication layouts
-
-For XY, factorial, survival and specialized charts, open **Data → Advanced table & scientific examples**. Add a synthetic example to learn the column meanings while preserving your existing work. Import CSV/TSV or native `.xlsx` workbooks; every visible nonempty Excel sheet becomes a separate dataset. Select an appropriate table-column view to keep the editor simple.
-
-Open **Statistics → Factorial, regression & survival**, choose a compatible method and review its requirements. Click **Run analysis**, then **Create figure with this result**. Each run is kept; changing data marks older results out of date. The [advanced guide](ADVANCED-METHODS.md) explains the supported models.
-
-Use **Publication** to select figures across datasets, put them in order, choose columns and print width, and add A/B/C labels. Export the entire layout or a ZIP of individual panels. Scientific titles accept `H_{2}O`, `X^{2}`, `*italic*` and `**bold**`; exported SVG keeps editable text. See the [publication guide](PUBLICATION.md).
-
-All these functions run offline after initial setup. The [installation guide](INSTALLATION.md) covers Windows/macOS graphical packages, and the [offline guide](OFFLINE.md) identifies the few network connections PSL uses.
+For bug reports, include OS, PSL version, steps and error text. Use a small fictional dataset instead of confidential measurements where possible.

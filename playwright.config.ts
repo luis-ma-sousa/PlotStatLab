@@ -1,2 +1,3 @@
 import {defineConfig} from '@playwright/test';
-export default defineConfig({testDir:'tests/e2e',webServer:{command:'python -m uvicorn server.app:app --host 127.0.0.1 --port 8765',url:'http://127.0.0.1:8765/api/health',reuseExistingServer:true,timeout:30000},fullyParallel:false,workers:1,timeout:30000,use:{baseURL:'http://127.0.0.1:8765',viewport:{width:1440,height:1000},trace:'retain-on-failure'},reporter:'list'});
+const port=process.env.PSL_TEST_PORT??'8765';
+export default defineConfig({testDir:'tests/e2e',webServer:{command:`python -m uvicorn server.app:app --host 127.0.0.1 --port ${port}`,url:`http://127.0.0.1:${port}/api/health`,reuseExistingServer:true,timeout:30000},fullyParallel:false,workers:1,timeout:30000,use:{launchOptions:process.env.PSL_BROWSER_PATH?{executablePath:process.env.PSL_BROWSER_PATH}:undefined,baseURL:`http://127.0.0.1:${port}`,viewport:{width:1440,height:1000},trace:'retain-on-failure'},reporter:'list'});

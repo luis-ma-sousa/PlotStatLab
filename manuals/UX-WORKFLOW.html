@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PlotStatLab workspace workflow</title><style>body{font:16px/1.7 system-ui,sans-serif;color:#263d34;max-width:900px;margin:50px auto;padding:0 26px;background:#fcfdf9}a{color:#286651}h1,h2,h3{line-height:1.25;color:#244c3c}h1{font-size:34px}h2{margin-top:40px}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border:1px solid #dfe6d9;padding:9px;text-align:left}pre{background:#edf2e7;padding:16px;overflow:auto;border-radius:6px}code{font-size:.9em}img{max-width:100%}.masthead{font-size:13px;letter-spacing:1px;color:#7c9473;border-bottom:1px solid #dfe6d9;padding-bottom:16px}blockquote{border-left:3px solid #a8bca0;padding-left:16px;color:#6e825f}@media print{body{margin:0;max-width:none}a{color:inherit}pre{white-space:pre-wrap}}</style></head><body><div class="masthead">PlotStatLab · PSL · <a href="/">Return to app</a> · <a href="QUICK-START.html">Quick start</a></div><h1>PlotStatLab workspace workflow</h1>
+<p>The working model is <strong>workspace → dataset → analysis and figure</strong>. An analysis is a saved calculation. A figure is a view of selected columns, with its own appearance. Linking an analysis to a figure is an explicit action.</p>
+<table>
+<thead>
+<tr>
+<th>Object</th>
+<th>Owns</th>
+<th>Main controls</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Workspace</td>
+<td>Datasets, saved tests, figures, presets and overview/publication layouts</td>
+<td>Workspace name; <strong>Switch / new workspace</strong>; <strong>Save workspace</strong>; <strong>Open</strong></td>
+</tr>
+<tr>
+<td>Dataset</td>
+<td>Named measurement columns, row IDs/labels, original values and exclusion state</td>
+<td><strong>New dataset</strong>; editable <strong>Data</strong> grid; <strong>Paste table</strong>; <strong>Import files</strong></td>
+</tr>
+<tr>
+<td>Analysis run</td>
+<td>Dataset identity, selected columns, design, method, correction, alpha, timestamp and calculated results</td>
+<td><strong>Run and save new analysis</strong>; <strong>Open saved result</strong>; <strong>Results CSV / JSON</strong></td>
+</tr>
+<tr>
+<td>Figure</td>
+<td>Dataset link, plotted columns, chart type, styling, point overrides and linked result</td>
+<td><strong>New chart</strong>; dataset/column selector in Editor; <strong>Target figure → Add stars / ns to figure</strong></td>
+</tr>
+</tbody></table>
+<p>Typing and pasting ranges edit the open dataset. Pasting a complete table with headings adds a new dataset. Importing several files adds several datasets; it does not replace the existing workspace.</p>
+<p>Choose columns independently for analysis and plotting. A t-test can use two columns from a wider dataset. Adding comparisons automatically adds any missing compared columns to the target figure. Merely opening a figure or changing the next-test settings does not rerun a test or replace its saved result.</p>
+<p>Exclusion is stored with the original observation and affects every figure and future analysis of that dataset. Excluded measurements remain visible and can be restored. Point styling belongs only to the figure and never excludes a measurement.</p>
+<p>When source measurements or exclusions change, affected saved calculations remain available and are marked out of date. Their old comparisons are hidden on figures. Run a new analysis, review it, and explicitly attach it. Appearance changes do not make a calculation stale.</p>
+<p>Workspace switching saves the current workspace in this browser&#39;s local library before opening another one. This is an explicit save action, including when Autosave is off. Browser storage is local to a profile/origin; <code>.psl</code> files are portable backups. SVG/PNG and result CSV/JSON exports serve presentation/reporting purposes and do not replace a complete workspace file.</p>
+<hr><p>PlotStatLab · MIT License · Documentation included for offline use.</p></body></html>

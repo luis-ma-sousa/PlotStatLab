@@ -13,6 +13,7 @@ export interface AdvancedRow {
   upper?: number;
   p?: number;
   label?: string;
+  labels?: Record<string,string>;
   excluded?: boolean;
 }
 export type AdvancedChartType = 'grouped' | 'regression' | 'dose-response' | 'kaplan-meier' | 'forest' | 'bland-altman' | 'volcano';

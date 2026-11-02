@@ -213,3 +213,31 @@ def test_dunn_pooled_ranks_tie_correction_and_holm_control_family():
     assert [p['p'] for p in result['comparisons']]==pytest.approx(expected)
     assert [p['adjustedP'] for p in result['comparisons']]==pytest.approx([expected[0],2*expected[1]])
     assert all('ci' not in p for p in result['comparisons'])
+
+
+def test_t_test_selected_pair_from_larger_dataset_keeps_original_group_ids():
+    data = groups([100, 200, 300], [1, 2, 3], [4, 5, 6], [-40, -30, -20])
+    payload = request(data, test="student").model_dump()
+    payload["config"].update(groupIds=["g1", "g2"], control="g1")
+    result = analyze(AnalyzeRequest(**payload))
+    assert result["p"] == pytest.approx(0.021311641128756727)
+    assert result["comparisons"][0]["groupA"] == "g1"
+    assert result["comparisons"][0]["groupB"] == "g2"
+    assert result["comparisons"][0]["label"] == "*"
+    assert result["config"]["groupIds"] == ["g1", "g2"]
+    assert len(data) == 4
+
+
+@pytest.mark.parametrize("selection", [["g0", "missing"], ["g0", "g0"]])
+def test_unknown_or_duplicate_selected_groups_are_rejected(selection):
+    payload = request(groups([1, 2, 3], [4, 5, 6])).model_dump()
+    payload["config"]["groupIds"] = selection
+    with pytest.raises(ValueError, match="group"):
+        analyze(AnalyzeRequest(**payload))
+
+
+def test_control_must_belong_to_selected_comparison_family():
+    payload = request(groups([1, 2, 3], [4, 5, 6], [7, 8, 9]), comparisons="control").model_dump()
+    payload["config"]["groupIds"] = ["g1", "g2"]
+    with pytest.raises(ValueError, match="valid control"):
+        analyze(AnalyzeRequest(**payload))

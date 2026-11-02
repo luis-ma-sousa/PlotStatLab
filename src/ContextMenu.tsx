@@ -1,0 +1,8 @@
+import {useEffect,useRef} from 'react';
+import './workflow.css';
+export interface ContextAction {label:string;run:()=>void;disabled?:boolean;danger?:boolean}
+export default function ContextMenu({x,y,label,actions,onClose}:{x:number;y:number;label:string;actions:ContextAction[];onClose:()=>void}){
+ const ref=useRef<HTMLDivElement>(null);
+ useEffect(()=>{ref.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();const dismiss=()=>onClose();const key=(e:KeyboardEvent)=>{if(e.key==='Escape')onClose()};window.addEventListener('pointerdown',dismiss);window.addEventListener('keydown',key);window.addEventListener('resize',dismiss);window.addEventListener('scroll',dismiss,true);return()=>{window.removeEventListener('pointerdown',dismiss);window.removeEventListener('keydown',key);window.removeEventListener('resize',dismiss);window.removeEventListener('scroll',dismiss,true)}},[onClose]);
+ return <div ref={ref} role="menu" aria-label={label} className="context-menu" style={{left:Math.max(8,Math.min(x,window.innerWidth-250)),top:Math.max(8,Math.min(y,window.innerHeight-40-actions.length*36))}} onPointerDown={e=>e.stopPropagation()} onContextMenu={e=>e.preventDefault()} onKeyDown={e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const buttons=[...ref.current!.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')],index=buttons.indexOf(document.activeElement as HTMLButtonElement);buttons[(index+(e.key==='ArrowDown'?1:buttons.length-1))%buttons.length]?.focus()}}}><div className="context-menu-label">{label}</div>{actions.map(action=><button key={action.label} role="menuitem" disabled={action.disabled} className={action.danger?'danger':''} onClick={()=>{onClose();action.run()}}>{action.label}</button>)}</div>
+}

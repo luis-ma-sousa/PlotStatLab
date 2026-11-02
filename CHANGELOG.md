@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 — connected data, analyses and figures
+
+- Blank spreadsheet tables, direct range paste, editable text labels, decimal commas, and CSV/TSV/JSON/XLSX/XLSM/ODS imports. Mixed-validity file batches retain successful imports and explain failures.
+- Choose datasets and columns for each figure and each statistical analysis; selected-pair t-tests work within larger datasets.
+- Multiple named saved analyses per dataset, persistent tab state, CSV/JSON result exports and explicit figure annotation with stars or ns.
+- Point and row context menus, precise swarm point selection, reversible visible exclusions, per-point formatting and stale-analysis protection.
+- Device workspace library with explicit switching, blank workspaces, portable .psl files and preservation of the current snapshot when opening an older revision.
+- Stable advanced-data group identities and chart palettes when editing or selecting columns.
+- Updated English manuals and integrated workflow regression tests.
+
 ## 0.3.1 — specialized axis defaults
 
 - Newly created specialized figures use the chart family's semantic axis labels, including survival probability and transformed volcano p-values.
