@@ -21,6 +21,18 @@
 <td><strong>Paste new dataset</strong> or <strong>Paste table</strong> → paste the table → <strong>Import table</strong>. This adds a dataset. Text columns remain labels; numeric columns become measurement groups.</td>
 </tr>
 <tr>
+<td>Clear several measurements</td>
+<td>Drag across numeric cells, or click the first and <strong>Shift-click</strong> the last → <strong>Clear selected values</strong>. Delete/Backspace also clears a selected range; <strong>Undo</strong> restores the operation.</td>
+</tr>
+<tr>
+<td>Remove several advanced observations</td>
+<td>In an <strong>Advanced table</strong>, select row checkboxes → <strong>Remove selected rows</strong>. The heading checkbox selects all rows across pages.</td>
+</tr>
+<tr>
+<td>Keep values but omit them from analysis</td>
+<td>Select numeric cells → <strong>Exclude selected</strong>. Use <strong>Restore selected</strong> to include them again.</td>
+</tr>
+<tr>
 <td>Import several files</td>
 <td><strong>Import files</strong>, then select CSV, TSV, TXT, JSON, XLSX, XLSM or ODS files. Each visible nonempty Excel sheet becomes a dataset.</td>
 </tr>
@@ -61,6 +73,22 @@
 <td>Click it, or right-click → <strong>Format this point</strong>. Change its color/HEX, shape, size, opacity or outline.</td>
 </tr>
 <tr>
+<td>Make letters italic or bold</td>
+<td><strong>Text &amp; axes → Chart title / X axis title / Y axis title</strong> → select words in the visual text editor → <strong>Italic</strong> or <strong>Bold</strong>. You can also click the title in the figure.</td>
+</tr>
+<tr>
+<td>Add a subscript or superscript</td>
+<td>Select the characters in the title editor → <strong>x₂ — Subscript</strong> or <strong>x² — Superscript</strong>. No formatting codes are needed.</td>
+</tr>
+<tr>
+<td>Make a title use several lines</td>
+<td>Open its text editor using <strong>Text &amp; axes</strong>, place the cursor at the break, then press <strong>Enter</strong>.</td>
+</tr>
+<tr>
+<td>Change the Y-title spacing</td>
+<td><strong>Text &amp; axes → Y axis title → Move closer / Move farther</strong>, or adjust <strong>Distance from Y axis · px</strong>.</td>
+</tr>
+<tr>
 <td>Exclude a point without deleting it</td>
 <td>Right-click a table value or plotted point → <strong>Exclude … from analysis</strong>. Crossed-out values remain in Data; plotted points remain hollow and crossed. Use the same menu to restore them, then run a new analysis.</td>
 </tr>
@@ -89,6 +117,10 @@
 <td>Click the workspace name at the top, or <strong>Switch / new workspace</strong>. Choose an existing workspace or <strong>Create blank workspace</strong>. Switching checkpoints the current work on this device.</td>
 </tr>
 <tr>
+<td>Delete a dataset</td>
+<td><strong>Data → Delete dataset</strong>, or its <strong>Overview</strong> card → <strong>Delete dataset</strong>. Review its related figures/results, choose <strong>Cancel</strong> or <strong>Delete dataset</strong>, and use <strong>Undo</strong> to restore if needed.</td>
+</tr>
+<tr>
 <td>Keep a portable backup</td>
 <td><strong>Save workspace</strong> downloads one <code>.psl</code> containing datasets, tests, figures and selected panels. <strong>Open</strong> restores it.</td>
 </tr>
@@ -98,5 +130,5 @@
 </tr>
 </tbody></table>
 <p>Blank/NA cells mean missing measurements; <strong>zero is a measurement</strong>. A text-only column is a label column. If a measurement column mixes numbers and unrelated text, move the labels to a separate label column or correct the cell; PSL reports the problem rather than silently dropping it. Only choose paired analyses when IDs identify the same experimental units across conditions.</p>
-<p>For two factors, XY fits or survival, use <strong>Data → Advanced table &amp; scientific examples</strong>, then <strong>Statistics → Factorial, regression &amp; survival → Run analysis</strong>. For layouts, use <strong>Publication</strong>. The <a href="BEGINNER-GUIDE.html">beginner guide</a> walks through an example; the <a href="EXPERT-GUIDE.html">expert guide</a> explains methods and reproducibility. All manuals are available offline in <strong>Help</strong>.</p>
+<p>For title formatting, spacing and table selections, see <a href="EDITING-GUIDE.html">everyday editing</a>. For two factors, XY fits or survival, use <strong>Data → Advanced table &amp; scientific examples</strong>, then <strong>Statistics → Factorial, regression &amp; survival → Run analysis</strong>. For layouts, use <strong>Publication</strong>. The <a href="BEGINNER-GUIDE.html">beginner guide</a> walks through an example; the <a href="EXPERT-GUIDE.html">expert guide</a> explains methods and reproducibility. All manuals are available offline in <strong>Help</strong>.</p>
 <hr><p>PlotStatLab · MIT License · Documentation included for offline use.</p></body></html>

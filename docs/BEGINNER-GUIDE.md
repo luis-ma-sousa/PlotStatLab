@@ -69,6 +69,22 @@ Mouse 6,24,34,46
 
 `Sample` remains a label column; the three numeric columns become measurement groups. Check that each group has six observations.
 
+### Clear or exclude several values
+
+Drag across numeric cells to select a rectangle. You can also click the first cell and **Shift-click** the last cell. The highlight and selection bar show the range you are about to change.
+
+Choose **Clear selected values**, or press **Delete/Backspace** while that range is selected, to turn the selected measurements into blank cells. **Undo** restores the whole clear operation in one step. Use **Select all values**, a row-number button or a column-selection button for larger selections.
+
+To keep measurements visible while omitting them from calculations, choose **Exclude selected**. **Restore selected** includes them again. Double-click a cell or press **F2** when you want to edit the characters in a single value; Delete/Backspace then edits its text. Press Enter to finish editing.
+
+An **Advanced table** has a checkbox beside each observation. Select several rows, then choose **Remove selected rows** to remove those complete observations in one action. The heading checkbox selects all observations across pages. **Exclude selected** and **Restore selected** work on those row selections too.
+
+### Remove a dataset from the workspace
+
+Open the dataset in **Data** and choose **Delete dataset**. You can also use that action on its card in **Overview**. Review the measurements, figures and saved results that belong to the dataset, then confirm **Delete dataset**. Those items are removed together. Other datasets remain available.
+
+Choose **Undo** to put the dataset and its linked work back. Deleting the final dataset leaves a blank table. Saving a `.psl` file with **Save workspace** keeps an independent copy of your work.
+
 ### Import existing files
 
 Use **Import files** and select one or several CSV, TSV, TXT, JSON, XLSX, XLSM or ODS files. Visible nonempty workbook sheets become separate datasets. XLSM imports read stored values; PSL does not run macros. Convert older `.xls`/`.xlsb` workbooks to `.xlsx` or CSV first.
@@ -176,6 +192,18 @@ Under **Statistics → Find outliers**, choose ROUT with its **Q** threshold or 
 
 **Format figure** controls titles, axes, colors, fonts, symbols, error bars and dimensions. In a narrow window, choose **Format** to open the drawer.
 
+### Edit titles directly
+
+In the visible **Text & axes** toolbar, choose **Chart title**, **X axis title** or **Y axis title**. You can also click that title in the figure. Its visual text editor opens with the relevant controls. Select a word or a few letters, then click **Italic** or **Bold**. The figure shows the result immediately. To format all of a title, select all text inside that editor before choosing the formatting button.
+
+For chemical labels or powers, use **x₂ — Subscript** or **x² — Superscript**. For example, type H2O, select only the 2 and click x₂. You can select the exponent in the same way and click x². Use these buttons directly rather than typing formatting codes.
+
+Press **Enter** inside the title editor to start a new line. For example, put `Treatment duration` on one line and `(days)` on the next. Saved figures and SVG/PNG exports keep those line breaks and text styles.
+
+Choose **Y axis title** to adjust its distance from the vertical axis. Use **Move closer**, **Move farther**, the slider or the **Distance from Y axis · px** value. Watch the figure update as you make the adjustment. **Reset** restores the default spacing.
+
+The [everyday editing guide](EDITING-GUIDE.md) covers these controls and table selections in one short page.
+
 | Error-bar option | Meaning |
 |---|---|
 | SD | Sample standard deviation |
@@ -201,12 +229,17 @@ Choose **Export → PNG** for images or **Export → SVG** for vector editing. P
 
 For Illustrator, export SVG, then use **File → Open** in Illustrator. Text remains text and points remain separate vector objects. Use Layers/Ungroup as needed and keep the original font installed. Save an `.ai` copy if desired. External changes do not update the PSL dataset or analysis; reopen `.psl` in PSL to recalculate.
 
-For several panels, use **Publication** to select/order figures across datasets, choose columns and print dimensions, and export the layout. Scientific titles accept `H_{2}O`, `X^{2}`, `*italic*` and `**bold**`.
+For several panels, use **Publication** to select/order figures across datasets, choose columns and print dimensions, and export the layout. Text formatting and line breaks remain editable in SVG. Existing scientific titles using subscripts, superscripts and emphasis remain supported.
 
 ## 11. Common problems
 
 | Situation | What to check |
 |---|---|
+| I want only part of an axis title italic | Click the title, select those words in its text editor, then choose **Italic** |
+| Enter does not create a new line | Place the cursor inside the title's text editor before pressing Enter |
+| The Y-axis title is too far from the axis | **Text & axes → Y axis title → Move closer** |
+| I want to remove a dataset | Use **Delete dataset** in Data or on its Overview card, then review the related work |
+| I want to remove several measurements | Drag/Shift-click a numeric range, then **Clear selected values** |
 | A whole-table paste reports text in a measurement cell | Use **Paste table** for headings; paste only values directly into numeric cells |
 | Labels are treated as data | Give the label column a clear name such as `Sample` or `Label`; keep measurements in separate columns |
 | A mixed column is rejected | The error identifies the cell; move unrelated text to a label column or leave a missing measurement blank |

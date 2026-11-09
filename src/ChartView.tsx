@@ -1,5 +1,6 @@
 import AdvancedChartView from './AdvancedChartView';
-import ScientificText from './ScientificText';
+import ScientificText,{scientificLineCount,scientificPlainText} from './ScientificText';
+import {labelLayout} from './labelLayout';
 import {advancedChartTypes} from './advancedTypes';
 import type {AdvancedRow,AdvancedResult} from './advancedTypes';
 import {advancedFingerprint} from './advancedData';
@@ -27,7 +28,7 @@ function ClassicChartView({svgId="chart-svg",chart, groups, selection, onSelect,
   const drag = useRef<{id: string; startX: number; startY: number; position: AnnotationPosition} | null>(null);
   const [preview, setPreview] = useState<{id: string; position: AnnotationPosition} | null>(null);
   const {style} = chart, width = style.width, height = style.height;
-  const margin = {left: 88, right: 38, top: style.legend ? 104 : 79, bottom: 89};
+  const margin = labelLayout(chart,{tickLines:categoryTypes.has(chart.type)?Math.max(1,...groups.map(g=>scientificLineCount(g.name))):1});
   const plotLeft = margin.left, plotRight = width - margin.right, plotTop = margin.top, plotBottom = height - margin.bottom;
   const plotWidth = plotRight - plotLeft, plotHeight = plotBottom - plotTop;
   const categorical = categoryTypes.has(chart.type), distribution = ['histogram', 'density', 'ecdf'].includes(chart.type);
@@ -150,7 +151,7 @@ function ClassicChartView({svgId="chart-svg",chart, groups, selection, onSelect,
     const distY = scaleLinear().domain([0, chart.type === 'ecdf' ? 1.04 : chart.type === 'histogram' ? maxCount * 1.15 : maxDensity * 1.15]).range([plotBottom, plotTop]);
     const y = distribution ? distY : yScale;
     yTickItems = y.ticks(6).map(v => ({value: y(v), label: fmt(v)}));
-    if (distribution) { horizontalLabel = chart.xLabel || 'Value'; verticalLabel = chart.type === 'histogram' ? 'Frequency' : chart.type === 'ecdf' ? 'Cumulative probability' : 'Density'; }
+    if (distribution) { horizontalLabel = chart.xLabel || 'Value'; verticalLabel = chart.yLabel&&chart.yLabel!=='Relative expression (a.u.)'?chart.yLabel:chart.type === 'histogram' ? 'Frequency' : chart.type === 'ecdf' ? 'Cumulative probability' : 'Density'; }
     content = <>{visibleGroups.map((g, index) => {
       const ordered = g.observations.filter(o => !o.excluded).sort((a, b) => a.value - b.value);
       const points = g.observations.map((o, i) => ({observation: o, x: o.x ?? i + 1})).sort((a, b) => a.x - b.x);
@@ -165,14 +166,15 @@ function ClassicChartView({svgId="chart-svg",chart, groups, selection, onSelect,
     })}</>;
   }
   const warnings = [];
+  if (margin.crowded) warnings.push('Labels need more room. Increase the figure height for a larger plot.');
   if (useLog && allValues.some(v => v <= 0)) warnings.push('Values ≤ 0 are not shown on a logarithmic scale.');
   if (chart.type === 'paired' && groups.some(g => g.observations.some(o => !o.subject))) warnings.push('Lines connect only observations with matching subject IDs.');
   if (bracketCount > 5) warnings.push('Many comparisons: increase the height or select fewer pairs.');
-  return <svg ref={svgRef} id={svgId} xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="group" aria-roledescription="interactive scientific chart" aria-label={chart.title || 'Scientific chart'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background, touchAction: 'none'}} onClick={() => {if (suppressRootClick.current) {suppressRootClick.current = false; return;} onSelect({kind: 'chart'});}} onContextMenu={e=>contextMenu(e,{kind:'chart'})} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={() => {drag.current = null; suppressRootClick.current = false; setPreview(null);}}>
+  return <svg ref={svgRef} id={svgId} xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="group" aria-roledescription="interactive scientific chart" aria-label={scientificPlainText(chart.title) || 'Scientific chart'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background, touchAction: 'none'}} onClick={() => {if (suppressRootClick.current) {suppressRootClick.current = false; return;} onSelect({kind: 'chart'});}} onContextMenu={e=>contextMenu(e,{kind:'chart'})} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={() => {drag.current = null; suppressRootClick.current = false; setPreview(null);}}>
     <rect width={width} height={height} fill={style.background} />
     <defs><clipPath id={`plot-clip-${chart.id}`}><rect x={plotLeft - 1} y={plotTop - 1} width={plotWidth + 2} height={plotHeight + 2} /></clipPath></defs>
-    <text data-edit="title" x={width / 2} y={39} textAnchor="middle" fill={style.axisColor} fontSize={style.titleSize} fontWeight={600} style={{cursor: 'pointer'}} onClick={e => {e.stopPropagation(); onSelect({kind: 'title'});}} onContextMenu={e=>contextMenu(e,{kind:'title'})}><ScientificText text={chart.title}/></text>
-    {style.legend && <g transform={`translate(${plotLeft},66)`}>{groups.map((g, i) => {const spacing = Math.min(160, plotWidth / Math.max(groups.length, 1)); return <g key={g.id} transform={`translate(${i * spacing},0)`} onClick={e => {e.stopPropagation(); onSelect({kind: 'group', id: g.id});}} onContextMenu={e=>contextMenu(e,{kind:'group',id:g.id})} style={{cursor: 'pointer'}}><circle cx={4} cy={-4} r={3.7} fill={color(i)} /><text x={15} fill={style.axisColor} fontSize={Math.max(10, style.fontSize - 2)}><ScientificText text={g.name.length > 21 ? `${g.name.slice(0, 19)}…` : g.name}/></text></g>;})}</g>}
+    <text data-edit="title" x={width / 2} y={39} textAnchor="middle" fill={style.axisColor} fontSize={style.titleSize} fontWeight={600} style={{cursor: 'pointer'}} onClick={e => {e.stopPropagation(); onSelect({kind: 'title'});}} onContextMenu={e=>contextMenu(e,{kind:'title'})}><ScientificText text={chart.title} x={width/2} lineHeight={margin.titleLineHeight}/></text>
+    {style.legend && <g transform={`translate(${plotLeft},${66+margin.titleExtra})`}>{groups.map((g, i) => {const spacing = Math.min(160, plotWidth / Math.max(groups.length, 1)); return <g key={g.id} transform={`translate(${i * spacing},0)`} onClick={e => {e.stopPropagation(); onSelect({kind: 'group', id: g.id});}} onContextMenu={e=>contextMenu(e,{kind:'group',id:g.id})} style={{cursor: 'pointer'}}><circle cx={4} cy={-4} r={3.7} fill={color(i)} /><text x={15} fill={style.axisColor} fontSize={Math.max(10, style.fontSize - 2)}><ScientificText text={g.name.length > 21 ? `${g.name.slice(0, 19)}…` : g.name} x={15} lineHeight={margin.tickLineHeight}/></text></g>;})}</g>}
     {style.grid && yTickItems.map((tick, i) => <line key={i} x1={plotLeft} x2={plotRight} y1={tick.value} y2={tick.value} stroke={style.axisColor} strokeOpacity={.09} strokeWidth={.8} />)}
     <g clipPath={`url(#plot-clip-${chart.id})`}>{content}</g>
     {placedBrackets.map(b => {const selected = selection.kind === 'annotation' && selection.id === b.comparison.id; const label = chart.significanceDisplay === 'p' ? `p = ${Number(b.comparison.adjustedP.toPrecision(3))}` : significanceLabel(b.comparison.adjustedP); return <g key={b.comparison.id} data-annotation-id={b.comparison.id} role="button" aria-label={`Comparison ${b.comparison.groupA} with ${b.comparison.groupB}, ${label}. Drag to reposition.`} tabIndex={0} style={{cursor: 'grab'}} onContextMenu={e=>contextMenu(e,{kind:'annotation',id:b.comparison.id})} onPointerDown={e => startDrag(e, b.comparison.id)} onClick={e => {e.stopPropagation(); onSelect({kind: 'annotation', id: b.comparison.id});}} onKeyDown={e => annotationKey(e, b.comparison.id)}>
@@ -182,12 +184,12 @@ function ClassicChartView({svgId="chart-svg",chart, groups, selection, onSelect,
       <rect data-editor-only="true" x={b.x1 - 8} y={b.y - 26} width={b.x2 - b.x1 + 16} height={40} fill="transparent" stroke={selected ? '#4d8a78' : 'none'} strokeDasharray="4 3" rx={3} />
     </g>;})}
     <path d={`M${plotLeft},${plotTop}V${plotBottom}H${plotRight}`} {...axisProps} />
-    {yTickItems.map((tick, i) => <g key={i}><line x1={plotLeft - 5} x2={plotLeft} y1={tick.value} y2={tick.value} {...axisProps} /><text x={plotLeft - 11} y={tick.value + style.fontSize * .34} textAnchor="end" {...textProps}><ScientificText text={tick.label}/></text></g>)}
+    {yTickItems.map((tick, i) => <g key={i}><line x1={plotLeft - 5} x2={plotLeft} y1={tick.value} y2={tick.value} {...axisProps} /><text x={plotLeft - 11} y={tick.value + style.fontSize * .34} textAnchor="end" {...textProps}><ScientificText text={tick.label} x={plotLeft-11} lineHeight={margin.tickLineHeight} centerLines/></text></g>)}
     {xTickItems.map((tick, i) => <g key={i}><line x1={tick.value} x2={tick.value} y1={plotBottom} y2={plotBottom + 5} {...axisProps} /><text x={tick.value} y={plotBottom + 24} textAnchor="middle" {...textProps}><ScientificText text={tick.label}/></text></g>)}
-    <text data-edit="xaxis" x={(plotLeft + plotRight) / 2} y={height - 24} textAnchor="middle" {...textProps} fontSize={style.fontSize + 1} style={{cursor: 'pointer'}} onClick={e => {e.stopPropagation(); onSelect({kind: 'xaxis'});}} onContextMenu={e=>contextMenu(e,{kind:'xaxis'})}><ScientificText text={horizontalLabel}/></text>
-    <text data-edit="yaxis" transform={`translate(25,${(plotTop + plotBottom) / 2}) rotate(-90)`} textAnchor="middle" {...textProps} fontSize={style.fontSize + 1} style={{cursor: 'pointer'}} onClick={e => {e.stopPropagation(); onSelect({kind: 'yaxis'});}} onContextMenu={e=>contextMenu(e,{kind:'yaxis'})}><ScientificText text={verticalLabel}/></text>
+    <text data-edit="xaxis" x={(plotLeft + plotRight) / 2} y={margin.xLabelY} textAnchor="middle" {...textProps} fontSize={style.fontSize + 1} style={{cursor: 'pointer'}} onClick={e => {e.stopPropagation(); onSelect({kind: 'xaxis'});}} onContextMenu={e=>contextMenu(e,{kind:'xaxis'})}><ScientificText text={horizontalLabel} x={(plotLeft+plotRight)/2} lineHeight={margin.axisLineHeight}/></text>
+    <text data-edit="yaxis" transform={`translate(${margin.yLabelX},${(plotTop + plotBottom) / 2}) rotate(-90)`} textAnchor="middle" {...textProps} fontSize={style.fontSize + 1} style={{cursor: 'pointer'}} onClick={e => {e.stopPropagation(); onSelect({kind: 'yaxis'});}} onContextMenu={e=>contextMenu(e,{kind:'yaxis'})}><ScientificText text={verticalLabel} x={0} lineHeight={margin.axisLineHeight} centerLines/></text>
     {warnings.length > 0 && <text data-editor-only="true" x={plotLeft} y={height - 5} fontSize={9} fill="#9a6b2b">{warnings.join(' ')}</text>}
-    {selection.kind === 'title' && <rect data-editor-only="true" x={plotLeft} y={15} width={plotWidth} height={32} fill="none" stroke="#4d8a78" strokeDasharray="4 3" rx={3} />}
+    {selection.kind === 'title' && <rect data-editor-only="true" x={plotLeft} y={15} width={plotWidth} height={32+margin.titleExtra} fill="none" stroke="#4d8a78" strokeDasharray="4 3" rx={3} />}
   </svg>;
 }
 

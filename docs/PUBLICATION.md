@@ -37,17 +37,24 @@ Batch files contain individual panels; the main **Export SVG/PNG** buttons produ
 
 ## Scientific text
 
-In figure titles, axis labels, legends and category labels, use:
+Edit the individual figure before composing or exporting its publication panel. Click its title or axis title, or choose **Chart title**, **X axis title** or **Y axis title** in **Text & axes**. The visual editor shows the formatted text while you work.
 
-| Input | Meaning |
+Select the characters you want to change, then use the visible formatting buttons:
+
+| Goal | Button and action |
 |---|---|
-| `H_{2}O` | Subscript 2 |
-| `10^{−3}` | Superscript −3 |
-| `*P*` | Italic P |
-| `**Signal**` | Bold Signal |
-| `\*literal\*` | Literal asterisks |
-| `x\^{2}` | Literal superscript notation |
+| Italic letters | Select the letters, then **I — Italic** |
+| Bold text | Select the words, then **B — Bold** |
+| Chemical subscript | Type H2O, select only the 2, then **x₂ — Subscript** |
+| Superscript or power | Type 10−3, select −3, then **x² — Superscript** |
+| A second title line | Place the cursor at the break and press **Enter** |
 
-Use braces around the complete superscript or subscript. This intentionally small grammar does not evaluate LaTeX or mathematical expressions. Unbalanced or unsupported notation stays literal. Unicode Greek letters, mathematical symbols and minus signs may be typed directly, subject to the chosen font's glyph support.
+Formatting applies to the selected text. To change the entire title, select all text inside that editor first. You can type Unicode Greek letters, mathematical symbols and minus signs directly, subject to the chosen font's glyph support. Newly typed asterisks, braces and other notation are literal text; use the buttons to format new labels.
 
-SVG exports keep these labels as text and `tspan` objects with font and baseline attributes. They remain text-editable in vector software. The chosen font must be installed when opening the export elsewhere. See [Editable SVG in Adobe Illustrator](SVG-ILLUSTRATOR.md) for the interoperability scope and practical limits.
+For a multiline Y-axis title, choose **Y axis title** and use **Move closer**, **Move farther**, the distance slider or **Distance from Y axis · px**. If the labels crowd a small publication panel, increase the panel height or drawing width before export. See the [everyday editing guide](EDITING-GUIDE.md) for the short workflow.
+
+### Older saved labels
+
+PSL continues to read scientific notation already stored in older projects, including `H_{2}O`, `10^{−3}`, `*P*` and `**Signal**`. This preserves their original presentation when reopened. It is a compatibility format for saved labels, rather than the way to enter formatting in the visual editor.
+
+SVG exports keep labels as text and styled `tspan` objects, including line positions and subscript/superscript baselines. They remain text-editable in vector software. The chosen font must be installed when opening the export elsewhere. See [Editable SVG in Adobe Illustrator](SVG-ILLUSTRATOR.md) for the interoperability scope and practical limits.

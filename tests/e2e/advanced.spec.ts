@@ -19,8 +19,12 @@ test('advanced analyses, individual edits, multipanel vector export and complete
  await expect(page.locator('#chart-svg [data-series-name="Linear fit"]')).toBeVisible();
  const point=page.locator('#chart-svg [data-point-id]').first();const pointId=await point.getAttribute('data-point-id');await point.press('Enter');
  await page.getByLabel('Point color hex',{exact:true}).fill('#ab24df');await page.getByLabel('Point color hex',{exact:true}).press('Enter');
- await page.getByLabel('Chart title',{exact:true}).fill('H_{2}O and X^{2}');
+ await page.locator('.figure-text-shortcuts').getByRole('button',{name:'Chart title',exact:true}).click();
+ const title=page.getByRole('textbox',{name:'Chart title',exact:true});await expect(title).toBeFocused();await title.fill('H2O and X2');
+ await title.press('Home');await title.press('ArrowRight');await title.press('Shift+ArrowRight');await page.getByRole('button',{name:'Subscript Chart title',exact:true}).click();
+ await title.press('End');await title.press('Shift+ArrowLeft');await page.getByRole('button',{name:'Superscript Chart title',exact:true}).click();
  await expect(page.locator('#chart-svg tspan[baseline-shift="sub"]')).toHaveText('2');
+ await expect(page.locator('#chart-svg tspan[baseline-shift="super"]')).toHaveText('2');
  await page.locator('.dataset-navigation>button').filter({hasText:'Local Survival'}).click();
  await page.locator('.tab-switch').getByRole('button',{name:'Statistics',exact:true}).click();
  await page.getByRole('button',{name:'Group comparisons & outliers',exact:true}).click();

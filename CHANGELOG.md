@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 — visible text and data editing
+
+- Click a chart or axis title to open a visual text editor, with visible bold, italic, subscript and superscript controls. Enter creates editable SVG lines without requiring formatting codes.
+- Adjust the Y-axis title distance live with a slider, numeric field and Move closer / Move farther buttons. Multiline titles reserve space in classic and specialized charts.
+- Delete datasets from visible Data and Overview controls, review dependent figures/results before deleting, and restore the whole action with Undo.
+- Select numeric cell ranges by dragging, Shift-clicking, or choosing row/column headers. Clear selected values, exclude/restore, copy/cut and use Undo in one operation. Selection actions stay visible while scrolling.
+- Keep empty rows, labels and row order in workspace files after clearing measurements. Corrected scalar blank clearing and pasted row identity collisions.
+- Select and remove multiple advanced observations, including the final row, with Undo support.
+- Updated English quick-start, beginner, expert and editing guides; retained existing workspace and SVG compatibility.
+
 ## 0.4.0 — connected data, analyses and figures
 
 - Blank spreadsheet tables, direct range paste, editable text labels, decimal commas, and CSV/TSV/JSON/XLSX/XLSM/ODS imports. Mixed-validity file batches retain successful imports and explain failures.

@@ -5,7 +5,8 @@ import type {Chart, Group, Selection, Shape} from './types';
 import type {AdvancedChartOptions, AdvancedResult, AdvancedRow, AdvancedSeriesPoint} from './advancedTypes';
 import {agreementCoordinates, agreementSummary, forestInterval, kaplanMeier, paddedDomain, stepPath, survivalAt, volcanoCoordinates} from './advancedChartMath';
 import {errorSize, mean, swarmLayout} from './chartMath';
-import ScientificText from './ScientificText';
+import ScientificText,{scientificLineCount,scientificPlainText} from './ScientificText';
+import {labelLayout} from './labelLayout';
 
 interface Props {
   svgId?: string;
@@ -33,7 +34,7 @@ function marker(shape: Shape, x: number, y: number, radius: number, props: SVGPr
 export default function AdvancedChartView({svgId = 'chart-svg', chart, groups, rows, result, selection, onSelect, onContextMenu, analysisStale = false, flaggedIds = []}: Props) {
   const {style} = chart, options = chart.advancedOptions ?? {};
   const width = style.width, height = style.height;
-  const margin = {left: chart.type === 'forest' ? Math.min(width * .29, 200) : 88, right: 40, top: style.legend ? 104 : 79, bottom: 89};
+  const margin = labelLayout(chart,{baseLeft:chart.type==='forest'?Math.min(width*.29,200):88,right:40,tickLines:chart.type==='grouped'?Math.max(1,...groups.map(g=>scientificLineCount(g.name))):1});
   const left = margin.left, right = width-margin.right, top = margin.top, bottom = height-margin.bottom;
   const plotWidth = Math.max(10, right-left), plotHeight = Math.max(10, bottom-top);
   const color = (index: number) => style.palette[index % style.palette.length] || '#387c70';
@@ -46,6 +47,7 @@ export default function AdvancedChartView({svgId = 'chart-svg', chart, groups, r
   const cleanRows = rows.filter(row => Number.isFinite(row.y));
   const availableResult = analysisStale ? undefined : result;
   const notes: string[] = [];
+  if (margin.crowded) notes.push('Labels need more room. Increase the figure height for a larger plot.');
   let horizontalLabel = chart.xLabel, verticalLabel = chart.yLabel;
   let xTicks: {value: number; label: string}[] = [], yTicks: {value: number; label: string}[] = [];
   let content: ReactNode, legend = groupNames.map((name, index) => ({name, color: color(index)}));
@@ -127,7 +129,7 @@ export default function AdvancedChartView({svgId = 'chart-svg', chart, groups, r
     const rowHeight = plotHeight/Math.max(1, visible.length);
     xTicks = x.ticks(6).map(value => ({value: x(value), label: formatNumber(value)}));
     yTicks = visible.map((row, index) => ({value: top+rowHeight*(index+.5), label: row.label || row.subject || row.id}));
-    horizontalLabel ||= 'Effect estimate and interval'; verticalLabel = '';
+    horizontalLabel ||= 'Effect estimate and interval';
     content = <>
       {(options.xScale !== 'log' || reference > 0) && <path d={`M${x(reference)},${top}V${bottom}`} stroke={style.axisColor} strokeOpacity={.4} strokeDasharray="4 4" fill="none"/>}
       {visible.map((row, index) => {const cy = top+rowHeight*(index+.5), own = chart.pointStyles[row.id] ?? {}; return <g key={row.id}>
@@ -212,18 +214,18 @@ export default function AdvancedChartView({svgId = 'chart-svg', chart, groups, r
   if (analysisStale && result) notes.push('The recorded analysis is out of date. Run it again to display fitted results.');
   const textStyle = {fill: style.axisColor, fontSize: style.fontSize};
   const axisStyle = {fill: 'none', stroke: style.axisColor, strokeWidth: 1.2};
-  return <svg id={svgId} xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="group" aria-roledescription="interactive scientific chart" aria-label={chart.title || 'Scientific chart'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background}} onClick={() => onSelect({kind: 'chart'})} onContextMenu={event=>contextMenu(event,{kind:'chart'})}>
+  return <svg id={svgId} xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="group" aria-roledescription="interactive scientific chart" aria-label={scientificPlainText(chart.title) || 'Scientific chart'} style={{display: 'block', maxWidth: '100%', height: 'auto', fontFamily: style.fontFamily, background: style.background}} onClick={() => onSelect({kind: 'chart'})} onContextMenu={event=>contextMenu(event,{kind:'chart'})}>
     <rect width={width} height={height} fill={style.background}/>
     <defs><clipPath id={`advanced-clip-${chart.id}`} clipPathUnits="userSpaceOnUse"><rect x={left-1} y={top-1} width={plotWidth+2} height={plotHeight+2}/></clipPath></defs>
-    <text data-edit="title" x={width/2} y={39} textAnchor="middle" fill={style.axisColor} fontSize={style.titleSize} fontWeight={600} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'title')} onContextMenu={event=>contextMenu(event,{kind:'title'})}><ScientificText text={chart.title}/></text>
-    {style.legend && <g transform={`translate(${left},66)`}>{legend.map((item, index) => {const spacing = plotWidth/Math.max(1, legend.length); return <g key={`${item.name}-${index}`} transform={`translate(${index*spacing},0)`}><circle cx={4} cy={-4} r={3.7} fill={item.color}/><text x={15} fill={style.axisColor} fontSize={Math.max(10,style.fontSize-2)}>{item.name.length > 22 ? `${item.name.slice(0,20)}…` : item.name}</text></g>;})}</g>}
+    <text data-edit="title" x={width/2} y={39} textAnchor="middle" fill={style.axisColor} fontSize={style.titleSize} fontWeight={600} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'title')} onContextMenu={event=>contextMenu(event,{kind:'title'})}><ScientificText text={chart.title} x={width/2} lineHeight={margin.titleLineHeight}/></text>
+    {style.legend && <g transform={`translate(${left},${66+margin.titleExtra})`}>{legend.map((item, index) => {const spacing = plotWidth/Math.max(1, legend.length); return <g key={`${item.name}-${index}`} transform={`translate(${index*spacing},0)`}><circle cx={4} cy={-4} r={3.7} fill={item.color}/><text x={15} fill={style.axisColor} fontSize={Math.max(10,style.fontSize-2)}><ScientificText text={item.name.length>22?`${item.name.slice(0,20)}…`:item.name} x={15} lineHeight={margin.tickLineHeight}/></text></g>;})}</g>}
     {style.grid && yTicks.map((tick, index) => <line key={index} x1={left} x2={right} y1={tick.value} y2={tick.value} stroke={style.axisColor} strokeOpacity={.09} strokeWidth={.8}/>)}
     <g clipPath={`url(#advanced-clip-${chart.id})`}>{content}</g>
     <path d={`M${left},${top}V${bottom}H${right}`} {...axisStyle}/>
-    {yTicks.map((tick, index) => <g key={index}><line x1={left-5} x2={left} y1={tick.value} y2={tick.value} {...axisStyle}/><text x={left-11} y={tick.value+style.fontSize*.34} textAnchor="end" {...textStyle}>{tick.label}</text></g>)}
-    {xTicks.map((tick, index) => <g key={index}><line x1={tick.value} x2={tick.value} y1={bottom} y2={bottom+5} {...axisStyle}/><text x={tick.value} y={bottom+24} textAnchor="middle" {...textStyle}>{tick.label}</text></g>)}
-    <text data-edit="xaxis" x={(left+right)/2} y={height-24} textAnchor="middle" {...textStyle} fontSize={style.fontSize+1} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'xaxis')} onContextMenu={event=>contextMenu(event,{kind:'xaxis'})}><ScientificText text={horizontalLabel}/></text>
-    <text data-edit="yaxis" transform={`translate(25,${(top+bottom)/2}) rotate(-90)`} textAnchor="middle" {...textStyle} fontSize={style.fontSize+1} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'yaxis')} onContextMenu={event=>contextMenu(event,{kind:'yaxis'})}><ScientificText text={verticalLabel}/></text>
+    {yTicks.map((tick, index) => <g key={index}><line x1={left-5} x2={left} y1={tick.value} y2={tick.value} {...axisStyle}/><text x={left-11} y={tick.value+style.fontSize*.34} textAnchor="end" {...textStyle}><ScientificText text={tick.label} x={left-11} lineHeight={margin.tickLineHeight} centerLines/></text></g>)}
+    {xTicks.map((tick, index) => <g key={index}><line x1={tick.value} x2={tick.value} y1={bottom} y2={bottom+5} {...axisStyle}/><text x={tick.value} y={bottom+24} textAnchor="middle" {...textStyle}><ScientificText text={tick.label} x={tick.value} lineHeight={margin.tickLineHeight}/></text></g>)}
+    <text data-edit="xaxis" x={(left+right)/2} y={margin.xLabelY} textAnchor="middle" {...textStyle} fontSize={style.fontSize+1} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'xaxis')} onContextMenu={event=>contextMenu(event,{kind:'xaxis'})}><ScientificText text={horizontalLabel} x={(left+right)/2} lineHeight={margin.axisLineHeight}/></text>
+    <text data-edit="yaxis" transform={`translate(${margin.yLabelX},${(top+bottom)/2}) rotate(-90)`} textAnchor="middle" {...textStyle} fontSize={style.fontSize+1} style={{cursor: 'pointer'}} onClick={event => selectText(event, 'yaxis')} onContextMenu={event=>contextMenu(event,{kind:'yaxis'})}><ScientificText text={verticalLabel} x={0} lineHeight={margin.axisLineHeight} centerLines/></text>
     {notes.length > 0 && <text data-editor-only="true" x={left} y={height-5} fontSize={9} fill="#9a6b2b">{notes.join(' ')}</text>}
   </svg>;
 }

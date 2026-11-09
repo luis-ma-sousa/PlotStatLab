@@ -174,3 +174,15 @@ it('migrates the previous brand autosave without overwriting the original projec
 it('preserves existing fingerprints when exclusion is absent or explicitly false',()=>{const p=createProject();const original=dataFingerprint(p.groups,p.analysisConfig);p.groups[0].observations[0].excluded=false;expect(dataFingerprint(p.groups,p.analysisConfig)).toBe(original);p.groups[0].observations[0].excluded=true;expect(dataFingerprint(p.groups,p.analysisConfig)).not.toBe(original);});
 
 it('opens the v0.1 project fixture without changing its analysis fingerprint or individual formatting',()=>{const p=parseProject(readFileSync(new URL('../examples/legacy-v0.1.json',import.meta.url),'utf8'));expect(dataFingerprint(p.groups,p.analysisConfig)).toBe(p.charts[0].analysis?.fingerprint);expect(p.charts[0].pointStyles['point-1-1'].color).toBe('#cc2288');expect(parseProject(serializeProject(p))).toEqual(p);});
+
+it('retains visual text, line breaks and Y-title distance through workspace files and axis style transfer',()=>{
+ const project=createProject(),chart=project.charts[0];chart.title='<i>Gene A</i>\nResponse';chart.xLabel='Treatment\nDose';chart.yLabel='<b>Signal</b>\n(a.u.)';chart.style.yLabelDistance=140;
+ const reopened=parseProject(serializeProject(project));expect(reopened.charts[0]).toEqual(chart);expect(applyStyle(project.charts[1],chart,'axes').style.yLabelDistance).toBe(140);
+ chart.style.yLabelDistance=NaN;expect(()=>parseProject(JSON.stringify(project))).toThrow('yLabelDistance');chart.style.yLabelDistance=241;expect(()=>parseProject(JSON.stringify(project))).toThrow('yLabelDistance');
+});
+it('preserves empty table rows and descriptive labels and rejects duplicate or invalid row identities',()=>{
+ const project=normalizeWorkspace(createProject());project.datasets![0].tableRows=[{subject:'Sample 1',labels:{Cell:'A'}},{subject:'Sample 2',labels:{Cell:'B'}}];
+ expect(parseProject(serializeProject(project)).datasets![0].tableRows).toEqual(project.datasets![0].tableRows);
+ project.datasets![0].tableRows!.push({subject:'Sample 1'});expect(()=>parseProject(JSON.stringify(project))).toThrow('duplicate table row');
+ project.datasets![0].tableRows=[{subject:''}];expect(()=>parseProject(JSON.stringify(project))).toThrow('tableRow.subject');
+});
