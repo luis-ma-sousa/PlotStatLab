@@ -237,7 +237,7 @@ General formatting covers palette, typography, axes, symbols, opacity, bar width
 
 ### Titles, emphasis and line breaks
 
-Use the visible **Text & axes** toolbar to select **Chart title**, **X axis title** or **Y axis title**, or click the corresponding text in the figure. The visual editor applies **Italic** and **Bold** to the selected text. Enter inserts a line break. Formatting changes the presentation and does not recalculate a saved analysis.
+Use the visible **Text & axes** toolbar to select **Chart title**, **X axis title** or **Y axis title**, or click the corresponding text in the figure. The visual editor applies **I — Italic**, **B — Bold**, **x₂ — Subscript** and **x² — Superscript** to the selected characters. For example, type H2O, select 2 and choose Subscript. Enter inserts a line break. Newly typed formatting notation is retained as literal text; use the buttons for new edits. Formatting changes the presentation and does not recalculate a saved analysis.
 
 **Y axis title** also exposes **Distance from Y axis · px**, a slider, **Move closer**, **Move farther** and **Reset**. Distances use figure coordinates; exported SVG and PNG preserve the chosen layout. Increasing the distance reserves additional plot margin, so review the available plot width for small publication panels.
 

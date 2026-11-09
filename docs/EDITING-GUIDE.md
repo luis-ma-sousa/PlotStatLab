@@ -8,6 +8,10 @@
 
 The figure updates while you edit. To format an entire title, click inside its text editor, select all of that title's text, then choose the formatting button.
 
+## Write a chemical label or a power
+
+Type H2O, select only the 2 and click **x₂ — Subscript** to display H₂O. To display a power, select its exponent and click **x² — Superscript**. These buttons format the characters directly; no formatting codes are needed. Existing labels from older workspaces keep their saved scientific formatting.
+
 ## Put an axis title on two lines
 
 Click the title, or choose it from **Text & axes**, place the cursor where the new line should start, and press **Enter**. For example:

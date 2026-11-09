@@ -52,39 +52,39 @@
 <p>Choose <strong>Batch export → SVG panels (.zip)</strong> or <strong>PNG panels (.zip)</strong>. The archive contains one numbered file per selected panel, in the saved publication order. The number prevents collisions when two figures have the same name. Each panel uses the size and shared typography shown in the publication layout. SVG files keep separate vectors and live text. PNG files receive the selected DPI metadata.</p>
 <p>Batch files contain individual panels; the main <strong>Export SVG/PNG</strong> buttons produce the complete labelled composition. A ZIP avoids a series of browser download prompts. Very large PNGs are limited to 80 megapixels per image; batch archives are limited to 150 MB to avoid exhausting browser memory.</p>
 <h2>Scientific text</h2>
-<p>In figure titles, axis labels, legends and category labels, use:</p>
+<p>Edit the individual figure before composing or exporting its publication panel. Click its title or axis title, or choose <strong>Chart title</strong>, <strong>X axis title</strong> or <strong>Y axis title</strong> in <strong>Text &amp; axes</strong>. The visual editor shows the formatted text while you work.</p>
+<p>Select the characters you want to change, then use the visible formatting buttons:</p>
 <table>
 <thead>
 <tr>
-<th>Input</th>
-<th>Meaning</th>
+<th>Goal</th>
+<th>Button and action</th>
 </tr>
 </thead>
 <tbody><tr>
-<td><code>H_{2}O</code></td>
-<td>Subscript 2</td>
+<td>Italic letters</td>
+<td>Select the letters, then <strong>I — Italic</strong></td>
 </tr>
 <tr>
-<td><code>10^{−3}</code></td>
-<td>Superscript −3</td>
+<td>Bold text</td>
+<td>Select the words, then <strong>B — Bold</strong></td>
 </tr>
 <tr>
-<td><code>*P*</code></td>
-<td>Italic P</td>
+<td>Chemical subscript</td>
+<td>Type H2O, select only the 2, then <strong>x₂ — Subscript</strong></td>
 </tr>
 <tr>
-<td><code>**Signal**</code></td>
-<td>Bold Signal</td>
+<td>Superscript or power</td>
+<td>Type 10−3, select −3, then <strong>x² — Superscript</strong></td>
 </tr>
 <tr>
-<td><code>\*literal\*</code></td>
-<td>Literal asterisks</td>
-</tr>
-<tr>
-<td><code>x\^{2}</code></td>
-<td>Literal superscript notation</td>
+<td>A second title line</td>
+<td>Place the cursor at the break and press <strong>Enter</strong></td>
 </tr>
 </tbody></table>
-<p>Use braces around the complete superscript or subscript. This intentionally small grammar does not evaluate LaTeX or mathematical expressions. Unbalanced or unsupported notation stays literal. Unicode Greek letters, mathematical symbols and minus signs may be typed directly, subject to the chosen font&#39;s glyph support.</p>
-<p>SVG exports keep these labels as text and <code>tspan</code> objects with font and baseline attributes. They remain text-editable in vector software. The chosen font must be installed when opening the export elsewhere. See <a href="SVG-ILLUSTRATOR.html">Editable SVG in Adobe Illustrator</a> for the interoperability scope and practical limits.</p>
+<p>Formatting applies to the selected text. To change the entire title, select all text inside that editor first. You can type Unicode Greek letters, mathematical symbols and minus signs directly, subject to the chosen font&#39;s glyph support. Newly typed asterisks, braces and other notation are literal text; use the buttons to format new labels.</p>
+<p>For a multiline Y-axis title, choose <strong>Y axis title</strong> and use <strong>Move closer</strong>, <strong>Move farther</strong>, the distance slider or <strong>Distance from Y axis · px</strong>. If the labels crowd a small publication panel, increase the panel height or drawing width before export. See the <a href="EDITING-GUIDE.html">everyday editing guide</a> for the short workflow.</p>
+<h3>Older saved labels</h3>
+<p>PSL continues to read scientific notation already stored in older projects, including <code>H_{2}O</code>, <code>10^{−3}</code>, <code>*P*</code> and <code>**Signal**</code>. This preserves their original presentation when reopened. It is a compatibility format for saved labels, rather than the way to enter formatting in the visual editor.</p>
+<p>SVG exports keep labels as text and styled <code>tspan</code> objects, including line positions and subscript/superscript baselines. They remain text-editable in vector software. The chosen font must be installed when opening the export elsewhere. See <a href="SVG-ILLUSTRATOR.html">Editable SVG in Adobe Illustrator</a> for the interoperability scope and practical limits.</p>
 <hr><p>PlotStatLab · MIT License · Documentation included for offline use.</p></body></html>

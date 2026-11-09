@@ -23,6 +23,7 @@
 | Compare figures or tests together | **Overview → Choose figures / Choose analyses**. Select panels from the same or different datasets. |
 | Edit one point | Click it, or right-click → **Format this point**. Change its color/HEX, shape, size, opacity or outline. |
 | Make letters italic or bold | **Text & axes → Chart title / X axis title / Y axis title** → select words in the visual text editor → **Italic** or **Bold**. You can also click the title in the figure. |
+| Add a subscript or superscript | Select the characters in the title editor → **x₂ — Subscript** or **x² — Superscript**. No formatting codes are needed. |
 | Make a title use several lines | Open its text editor using **Text & axes**, place the cursor at the break, then press **Enter**. |
 | Change the Y-title spacing | **Text & axes → Y axis title → Move closer / Move farther**, or adjust **Distance from Y axis · px**. |
 | Exclude a point without deleting it | Right-click a table value or plotted point → **Exclude … from analysis**. Crossed-out values remain in Data; plotted points remain hollow and crossed. Use the same menu to restore them, then run a new analysis. |

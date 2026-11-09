@@ -196,6 +196,8 @@ Under **Statistics → Find outliers**, choose ROUT with its **Q** threshold or 
 
 In the visible **Text & axes** toolbar, choose **Chart title**, **X axis title** or **Y axis title**. You can also click that title in the figure. Its visual text editor opens with the relevant controls. Select a word or a few letters, then click **Italic** or **Bold**. The figure shows the result immediately. To format all of a title, select all text inside that editor before choosing the formatting button.
 
+For chemical labels or powers, use **x₂ — Subscript** or **x² — Superscript**. For example, type H2O, select only the 2 and click x₂. You can select the exponent in the same way and click x². Use these buttons directly rather than typing formatting codes.
+
 Press **Enter** inside the title editor to start a new line. For example, put `Treatment duration` on one line and `(days)` on the next. Saved figures and SVG/PNG exports keep those line breaks and text styles.
 
 Choose **Y axis title** to adjust its distance from the vertical axis. Use **Move closer**, **Move farther**, the slider or the **Distance from Y axis · px** value. Watch the figure update as you make the adjustment. **Reset** restores the default spacing.
