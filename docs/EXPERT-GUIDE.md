@@ -77,6 +77,16 @@ Each observation also has an internal stable ID, separate from group names and s
 
 Text-label metadata are retained with observations and stored in `.psl`. They do not become numeric covariates, factors or analysis inputs automatically. The advanced table has explicit scientific roles when a model requires them.
 
+### Clearing ranges and removing datasets
+
+In the Data grid, drag or Shift-click numeric cells to select a rectangle. The selection bar exposes **Clear selected values**, **Exclude selected** and **Restore selected**. Row-number and column-selection controls select larger ranges; **Select all values** selects every measurement cell. Delete/Backspace clears a selected range. Double-click or F2 enters single-cell character editing, where ordinary text-selection and deletion keys retain their usual meaning.
+
+Clearing turns selected measurements into missing cells and removes their observation objects. Text labels and row positions remain available. Exclusion keeps the observations, values and IDs but changes their inclusion state. Clearing or excluding observations can invalidate analyses that used those observations. One **Undo** restores a complete range operation, including the prior values and inclusion state.
+
+Advanced long-format tables select complete observations with row checkboxes. **Remove selected rows** removes the chosen observation rows in one operation, including their explicit predictors, response and factor/censoring fields. The header checkbox includes rows on other pages. **Exclude selected** and **Restore selected** change inclusion flags while retaining the full observations.
+
+**Delete dataset** is visible in Data and on Overview's dataset cards. Its review reports the associated measurements, figures, saved analyses and publication panels before confirmation. Removing the dataset also removes those dependent objects and layout references; unrelated datasets and results remain intact. **Undo** restores the full operation. The final dataset is replaced by a blank table and an editable figure, rather than demonstration data.
+
 ## 3. Charts and conventions
 
 Every **New chart** dialog exposes **Dataset for the new figure** and **Columns to plot**. The editor also exposes the source link and plotted-column selection. Changing plotted columns does not change the dataset or other figures. Relinking a figure to a different dataset clears its old attached results and individual observation overrides; saved analysis history and other figures remain in the workspace.
@@ -225,6 +235,14 @@ Recalculation creates another saved run. Explicitly attaching it updates the cho
 
 General formatting covers palette, typography, axes, symbols, opacity, bar width, lines, dimensions and error settings. Point-level overrides can change color, size, shape, outline, outline width and opacity.
 
+### Titles, emphasis and line breaks
+
+Use the visible **Text & axes** toolbar to select **Chart title**, **X axis title** or **Y axis title**, or click the corresponding text in the figure. The visual editor applies **Italic** and **Bold** to the selected text. Enter inserts a line break. Formatting changes the presentation and does not recalculate a saved analysis.
+
+**Y axis title** also exposes **Distance from Y axis · px**, a slider, **Move closer**, **Move farther** and **Reset**. Distances use figure coordinates; exported SVG and PNG preserve the chosen layout. Increasing the distance reserves additional plot margin, so review the available plot width for small publication panels.
+
+Text styles and line breaks are stored with the figure. SVG keeps text as editable text and uses styled text spans for emphasis and line positioning. Existing scientific subscript, superscript and emphasis syntax in older projects remains supported. The [everyday editing guide](EDITING-GUIDE.md) gives the short UI workflow.
+
 Click an individual point or right-click **Format this point** to open its controls. Right-click also provides exclusion/restore and data-table navigation. Dataset and figure entries have contextual navigation actions. A point's context action uses its stable observation ID, including after a value edit or reversible exclusion.
 
 The precedence is **figure/group style → observation override**. Applying a style preserves destination observation overrides. **Reset to group style** removes the selected point's exception.
@@ -293,7 +311,7 @@ The server listens on `127.0.0.1`, port 8765. It is not configured as a public n
 
 Retain the original measurements and experimental unit; the `.psl`; the full design, test, comparison family, correction, α and error-bar definition; PSL/engine versions; and data-preparation or external graphic-editing decisions.
 
-PSL includes numerical and project tests but does not claim complete GraphPad Prism equivalence or validate a scientific design automatically. Mixed models, two-factor/repeated-measures parametric ANOVA, regression, dose–response, survival and additional specialized charts are future work. See the [roadmap](ROADMAP.md).
+PSL includes numerical and project tests but does not claim complete GraphPad Prism equivalence or validate a scientific design automatically. Mixed models, two-factor/repeated-measures ANOVA, regression, dose–response, survival and specialized charts are covered by the [advanced methods guide](ADVANCED-METHODS.md); check its implementation scope and assumptions for the chosen method. See the [roadmap](ROADMAP.md) for future work.
 
 Technical references: [SciPy statistical functions](https://docs.scipy.org/doc/scipy/reference/stats.html), [Welch/Student t-tests](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html), [Tukey HSD](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.tukey_hsd.html).
 

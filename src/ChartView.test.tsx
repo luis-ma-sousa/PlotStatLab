@@ -5,6 +5,7 @@ import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 import ChartView from './ChartView';
 import {createChart,dataFingerprint} from './project';
 import type {AnalysisResult,Chart,Group} from './types';
+import {serializeFigureSvg} from './export';
 
 const groups:Group[]=[
   {id:'control',name:'Control',observations:[{id:'a1',subject:'Sample 1',value:1},{id:'a2',subject:'Sample 2',value:3},{id:'a3',subject:'Sample 3',value:100,excluded:true}]},
@@ -117,4 +118,31 @@ it.each(['regression','dose-response','kaplan-meier','forest','bland-altman'] as
   expect(host.querySelector('[data-point-id="a1"]')).toBeNull();
   await act(async()=>root.render(view({...chart,groupIds:undefined})));
   expect(host.querySelector('[data-point-id="b1"] circle')?.getAttribute('fill')).toBe(chart.style.palette[1]);
+});
+
+it.each(['bar-swarm','grouped','regression','forest'] as const)('keeps styled multiline titles and adjustable Y spacing editable and inside a small %s figure',async type=>{
+ const chart={...createChart(type),title:'<i>Gene A</i>\nTreatment response',xLabel:'Treatment\n(second line)',yLabel:'<i>Relative signal</i>\n(a.u.)',style:{...createChart(type).style,width:400,height:300,yLabelDistance:240}};
+ await render(chart);
+ expect(host.innerHTML).not.toMatch(/NaN|Infinity/);
+ const svg=host.querySelector<SVGSVGElement>('svg')!,title=svg.querySelector('[data-edit="title"]')!,xLabel=svg.querySelector('[data-edit="xaxis"]')!,yLabel=svg.querySelector('[data-edit="yaxis"]')!;
+ expect(title.querySelectorAll('[data-text-line]')).toHaveLength(2);expect(title.querySelector('[font-style="italic"]')?.textContent).toBe('Gene A');
+ expect(xLabel.querySelectorAll('[data-text-line]')).toHaveLength(2);expect(Number(xLabel.getAttribute('y'))).toBeGreaterThan(0);
+ const frame=[...svg.children].find(element=>element.localName==='path')!,coordinates=/^M([^,]+),([^V]+)V([^H]+)H(.+)$/.exec(frame.getAttribute('d')!)!;
+ expect(Number(coordinates[4])-Number(coordinates[1])).toBeGreaterThanOrEqual(50);
+ expect(Number(coordinates[3])-Number(coordinates[2])).toBeGreaterThan(30);
+ const labelPosition=/translate\(([^,]+),/.exec(yLabel.getAttribute('transform')!)!;
+ expect(Number(coordinates[1])-Number(labelPosition[1])).toBe(240);
+ expect(Number(labelPosition[1])-10).toBeGreaterThanOrEqual(0);
+ const exported=new DOMParser().parseFromString(serializeFigureSvg(chart,svg),'image/svg+xml');
+ expect(exported.querySelector('parsererror,foreignObject,image')).toBeNull();expect(exported.querySelector('tspan[font-style="italic"]')?.textContent).toBe('Gene A');expect(exported.querySelectorAll('tspan[x][dy]')).toHaveLength(6);
+});
+it('preserves legacy single-line margins and allows custom distribution Y titles',async()=>{
+ const chart=createChart();await render(chart);const yTitle=host.querySelector('[data-edit="yaxis"]')!;
+ expect(yTitle.getAttribute('transform')).toContain('translate(25,');
+ await render({...createChart('histogram'),yLabel:'Counts\n(per sample)'});expect(host.querySelector('[data-edit="yaxis"]')?.textContent).toBe('Counts(per sample)');expect(host.querySelectorAll('[data-edit="yaxis"] [data-text-line]')).toHaveLength(2);
+});
+it('keeps a positive plot area when several title lines compete for a small canvas',async()=>{
+ const chart={...createChart(),title:'One\nTwo\nThree\nFour',xLabel:'First\nSecond\nThird\nFourth',style:{...createChart().style,width:400,height:300}};await render(chart);
+ const frame=host.querySelector('svg > path')!,coordinates=/^M([^,]+),([^V]+)V([^H]+)H(.+)$/.exec(frame.getAttribute('d')!)!;
+ expect(Number(coordinates[3])-Number(coordinates[2])).toBeGreaterThanOrEqual(10);expect(host.querySelector('clipPath rect')!.getAttribute('height')).not.toMatch(/^-/);expect(host.textContent).toContain('Increase the figure height');expect(host.innerHTML).not.toMatch(/NaN|Infinity/);
 });

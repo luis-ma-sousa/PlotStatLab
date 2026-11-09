@@ -82,6 +82,14 @@ Mouse 5,21,31,43
 Mouse 6,24,34,46
 </code></pre>
 <p><code>Sample</code> remains a label column; the three numeric columns become measurement groups. Check that each group has six observations.</p>
+<h3>Clear or exclude several values</h3>
+<p>Drag across numeric cells to select a rectangle. You can also click the first cell and <strong>Shift-click</strong> the last cell. The highlight and selection bar show the range you are about to change.</p>
+<p>Choose <strong>Clear selected values</strong>, or press <strong>Delete/Backspace</strong> while that range is selected, to turn the selected measurements into blank cells. <strong>Undo</strong> restores the whole clear operation in one step. Use <strong>Select all values</strong>, a row-number button or a column-selection button for larger selections.</p>
+<p>To keep measurements visible while omitting them from calculations, choose <strong>Exclude selected</strong>. <strong>Restore selected</strong> includes them again. Double-click a cell or press <strong>F2</strong> when you want to edit the characters in a single value; Delete/Backspace then edits its text. Press Enter to finish editing.</p>
+<p>An <strong>Advanced table</strong> has a checkbox beside each observation. Select several rows, then choose <strong>Remove selected rows</strong> to remove those complete observations in one action. The heading checkbox selects all observations across pages. <strong>Exclude selected</strong> and <strong>Restore selected</strong> work on those row selections too.</p>
+<h3>Remove a dataset from the workspace</h3>
+<p>Open the dataset in <strong>Data</strong> and choose <strong>Delete dataset</strong>. You can also use that action on its card in <strong>Overview</strong>. Review the measurements, figures and saved results that belong to the dataset, then confirm <strong>Delete dataset</strong>. Those items are removed together. Other datasets remain available.</p>
+<p>Choose <strong>Undo</strong> to put the dataset and its linked work back. Deleting the final dataset leaves a blank table. Saving a <code>.psl</code> file with <strong>Save workspace</strong> keeps an independent copy of your work.</p>
 <h3>Import existing files</h3>
 <p>Use <strong>Import files</strong> and select one or several CSV, TSV, TXT, JSON, XLSX, XLSM or ODS files. Visible nonempty workbook sheets become separate datasets. XLSM imports read stored values; PSL does not run macros. Convert older <code>.xls</code>/<code>.xlsb</code> workbooks to <code>.xlsx</code> or CSV first.</p>
 <p>Text-only columns are retained as labels, rather than being forced into statistical measurements. Conventional names such as <code>Sample</code>, <code>Label</code>, <code>Sex</code> and <code>Notes</code> identify label columns even when some labels contain numbers. Extra labels remain visible in the data grid.</p>
@@ -210,6 +218,11 @@ B;22,1;33,4
 <p>Under <strong>Statistics → Find outliers</strong>, choose ROUT with its <strong>Q</strong> threshold or Grubbs with <strong>Alpha</strong>, then <strong>Detect outliers</strong>. Current flags receive an amber ring. A flag does not exclude the point automatically. Review the measurement and scientific reason before excluding it, and record/report that reason. See <a href="OUTLIER-METHODS.html">outlier methods</a> for implementation limits.</p>
 <h2>8. Finish the appearance and reuse it</h2>
 <p><strong>Format figure</strong> controls titles, axes, colors, fonts, symbols, error bars and dimensions. In a narrow window, choose <strong>Format</strong> to open the drawer.</p>
+<h3>Edit titles directly</h3>
+<p>In the visible <strong>Text &amp; axes</strong> toolbar, choose <strong>Chart title</strong>, <strong>X axis title</strong> or <strong>Y axis title</strong>. You can also click that title in the figure. Its visual text editor opens with the relevant controls. Select a word or a few letters, then click <strong>Italic</strong> or <strong>Bold</strong>. The figure shows the result immediately. To format all of a title, select all text inside that editor before choosing the formatting button.</p>
+<p>Press <strong>Enter</strong> inside the title editor to start a new line. For example, put <code>Treatment duration</code> on one line and <code>(days)</code> on the next. Saved figures and SVG/PNG exports keep those line breaks and text styles.</p>
+<p>Choose <strong>Y axis title</strong> to adjust its distance from the vertical axis. Use <strong>Move closer</strong>, <strong>Move farther</strong>, the slider or the <strong>Distance from Y axis · px</strong> value. Watch the figure update as you make the adjustment. <strong>Reset</strong> restores the default spacing.</p>
+<p>The <a href="EDITING-GUIDE.html">everyday editing guide</a> covers these controls and table selections in one short page.</p>
 <table>
 <thead>
 <tr>
@@ -243,7 +256,7 @@ B;22,1;33,4
 <h2>10. Export a figure or publication layout</h2>
 <p>Choose <strong>Export → PNG</strong> for images or <strong>Export → SVG</strong> for vector editing. PNG offers 1× to 4×; 800 × 560 px at 3× becomes 2400 × 1680 px.</p>
 <p>For Illustrator, export SVG, then use <strong>File → Open</strong> in Illustrator. Text remains text and points remain separate vector objects. Use Layers/Ungroup as needed and keep the original font installed. Save an <code>.ai</code> copy if desired. External changes do not update the PSL dataset or analysis; reopen <code>.psl</code> in PSL to recalculate.</p>
-<p>For several panels, use <strong>Publication</strong> to select/order figures across datasets, choose columns and print dimensions, and export the layout. Scientific titles accept <code>H_{2}O</code>, <code>X^{2}</code>, <code>*italic*</code> and <code>**bold**</code>.</p>
+<p>For several panels, use <strong>Publication</strong> to select/order figures across datasets, choose columns and print dimensions, and export the layout. Text formatting and line breaks remain editable in SVG. Existing scientific titles using subscripts, superscripts and emphasis remain supported.</p>
 <h2>11. Common problems</h2>
 <table>
 <thead>
@@ -253,6 +266,26 @@ B;22,1;33,4
 </tr>
 </thead>
 <tbody><tr>
+<td>I want only part of an axis title italic</td>
+<td>Click the title, select those words in its text editor, then choose <strong>Italic</strong></td>
+</tr>
+<tr>
+<td>Enter does not create a new line</td>
+<td>Place the cursor inside the title&#39;s text editor before pressing Enter</td>
+</tr>
+<tr>
+<td>The Y-axis title is too far from the axis</td>
+<td><strong>Text &amp; axes → Y axis title → Move closer</strong></td>
+</tr>
+<tr>
+<td>I want to remove a dataset</td>
+<td>Use <strong>Delete dataset</strong> in Data or on its Overview card, then review the related work</td>
+</tr>
+<tr>
+<td>I want to remove several measurements</td>
+<td>Drag/Shift-click a numeric range, then <strong>Clear selected values</strong></td>
+</tr>
+<tr>
 <td>A whole-table paste reports text in a measurement cell</td>
 <td>Use <strong>Paste table</strong> for headings; paste only values directly into numeric cells</td>
 </tr>

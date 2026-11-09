@@ -1,5 +1,6 @@
 import type {AdvancedRow} from './advancedTypes';
 import type {AnalysisRun,Chart,Dataset,Group,Project} from './types';
+import {createChart} from './project';
 const uuid=()=>crypto.randomUUID();
 const labels:Record<string,string>={welch:'Welch t-test',student:'Student t-test','paired-t':'Paired t-test','mann-whitney':'Mann–Whitney U',wilcoxon:'Paired Wilcoxon',anova:'One-way ANOVA + Student t-tests','anova-tukey':'One-way ANOVA + Tukey HSD','welch-anova':'Welch ANOVA + Welch t-tests',kruskal:'Kruskal–Wallis + Mann–Whitney',friedman:'Friedman + paired Wilcoxon'};
 function presentResult(result:NonNullable<Chart['analysis']>){if(!/Teste|emparelhado|de Welch|de um fator/.test(result.testLabel))return result;return {...result,testLabel:labels[result.test]??result.testLabel,warnings:result.warnings.map(w=>w==='Os intervalos das diferenças são individuais; os p-values ajustados aplicam a correção à família de comparações selecionada.'?'Difference intervals are individual; adjusted p-values apply the correction to the selected comparison family.':w)}}
@@ -48,4 +49,61 @@ export function appendDatasets(project:Project,imports:{name:string;groups:Group
  const charts=added.map(d=>({...makeChart(d),datasetId:d.id}));
  const next={...p,datasets:[...p.datasets!,...added],charts:[...p.charts,...charts]};
  return added.length?activateDataset({...next,workspaceLayout:{advancedAnalysisIds:p.workspaceLayout?.advancedAnalysisIds,chartIds:[...p.workspaceLayout!.chartIds,...charts.map(c=>c.id)],analysisIds:p.workspaceLayout!.analysisIds}},added[0].id):next;
+}
+
+export interface DatasetDeletionImpact {
+ datasetName:string;
+ observationCount:number;
+ chartCount:number;
+ analysisCount:number;
+ publicationPanelCount:number;
+}
+
+/** Explain the full effect before the user removes a dataset and its dependent work. */
+export function datasetDeletionImpact(project:Project,datasetId:string):DatasetDeletionImpact|undefined {
+ const p=normalizeWorkspace(project),dataset=p.datasets!.find(d=>d.id===datasetId);
+ if(!dataset)return undefined;
+ const chartIds=new Set(p.charts.filter(chart=>chart.datasetId===datasetId).map(chart=>chart.id));
+ return {
+  datasetName:dataset.name,
+  observationCount:dataset.groups.reduce((count,group)=>count+group.observations.length,0),
+  chartCount:chartIds.size,
+  analysisCount:(p.analysisRuns??[]).filter(run=>run.datasetId===datasetId).length+(dataset.advancedAnalyses?.length??0)+(dataset.outlierAnalysis?1:0),
+  publicationPanelCount:p.publication?.chartIds.filter(id=>chartIds.has(id)).length??0,
+ };
+}
+
+function emptyDataset():Dataset {
+ const groups:Group[]=[{id:uuid(),name:'Group A',observations:[]},{id:uuid(),name:'Group B',observations:[]}];
+ return {id:uuid(),name:'Dataset 1',groups,analysisConfig:{test:'welch',design:'independent',comparisons:'control',correction:'holm',control:groups[0].id,alpha:.05}};
+}
+
+/** One immutable operation, so the caller's ordinary Undo restores the entire dataset. */
+export function deleteDataset(project:Project,datasetId:string):Project {
+ const p=normalizeWorkspace(project),deletedIndex=p.datasets!.findIndex(dataset=>dataset.id===datasetId);
+ if(deletedIndex<0)return project;
+ const datasets=p.datasets!.filter(dataset=>dataset.id!==datasetId);
+ if(!datasets.length)datasets.push(emptyDataset());
+ const dataset=datasets.find(candidate=>candidate.id===p.activeDatasetId)??datasets[Math.min(deletedIndex,datasets.length-1)];
+ const charts=p.charts.filter(chart=>chart.datasetId!==datasetId);
+ let selected=charts.find(chart=>chart.id===p.activeChartId&&chart.datasetId===dataset.id)??charts.find(chart=>chart.datasetId===dataset.id);
+ let addedChartId:string|undefined;
+ if(!selected){
+  selected={...createChart(),datasetId:dataset.id,name:'Figure 1',title:'',yLabel:'Value'};
+  charts.push(selected);addedChartId=selected.id;
+ }
+ const analysisRuns=(p.analysisRuns??[]).filter(run=>run.datasetId!==datasetId);
+ const chartIds=new Set(charts.map(chart=>chart.id)),analysisIds=new Set(analysisRuns.map(run=>run.id));
+ const advancedIds=new Set(datasets.flatMap(item=>(item.advancedAnalyses??[]).map(run=>run.id)));
+ return {
+  ...p,datasets,charts,analysisRuns,
+  activeDatasetId:dataset.id,activeChartId:selected.id,
+  groups:dataset.groups,analysisConfig:dataset.analysisConfig,outlierAnalysis:dataset.outlierAnalysis,
+  workspaceLayout:{
+   chartIds:[...(p.workspaceLayout?.chartIds??[]).filter(id=>chartIds.has(id)),...(addedChartId?[addedChartId]:[])],
+   analysisIds:(p.workspaceLayout?.analysisIds??[]).filter(id=>analysisIds.has(id)),
+   ...(p.workspaceLayout?.advancedAnalysisIds?{advancedAnalysisIds:p.workspaceLayout.advancedAnalysisIds.filter(id=>advancedIds.has(id))}:{}),
+  },
+  publication:p.publication?{...p.publication,chartIds:p.publication.chartIds.filter(id=>chartIds.has(id))}:undefined,
+ };
 }
